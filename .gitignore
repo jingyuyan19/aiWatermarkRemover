@@ -1,0 +1,56 @@
+# Python
+**/__pycache__/
+**/*.py[cod]
+**/*$py.class
+**/*.so
+**/.Python
+**/venv/
+**/.venv/
+**/ENV/
+**/env/
+**/.pytest_cache/
+**/.ruff_cache/
+
+# Node
+**/node_modules/
+**/.next/
+**/out/
+**/build/
+**/dist/
+
+# Environment
+**/.env
+**/.env.local
+**/.env.*.local
+
+# IDEs
+**/.vscode/
+**/.idea/
+**/.cursor/
+
+# OS
+**/.DS_Store
+**/Thumbs.db
+
+# Application specific
+**/uploads/
+**/outputs/
+**/temp/
+**/cache/
+
+# Logs
+**/*.log
+**/logs/
+
+# Database
+**/*.db
+**/*.sqlite
+
+# Coverage
+**/coverage/
+**/.coverage
+**/htmlcov/
+
+# Don't ignore these
+!.gitignore
+!.env.example
