@@ -48,21 +48,23 @@ async def startup():
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 
-@app.post("/api/upload-url")
-async def get_upload_url(filename: str, content_type: str):
-    """Generate a presigned URL for direct upload to S3/R2"""
-    key = f"uploads/{uuid.uuid4()}/{filename}"
+@app.post("/api/upload")
+async def upload_file(file: UploadFile = File(...)):
+    """Upload file directly through backend (bypasses CORS)"""
+    key = f"uploads/{uuid.uuid4()}/{file.filename}"
     try:
-        url = s3_client.generate_presigned_url(
-            'put_object',
-            Params={
-                'Bucket': BUCKET_NAME,
-                'Key': key,
-                'ContentType': content_type
-            },
-            ExpiresIn=3600
+        # Read file content
+        content = await file.read()
+        
+        # Upload to R2
+        s3_client.put_object(
+            Bucket=BUCKET_NAME,
+            Key=key,
+            Body=content,
+            ContentType=file.content_type
         )
-        return {"upload_url": url, "key": key}
+        
+        return {"key": key}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 

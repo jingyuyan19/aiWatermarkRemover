@@ -49,23 +49,17 @@ export default function Home() {
 
     setUploading(true);
     try {
-      // Step 1: Get presigned URL
-      const urlResponse = await fetch(
-        `${API_URL}/api/upload-url?filename=${encodeURIComponent(file.name)}&content_type=${encodeURIComponent(file.type)}`,
-        { method: 'POST' }
-      );
-      const { upload_url, key } = await urlResponse.json();
+      // Step 1: Upload file to backend (backend will upload to R2)
+      const formData = new FormData();
+      formData.append('file', file);
 
-      // Step 2: Upload file directly to S3/R2
-      await fetch(upload_url, {
-        method: 'PUT',
-        body: file,
-        headers: {
-          'Content-Type': file.type,
-        },
+      const uploadResponse = await fetch(`${API_URL}/api/upload`, {
+        method: 'POST',
+        body: formData,
       });
+      const { key } = await uploadResponse.json();
 
-      // Step 3: Create job
+      // Step 2: Create job
       const jobResponse = await fetch(`${API_URL}/api/jobs?input_key=${encodeURIComponent(key)}`, {
         method: 'POST',
         headers: {
