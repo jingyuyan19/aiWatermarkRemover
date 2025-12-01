@@ -51,7 +51,8 @@ export default function Home() {
     try {
       // Step 1: Get presigned URL
       const urlResponse = await fetch(
-        `${API_URL}/api/upload-url?filename=${encodeURIComponent(file.name)}&content_type=${encodeURIComponent(file.type)}`
+        `${API_URL}/api/upload-url?filename=${encodeURIComponent(file.name)}&content_type=${encodeURIComponent(file.type)}`,
+        { method: 'POST' }
       );
       const { upload_url, key } = await urlResponse.json();
 
