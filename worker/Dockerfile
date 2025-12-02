@@ -17,10 +17,10 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY demark_world /app/demark_world
-COPY tasks.py /app/tasks.py
+COPY handler.py /app/handler.py
 
 # Set python path to include demark_world/src
 ENV PYTHONPATH=/app/demark_world/src
 
-# Entrypoint for celery worker
-CMD ["celery", "-A", "tasks", "worker", "--loglevel=info"]
+# RunPod serverless entrypoint
+CMD ["python", "-u", "handler.py"]

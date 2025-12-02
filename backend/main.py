@@ -8,7 +8,7 @@ from schemas import JobCreate, JobResponse
 import uuid
 import os
 import boto3
-from celery import Celery
+import runpod
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -25,9 +25,12 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Celery Setup
-REDIS_URL = os.getenv("REDIS_URL", "redis://localhost:6379/0")
-celery_app = Celery('tasks', broker=REDIS_URL, backend=REDIS_URL)
+# RunPod Serverless Setup
+RUNPOD_API_KEY = os.getenv("RUNPOD_API_KEY")
+RUNPOD_ENDPOINT_ID = os.getenv("RUNPOD_ENDPOINT_ID")
+
+if RUNPOD_API_KEY:
+    runpod.api_key = RUNPOD_API_KEY
 
 # S3/R2 Setup
 S3_ENDPOINT_URL = os.getenv("S3_ENDPOINT_URL")
@@ -86,12 +89,21 @@ async def create_job(job_data: JobCreate, input_key: str, db: AsyncSession = Dep
     await db.commit()
     await db.refresh(new_job)
     
-    # Trigger Celery Task
-    celery_app.send_task(
-        "tasks.process_video",
-        args=[job_id, input_key, output_key, job_data.quality],
-        queue="video_processing"
-    )
+    # Trigger RunPod Serverless Job
+    if RUNPOD_ENDPOINT_ID:
+        try:
+            runpod_job = runpod.Endpoint(RUNPOD_ENDPOINT_ID).run({
+                "input": {
+                    "job_id": job_id,
+                    "input_key": input_key,
+                    "output_key": output_key,
+                    "quality": job_data.quality
+                }
+            })
+            print(f"RunPod job started: {runpod_job()}")
+        except Exception as e:
+            print(f"Error starting RunPod job: {e}")
+            # Job will stay in PENDING status - can be retried later
     
     return JobResponse(
         id=new_job.id,
