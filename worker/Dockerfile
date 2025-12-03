@@ -10,6 +10,9 @@ COPY requirements.txt .
 # Install mmcv-full from pre-built wheel (much faster than compiling)
 RUN pip install mmcv-full==1.7.2 -f https://download.openmmlab.com/mmcv/dist/cu118/torch2.1/index.html
 
+# Install ffmpeg (provides ffprobe)
+RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
+
 # Install python dependencies using Tsinghua mirror (faster in China)
 RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
     pip install --no-cache-dir -r requirements.txt
