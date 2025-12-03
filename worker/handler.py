@@ -6,6 +6,18 @@ import runpod
 import os
 import boto3
 from pathlib import Path
+import sys
+import os
+
+print("DEBUG: sys.path:", sys.path)
+try:
+    print("DEBUG: Listing /app:", os.listdir("/app"))
+    print("DEBUG: Listing /app/demark_world_code:", os.listdir("/app/demark_world_code"))
+    print("DEBUG: Listing /app/demark_world_code/src:", os.listdir("/app/demark_world_code/src"))
+    print("DEBUG: Listing /app/demark_world_code/src/demark_world:", os.listdir("/app/demark_world_code/src/demark_world"))
+except Exception as e:
+    print(f"DEBUG Error: {e}")
+
 from demark_world.core import DeMarkWorld
 from demark_world.schemas import CleanerType
 
