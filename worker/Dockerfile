@@ -1,19 +1,15 @@
-FROM pytorch/pytorch:2.1.0-cuda12.1-cudnn8-runtime
+# Use RunPod's official PyTorch base image (has ffmpeg and git pre-installed)
+# Using Python 3.10 with PyTorch 2.1 (slightly older but stable and battle-tested on RunPod)
+FROM runpod/pytorch:2.1.0-py3.10-cuda11.8.0-devel
 
 WORKDIR /app
-
-# Install system dependencies
-RUN apt-get update && apt-get install -y \
-    ffmpeg \
-    libgl1-mesa-glx \
-    git \
-    && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
 COPY requirements.txt .
 
-# Install python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Install python dependencies using Tsinghua mirror (faster in China)
+RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
+    pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 COPY demark_world /app/demark_world

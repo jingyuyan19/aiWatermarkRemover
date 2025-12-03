@@ -1,0 +1,8 @@
+FROM ubuntu:22.04
+
+# Test if proxy works for apt-get
+RUN apt-get update && \
+    apt-get install -y curl
+
+# Test if we can reach the internet
+RUN curl -I https://www.google.com

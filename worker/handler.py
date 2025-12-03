@@ -56,7 +56,7 @@ def handler(job):
         print(f"[{job_id}] Processing video with quality: {quality}...")
         cleaner_type = CleanerType.LAMA if quality == "lama" else CleanerType.E2FGVI_HQ
         demarker = DeMarkWorld(cleaner_type=cleaner_type)
-        demarker.run(str(local_input), str(local_output))
+        demarker.run(local_input, local_output)
         print(f"[{job_id}] Processing complete. Output size: {local_output.stat().st_size / 1024 / 1024:.2f} MB")
         
         # 3. Upload result to R2
