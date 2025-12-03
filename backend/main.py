@@ -118,6 +118,26 @@ async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)):
     
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
+    
+    # If job is still pending, check RunPod for updates
+    if job.status == JobStatus.PENDING and RUNPOD_ENDPOINT_ID:
+        try:
+            endpoint = runpod.Endpoint(RUNPOD_ENDPOINT_ID)
+            # RunPod stores job ID as the UUID we passed
+            runpod_status = endpoint.health()  # This will get all jobs
+            # Since we don't store the RunPod job ID, we check if output_key exists in R2
+            # If the file exists, the job completed successfully
+            try:
+                s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=job.output_key)
+                # File exists! Job is complete
+                job.status = JobStatus.COMPLETED
+                await db.commit()
+                await db.refresh(job)
+            except:
+                # File doesn't exist yet, job still processing
+                pass
+        except Exception as e:
+            print(f"Error checking RunPod status: {e}")
         
     # Construct public URLs
     input_url = f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None
