@@ -12,7 +12,7 @@ huggingface-hub>=0.20.3
 jupyter>=1.1.1
 loguru>=0.7.3
 matplotlib>=3.8.2
-mmcv-full>=1.7.2
+
 notebook>=7.0.7
 numpy<2.0.0
 omegaconf>=2.3.0
