@@ -15,11 +15,12 @@ RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && 
     pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
-COPY demark_world /app/demark_world
+# Copy application code
+COPY demark_world /app/demark_world_code
 COPY handler.py /app/handler.py
 
 # Set python path to include demark_world/src
-ENV PYTHONPATH=/app/demark_world/src
+ENV PYTHONPATH=/app/demark_world_code/src
 
 # RunPod serverless entrypoint
 CMD ["python", "-u", "handler.py"]
