@@ -128,7 +128,7 @@ async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)):
             # Since we don't store the RunPod job ID, we check if output_key exists in R2
             # If the file exists, the job completed successfully
             try:
-                s3_client.head_object(Bucket=R2_BUCKET_NAME, Key=job.output_key)
+                s3_client.head_object(Bucket=BUCKET_NAME, Key=job.output_key)
                 # File exists! Job is complete
                 job.status = JobStatus.COMPLETED
                 await db.commit()
