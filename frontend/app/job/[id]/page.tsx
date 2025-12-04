@@ -1,8 +1,9 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { useAuth } from '@clerk/nextjs';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -16,14 +17,28 @@ interface Job {
 
 export default function JobPage() {
     const params = useParams();
+    const router = useRouter();
     const jobId = params.id as string;
+    const { isLoaded, userId, getToken } = useAuth();
     const [job, setJob] = useState<Job | null>(null);
     const [error, setError] = useState<string>('');
 
     useEffect(() => {
+        if (!isLoaded) return;
+
+        if (!userId) {
+            router.push('/');
+            return;
+        }
+
         const fetchStatus = async () => {
             try {
-                const response = await fetch(`${API_URL}/api/jobs/${jobId}`);
+                const token = await getToken();
+                const response = await fetch(`${API_URL}/api/jobs/${jobId}`, {
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                    }
+                });
                 if (!response.ok) {
                     throw new Error('Job not found');
                 }
@@ -37,7 +52,8 @@ export default function JobPage() {
         fetchStatus();
         const interval = setInterval(fetchStatus, 3000);
         return () => clearInterval(interval);
-    }, [jobId]);
+    }, [jobId, isLoaded, userId, getToken, router]);
+
 
     if (error) {
         return (
@@ -78,9 +94,9 @@ export default function JobPage() {
                             <div className="flex items-center justify-between mb-4">
                                 <span className="text-gray-300">Status:</span>
                                 <span className={`px-4 py-2 rounded-full font-semibold ${job.status === 'completed' ? 'bg-green-500/20 text-green-300' :
-                                        job.status === 'processing' ? 'bg-blue-500/20 text-blue-300' :
-                                            job.status === 'failed' ? 'bg-red-500/20 text-red-300' :
-                                                'bg-yellow-500/20 text-yellow-300'
+                                    job.status === 'processing' ? 'bg-blue-500/20 text-blue-300' :
+                                        job.status === 'failed' ? 'bg-red-500/20 text-red-300' :
+                                            'bg-yellow-500/20 text-yellow-300'
                                     }`}>
                                     {job.status.toUpperCase()}
                                 </span>

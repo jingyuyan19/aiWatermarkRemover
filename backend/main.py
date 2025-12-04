@@ -5,6 +5,7 @@ from sqlalchemy import select
 from database import get_db, engine, Base
 from models import Job, JobStatus
 from schemas import JobCreate, JobResponse
+from auth import get_current_user
 import uuid
 import os
 import boto3
@@ -52,9 +53,12 @@ async def startup():
         await conn.run_sync(Base.metadata.create_all)
 
 @app.post("/api/upload")
-async def upload_file(file: UploadFile = File(...)):
-    """Upload file directly through backend (bypasses CORS)"""
-    key = f"uploads/{uuid.uuid4()}/{file.filename}"
+async def upload_file(
+    file: UploadFile = File(...),
+    user_id: str = Depends(get_current_user)
+):
+    """Upload file directly through backend (requires auth)"""
+    key = f"uploads/{user_id}/{uuid.uuid4()}/{file.filename}"
     try:
         # Read file content
         content = await file.read()
@@ -72,13 +76,19 @@ async def upload_file(file: UploadFile = File(...)):
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/api/jobs", response_model=JobResponse)
-async def create_job(job_data: JobCreate, input_key: str, db: AsyncSession = Depends(get_db)):
-    """Create a processing job"""
+async def create_job(
+    job_data: JobCreate,
+    input_key: str,
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user)
+):
+    """Create a processing job (requires auth)"""
     job_id = str(uuid.uuid4())
-    output_key = f"outputs/{job_id}.mp4"
+    output_key = f"outputs/{user_id}/{job_id}.mp4"
     
     new_job = Job(
         id=job_id,
+        user_id=user_id,
         input_key=input_key,
         output_key=output_key,
         quality=job_data.quality,
@@ -112,8 +122,15 @@ async def create_job(job_data: JobCreate, input_key: str, db: AsyncSession = Dep
     )
 
 @app.get("/api/jobs/{job_id}", response_model=JobResponse)
-async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)):
-    result = await db.execute(select(Job).where(Job.id == job_id))
+async def get_job_status(
+    job_id: str,
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user)
+):
+    """Get job status (requires auth, only returns user's own jobs)"""
+    result = await db.execute(
+        select(Job).where(Job.id == job_id, Job.user_id == user_id)
+    )
     job = result.scalar_one_or_none()
     
     if not job:
@@ -150,3 +167,25 @@ async def get_job_status(job_id: str, db: AsyncSession = Depends(get_db)):
         output_url=output_url,
         created_at=job.created_at
     )
+
+@app.get("/api/jobs", response_model=list[JobResponse])
+async def list_user_jobs(
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user)
+):
+    """List all jobs for the authenticated user"""
+    result = await db.execute(
+        select(Job).where(Job.user_id == user_id).order_by(Job.created_at.desc())
+    )
+    jobs = result.scalars().all()
+    
+    return [
+        JobResponse(
+            id=job.id,
+            status=job.status,
+            input_url=f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None,
+            output_url=f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED else None,
+            created_at=job.created_at
+        )
+        for job in jobs
+    ]

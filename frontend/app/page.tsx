@@ -3,15 +3,17 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
-import { Sparkles, Zap, Clock } from 'lucide-react';
+import { Sparkles, Zap, Clock, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload } from '../components/ui/FileUpload';
 import { toast } from 'sonner';
+import { useAuth, SignInButton } from '@clerk/nextjs';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
 export default function Home() {
+  const { isLoaded, userId, getToken } = useAuth();
   const [file, setFile] = useState<File | null>(null);
   const [quality, setQuality] = useState<'lama' | 'e2fgvi_hq'>('lama');
   const [uploading, setUploading] = useState(false);
@@ -19,18 +21,25 @@ export default function Home() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!file) return;
+    if (!file || !userId) return;
 
     setUploading(true);
     try {
+      const token = await getToken();
+
       // Step 1: Upload file to backend
       const formData = new FormData();
       formData.append('file', file);
 
       const uploadResponse = await fetch(`${API_URL}/api/upload`, {
         method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
         body: formData,
       });
+
+      if (!uploadResponse.ok) throw new Error('Upload failed');
       const { key } = await uploadResponse.json();
 
       // Step 2: Create job
@@ -38,11 +47,14 @@ export default function Home() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
         },
         body: JSON.stringify({ quality }),
       });
 
+      if (!jobResponse.ok) throw new Error('Job creation failed');
       const job = await jobResponse.json();
+
       toast.success('Video uploaded successfully!');
       router.push(`/job/${job.id}`);
     } catch (error) {
@@ -52,6 +64,10 @@ export default function Home() {
       setUploading(false);
     }
   };
+
+  if (!isLoaded) {
+    return null; // Or a loading spinner
+  }
 
   return (
     <main className="min-h-screen relative overflow-hidden flex flex-col items-center justify-center py-20 px-4">
@@ -87,86 +103,103 @@ export default function Home() {
         {/* Main Interaction Card */}
         <Card className="max-w-2xl mx-auto border-white/10 hover:border-primary/30 transition-colors duration-300">
           <CardContent className="pt-6">
-            <form onSubmit={handleSubmit} className="space-y-8">
-              <FileUpload
-                onFileSelect={setFile}
-                selectedFile={file}
-                onClear={() => setFile(null)}
-              />
-
-              {/* Quality Selection */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <button
-                  type="button"
-                  onClick={() => setQuality('lama')}
-                  className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'lama'
-                      ? 'bg-primary/10 border-primary/50'
-                      : 'bg-white/5 border-white/10 hover:bg-white/10'
-                    }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'}`}>
-                      <Zap className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>Fast Mode</h3>
-                      <p className="text-sm text-gray-500">LaMa Model • 1-2 min</p>
-                    </div>
-                  </div>
-                  {quality === 'lama' && (
-                    <motion.div
-                      layoutId="active-ring"
-                      className="absolute inset-0 border-2 border-primary rounded-xl pointer-events-none"
-                      initial={false}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    />
-                  )}
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => setQuality('e2fgvi_hq')}
-                  className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'e2fgvi_hq'
-                      ? 'bg-accent/10 border-accent/50'
-                      : 'bg-white/5 border-white/10 hover:bg-white/10'
-                    }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div className={`p-2 rounded-lg ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'}`}>
-                      <Clock className="w-5 h-5" />
-                    </div>
-                    <div>
-                      <h3 className={`font-semibold mb-1 ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>High Quality</h3>
-                      <p className="text-sm text-gray-500">E2FGVI Model • 5-10 min</p>
-                    </div>
-                  </div>
-                  {quality === 'e2fgvi_hq' && (
-                    <motion.div
-                      layoutId="active-ring"
-                      className="absolute inset-0 border-2 border-accent rounded-xl pointer-events-none"
-                      initial={false}
-                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                    />
-                  )}
-                </button>
+            {!userId ? (
+              <div className="text-center py-12">
+                <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                  <Lock className="w-8 h-8 text-gray-400" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-4">Sign in to Start</h3>
+                <p className="text-gray-400 mb-8 max-w-md mx-auto">
+                  Create a free account to upload videos and track your watermark removal history.
+                </p>
+                <SignInButton mode="modal">
+                  <Button size="lg" variant="glow" className="min-w-[200px]">
+                    Get Started
+                  </Button>
+                </SignInButton>
               </div>
+            ) : (
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <FileUpload
+                  onFileSelect={setFile}
+                  selectedFile={file}
+                  onClear={() => setFile(null)}
+                />
 
-              <Button
-                type="submit"
-                className="w-full text-lg h-14"
-                variant="glow"
-                disabled={!file || uploading}
-              >
-                {uploading ? (
-                  <div className="flex items-center gap-2">
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    <span>Processing Video...</span>
-                  </div>
-                ) : (
-                  'Start Removal Magic'
-                )}
-              </Button>
-            </form>
+                {/* Quality Selection */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <button
+                    type="button"
+                    onClick={() => setQuality('lama')}
+                    className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'lama'
+                        ? 'bg-primary/10 border-primary/50'
+                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                      }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'}`}>
+                        <Zap className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className={`font-semibold mb-1 ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>Fast Mode</h3>
+                        <p className="text-sm text-gray-500">LaMa Model • 1-2 min</p>
+                      </div>
+                    </div>
+                    {quality === 'lama' && (
+                      <motion.div
+                        layoutId="active-ring"
+                        className="absolute inset-0 border-2 border-primary rounded-xl pointer-events-none"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setQuality('e2fgvi_hq')}
+                    className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'e2fgvi_hq'
+                        ? 'bg-accent/10 border-accent/50'
+                        : 'bg-white/5 border-white/10 hover:bg-white/10'
+                      }`}
+                  >
+                    <div className="flex items-start gap-3">
+                      <div className={`p-2 rounded-lg ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'}`}>
+                        <Clock className="w-5 h-5" />
+                      </div>
+                      <div>
+                        <h3 className={`font-semibold mb-1 ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>High Quality</h3>
+                        <p className="text-sm text-gray-500">E2FGVI Model • 5-10 min</p>
+                      </div>
+                    </div>
+                    {quality === 'e2fgvi_hq' && (
+                      <motion.div
+                        layoutId="active-ring"
+                        className="absolute inset-0 border-2 border-accent rounded-xl pointer-events-none"
+                        initial={false}
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </button>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full text-lg h-14"
+                  variant="glow"
+                  disabled={!file || uploading}
+                >
+                  {uploading ? (
+                    <div className="flex items-center gap-2">
+                      <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                      <span>Processing Video...</span>
+                    </div>
+                  ) : (
+                    'Start Removal Magic'
+                  )}
+                </Button>
+              </form>
+            )}
           </CardContent>
         </Card>
 
