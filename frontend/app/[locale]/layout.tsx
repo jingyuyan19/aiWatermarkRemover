@@ -32,7 +32,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const metadata = messages.Metadata as { title: string; description: string };
 
     return {
-        title: metadata?.title || "AI Watermark Remover",
+        title: metadata?.title || "Vanishly",
         description: metadata?.description || "Remove watermarks from your videos instantly.",
     };
 }
@@ -93,7 +93,7 @@ function Navbar({ locale }: { locale: string }) {
         <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 <a href={`/${locale}`} className="font-bold text-xl text-white hover:text-primary transition-colors">
-                    {locale === 'zh-CN' ? 'AI去水印工具' : 'AI Watermark Remover'}
+                    Vanishly
                 </a>
                 <div className="flex items-center gap-4">
                     {/* Language Switcher */}

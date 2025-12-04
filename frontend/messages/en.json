@@ -1,10 +1,10 @@
 {
     "Metadata": {
-        "title": "AI Watermark Remover | Professional Video Tools",
+        "title": "Vanishly | AI Video Watermark Removal",
         "description": "Remove watermarks from your videos instantly using advanced AI technology."
     },
     "Navbar": {
-        "brand": "AI Watermark Remover",
+        "brand": "Vanishly",
         "signIn": "Sign In",
         "features": "Features",
         "pricing": "Pricing",
@@ -193,7 +193,7 @@
             "privacy": "Privacy Policy",
             "terms": "Terms of Service"
         },
-        "copyright": "© 2024 AI Watermark Remover. All rights reserved."
+        "copyright": "© 2024 Vanishly. All rights reserved."
     },
     "JobPage": {
         "backToHome": "← Back to Home",

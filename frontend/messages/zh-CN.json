@@ -1,10 +1,10 @@
 {
     "Metadata": {
-        "title": "AI去水印工具 | 专业视频处理",
+        "title": "Vanishly | AI视频去水印",
         "description": "使用先进的人工智能技术，即时去除视频中的水印。"
     },
     "Navbar": {
-        "brand": "AI去水印工具",
+        "brand": "Vanishly",
         "signIn": "登录",
         "features": "功能特点",
         "pricing": "价格方案",
@@ -193,7 +193,7 @@
             "privacy": "隐私政策",
             "terms": "服务条款"
         },
-        "copyright": "© 2024 AI去水印工具。保留所有权利。"
+        "copyright": "© 2024 Vanishly。保留所有权利。"
     },
     "JobPage": {
         "backToHome": "← 返回首页",

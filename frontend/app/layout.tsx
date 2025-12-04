@@ -13,7 +13,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "AI Watermark Remover | Professional Video Tools",
+  title: "Vanishly | AI Video Watermark Removal",
   description: "Remove watermarks from your videos instantly using advanced AI technology.",
 };
 
