@@ -166,3 +166,33 @@ body {
     @apply bg-background text-foreground;
   }
 }
+
+/* Clerk UserButton Dropdown Fixes for Dark Theme */
+.cl-userButtonPopoverCard {
+  background-color: #1a1a1a !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+.cl-userButtonPopoverActionButton {
+  color: white !important;
+}
+
+.cl-userButtonPopoverActionButton:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+
+.cl-userButtonPopoverActionButtonText {
+  color: white !important;
+}
+
+.cl-userButtonPopoverActionButtonIcon {
+  color: #9ca3af !important;
+}
+
+.cl-userPreviewMainIdentifier {
+  color: white !important;
+}
+
+.cl-userPreviewSecondaryIdentifier {
+  color: #9ca3af !important;
+}

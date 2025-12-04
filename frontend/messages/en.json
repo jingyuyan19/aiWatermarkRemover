@@ -1,0 +1,218 @@
+{
+    "Metadata": {
+        "title": "AI Watermark Remover | Professional Video Tools",
+        "description": "Remove watermarks from your videos instantly using advanced AI technology."
+    },
+    "Navbar": {
+        "brand": "AI Watermark Remover",
+        "signIn": "Sign In",
+        "features": "Features",
+        "pricing": "Pricing",
+        "faq": "FAQ"
+    },
+    "HomePage": {
+        "badge": "AI-Powered Video Magic",
+        "title": "Remove Watermarks",
+        "titleHighlight": "in Seconds",
+        "subtitle": "Professional-grade watermark removal powered by advanced AI. Upload your video and let our neural networks do the magic.",
+        "cta": "Start Free Now",
+        "ctaSecondary": "See How It Works",
+        "signInPrompt": {
+            "title": "Sign in to Start",
+            "description": "Create a free account to upload videos and track your watermark removal history.",
+            "button": "Get Started"
+        },
+        "upload": {
+            "clickToUpload": "Click to upload",
+            "dragAndDrop": "or drag and drop",
+            "formats": "MP4, MOV, AVI (max 100MB)"
+        },
+        "quality": {
+            "fast": {
+                "title": "Fast Mode",
+                "description": "LaMa Model • 1-2 min"
+            },
+            "hq": {
+                "title": "High Quality",
+                "description": "E2FGVI Model • 5-10 min"
+            }
+        },
+        "submitButton": "Start Removal Magic",
+        "processing": "Processing Video...",
+        "legal": "By using this service, you confirm you have the right to modify the uploaded content. This tool is intended for personal use on content you own."
+    },
+    "Features": {
+        "title": "Why Choose Us",
+        "subtitle": "Powerful features designed for content creators",
+        "items": {
+            "ai": {
+                "title": "AI-Powered Accuracy",
+                "description": "Our neural networks analyze and remove watermarks with pixel-perfect precision, preserving video quality."
+            },
+            "fast": {
+                "title": "Lightning Fast",
+                "description": "Process videos in minutes, not hours. Our optimized pipeline delivers results 10x faster than traditional methods."
+            },
+            "privacy": {
+                "title": "Privacy First",
+                "description": "Your videos are encrypted and automatically deleted after processing. We never store or share your content."
+            },
+            "formats": {
+                "title": "All Formats Supported",
+                "description": "Upload MP4, MOV, AVI, and more. Export in your preferred format with no quality loss."
+            },
+            "noWatermark": {
+                "title": "No Output Watermark",
+                "description": "Unlike other tools, we never add our own watermark. Your clean video is truly clean."
+            },
+            "cloud": {
+                "title": "Cloud Processing",
+                "description": "No software to install. Process videos from any device with just a web browser."
+            }
+        }
+    },
+    "HowItWorks": {
+        "title": "How It Works",
+        "subtitle": "Remove watermarks in three simple steps",
+        "steps": {
+            "upload": {
+                "title": "Upload Your Video",
+                "description": "Drag and drop or select your video file. We support all major formats up to 100MB."
+            },
+            "process": {
+                "title": "AI Processing",
+                "description": "Our neural network analyzes and removes watermarks while preserving video quality."
+            },
+            "download": {
+                "title": "Download Result",
+                "description": "Get your clean video ready to use. No watermarks, no quality loss."
+            }
+        }
+    },
+    "Comparison": {
+        "title": "See the Difference",
+        "before": "Before",
+        "after": "After"
+    },
+    "Pricing": {
+        "title": "Simple, Transparent Pricing",
+        "subtitle": "Choose the plan that fits your needs",
+        "free": {
+            "name": "Free",
+            "price": "$0",
+            "period": "forever",
+            "features": [
+                "3 videos per month",
+                "Max 50MB file size",
+                "Standard processing speed",
+                "720p output quality"
+            ],
+            "cta": "Get Started Free"
+        },
+        "pro": {
+            "name": "Pro",
+            "price": "$9.99",
+            "period": "per month",
+            "badge": "Most Popular",
+            "features": [
+                "Unlimited videos",
+                "Max 500MB file size",
+                "Priority processing",
+                "4K output quality",
+                "Batch processing",
+                "API access"
+            ],
+            "cta": "Start Pro Trial"
+        },
+        "enterprise": {
+            "name": "Enterprise",
+            "price": "Custom",
+            "period": "contact us",
+            "features": [
+                "Everything in Pro",
+                "Unlimited file size",
+                "Dedicated support",
+                "Custom integrations",
+                "SLA guarantee",
+                "On-premise option"
+            ],
+            "cta": "Contact Sales"
+        }
+    },
+    "FAQ": {
+        "title": "Frequently Asked Questions",
+        "items": {
+            "quality": {
+                "question": "Will the video quality be affected?",
+                "answer": "No, our AI preserves the original video quality. We use advanced inpainting technology that fills removed areas seamlessly."
+            },
+            "types": {
+                "question": "What types of watermarks can be removed?",
+                "answer": "Our AI can remove text watermarks, logo overlays, timestamps, and most semi-transparent marks. Complex animated watermarks may require high-quality mode."
+            },
+            "time": {
+                "question": "How long does processing take?",
+                "answer": "Fast mode takes 1-2 minutes for most videos. High-quality mode takes 5-10 minutes but provides better results for complex watermarks."
+            },
+            "privacy": {
+                "question": "Is my video data secure?",
+                "answer": "Yes, all uploads are encrypted. Videos are automatically deleted from our servers within 24 hours of processing."
+            },
+            "legal": {
+                "question": "Is it legal to remove watermarks?",
+                "answer": "You should only remove watermarks from content you own or have rights to modify. We're designed for creators removing their own watermarks or licensed content."
+            }
+        }
+    },
+    "Footer": {
+        "tagline": "Professional AI watermark removal for content creators.",
+        "product": {
+            "title": "Product",
+            "features": "Features",
+            "pricing": "Pricing",
+            "api": "API"
+        },
+        "company": {
+            "title": "Company",
+            "about": "About Us",
+            "contact": "Contact",
+            "careers": "Careers"
+        },
+        "legal": {
+            "title": "Legal",
+            "privacy": "Privacy Policy",
+            "terms": "Terms of Service"
+        },
+        "copyright": "© 2024 AI Watermark Remover. All rights reserved."
+    },
+    "JobPage": {
+        "backToHome": "← Back to Home",
+        "title": "Job Status",
+        "status": "Status",
+        "statusLabels": {
+            "pending": "PENDING",
+            "processing": "PROCESSING",
+            "completed": "COMPLETED",
+            "failed": "FAILED"
+        },
+        "messages": {
+            "pending": "⏳ Your video is in the queue. Processing will begin shortly...",
+            "processing": "🎬 Processing your video... This may take a few minutes.",
+            "failed": "❌ Processing failed. Please try again or contact support.",
+            "completed": "✅ Your video has been processed successfully!"
+        },
+        "result": {
+            "original": "Original",
+            "processed": "Processed",
+            "download": "Download Processed Video"
+        },
+        "details": {
+            "jobId": "Job ID",
+            "created": "Created"
+        },
+        "error": "Failed to fetch job status"
+    },
+    "Common": {
+        "loading": "Loading..."
+    }
+}

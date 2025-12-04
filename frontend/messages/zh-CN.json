@@ -1,0 +1,218 @@
+{
+    "Metadata": {
+        "title": "AI去水印工具 | 专业视频处理",
+        "description": "使用先进的人工智能技术，即时去除视频中的水印。"
+    },
+    "Navbar": {
+        "brand": "AI去水印工具",
+        "signIn": "登录",
+        "features": "功能特点",
+        "pricing": "价格方案",
+        "faq": "常见问题"
+    },
+    "HomePage": {
+        "badge": "AI视频魔法",
+        "title": "一键去除水印",
+        "titleHighlight": "秒级处理",
+        "subtitle": "专业级水印去除，由先进的人工智能驱动。上传您的视频，让我们的神经网络为您施展魔法。",
+        "cta": "免费开始",
+        "ctaSecondary": "了解工作原理",
+        "signInPrompt": {
+            "title": "登录即可开始",
+            "description": "创建免费账户，上传视频并追踪您的水印去除历史。",
+            "button": "立即开始"
+        },
+        "upload": {
+            "clickToUpload": "点击上传",
+            "dragAndDrop": "或拖拽文件到此处",
+            "formats": "支持 MP4、MOV、AVI 格式（最大 100MB）"
+        },
+        "quality": {
+            "fast": {
+                "title": "快速模式",
+                "description": "LaMa 模型 • 1-2 分钟"
+            },
+            "hq": {
+                "title": "高质量模式",
+                "description": "E2FGVI 模型 • 5-10 分钟"
+            }
+        },
+        "submitButton": "开始去除水印",
+        "processing": "正在处理视频...",
+        "legal": "使用本服务即表示您确认拥有修改所上传内容的权利。本工具仅供个人使用，用于处理您拥有的内容。"
+    },
+    "Features": {
+        "title": "为什么选择我们",
+        "subtitle": "专为内容创作者设计的强大功能",
+        "items": {
+            "ai": {
+                "title": "AI精准识别",
+                "description": "我们的神经网络以像素级精度分析和去除水印，完美保留视频质量。"
+            },
+            "fast": {
+                "title": "闪电般速度",
+                "description": "几分钟内处理完成，而非几小时。我们优化的处理管道比传统方法快10倍。"
+            },
+            "privacy": {
+                "title": "隐私第一",
+                "description": "您的视频经过加密传输，处理后自动删除。我们从不存储或分享您的内容。"
+            },
+            "formats": {
+                "title": "全格式支持",
+                "description": "支持上传 MP4、MOV、AVI 等格式。以您喜欢的格式导出，无质量损失。"
+            },
+            "noWatermark": {
+                "title": "无输出水印",
+                "description": "与其他工具不同，我们从不添加自己的水印。您的干净视频是真正干净的。"
+            },
+            "cloud": {
+                "title": "云端处理",
+                "description": "无需安装软件。只需浏览器，即可在任何设备上处理视频。"
+            }
+        }
+    },
+    "HowItWorks": {
+        "title": "使用流程",
+        "subtitle": "三个简单步骤，轻松去除水印",
+        "steps": {
+            "upload": {
+                "title": "上传视频",
+                "description": "拖拽或选择您的视频文件。我们支持所有主流格式，最大100MB。"
+            },
+            "process": {
+                "title": "AI处理",
+                "description": "我们的神经网络分析并去除水印，同时保持视频质量。"
+            },
+            "download": {
+                "title": "下载成品",
+                "description": "获取您的干净视频，随时可用。无水印，无质量损失。"
+            }
+        }
+    },
+    "Comparison": {
+        "title": "效果对比",
+        "before": "处理前",
+        "after": "处理后"
+    },
+    "Pricing": {
+        "title": "简单透明的定价",
+        "subtitle": "选择适合您需求的方案",
+        "free": {
+            "name": "免费版",
+            "price": "¥0",
+            "period": "永久免费",
+            "features": [
+                "每月3个视频",
+                "最大50MB文件",
+                "标准处理速度",
+                "720p输出质量"
+            ],
+            "cta": "免费开始"
+        },
+        "pro": {
+            "name": "专业版",
+            "price": "¥68",
+            "period": "每月",
+            "badge": "最受欢迎",
+            "features": [
+                "无限视频处理",
+                "最大500MB文件",
+                "优先处理队列",
+                "4K输出质量",
+                "批量处理",
+                "API接口"
+            ],
+            "cta": "开始专业版试用"
+        },
+        "enterprise": {
+            "name": "企业版",
+            "price": "定制",
+            "period": "联系我们",
+            "features": [
+                "专业版全部功能",
+                "无限文件大小",
+                "专属客服支持",
+                "定制集成",
+                "SLA保障",
+                "私有化部署"
+            ],
+            "cta": "联系销售"
+        }
+    },
+    "FAQ": {
+        "title": "常见问题",
+        "items": {
+            "quality": {
+                "question": "视频质量会受影响吗？",
+                "answer": "不会，我们的AI保留原始视频质量。我们使用先进的图像修复技术，无缝填充去除的区域。"
+            },
+            "types": {
+                "question": "可以去除哪些类型的水印？",
+                "answer": "我们的AI可以去除文字水印、Logo覆盖、时间戳和大多数半透明标记。复杂的动态水印可能需要使用高质量模式。"
+            },
+            "time": {
+                "question": "处理需要多长时间？",
+                "answer": "快速模式对于大多数视频需要1-2分钟。高质量模式需要5-10分钟，但对复杂水印效果更好。"
+            },
+            "privacy": {
+                "question": "我的视频数据安全吗？",
+                "answer": "是的，所有上传都经过加密。视频在处理完成后24小时内自动从我们的服务器删除。"
+            },
+            "legal": {
+                "question": "去除水印合法吗？",
+                "answer": "您只应去除您拥有或有权修改的内容上的水印。我们的服务专为创作者去除自己的水印或授权内容而设计。"
+            }
+        }
+    },
+    "Footer": {
+        "tagline": "专业的AI水印去除工具，为内容创作者而生。",
+        "product": {
+            "title": "产品",
+            "features": "功能特点",
+            "pricing": "价格方案",
+            "api": "API接口"
+        },
+        "company": {
+            "title": "公司",
+            "about": "关于我们",
+            "contact": "联系我们",
+            "careers": "加入我们"
+        },
+        "legal": {
+            "title": "法律",
+            "privacy": "隐私政策",
+            "terms": "服务条款"
+        },
+        "copyright": "© 2024 AI去水印工具。保留所有权利。"
+    },
+    "JobPage": {
+        "backToHome": "← 返回首页",
+        "title": "任务状态",
+        "status": "状态",
+        "statusLabels": {
+            "pending": "排队中",
+            "processing": "处理中",
+            "completed": "已完成",
+            "failed": "处理失败"
+        },
+        "messages": {
+            "pending": "⏳ 您的视频正在排队中，即将开始处理...",
+            "processing": "🎬 正在处理您的视频...这可能需要几分钟。",
+            "failed": "❌ 处理失败。请重试或联系客服。",
+            "completed": "✅ 您的视频已成功处理！"
+        },
+        "result": {
+            "original": "原始视频",
+            "processed": "处理后",
+            "download": "下载处理后的视频"
+        },
+        "details": {
+            "jobId": "任务 ID",
+            "created": "创建时间"
+        },
+        "error": "获取任务状态失败"
+    },
+    "Common": {
+        "loading": "加载中..."
+    }
+}
