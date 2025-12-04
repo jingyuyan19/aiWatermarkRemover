@@ -1,8 +1,5 @@
 'use client';
 
-// Prevent static prerendering - this page requires Clerk auth
-export const dynamic = 'force-dynamic';
-
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
