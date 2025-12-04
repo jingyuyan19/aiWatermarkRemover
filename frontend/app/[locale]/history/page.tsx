@@ -1,5 +1,8 @@
 'use client';
 
+// Prevent static prerendering - this page requires Clerk auth
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import {
@@ -196,8 +199,8 @@ export default function HistoryPage() {
                                                         </td>
                                                         <td className="px-6 py-4">
                                                             <span className={`px-2 py-1 rounded-full text-xs ${job.quality === 'e2fgvi_hq'
-                                                                    ? 'bg-purple-500/20 text-purple-400'
-                                                                    : 'bg-blue-500/20 text-blue-400'
+                                                                ? 'bg-purple-500/20 text-purple-400'
+                                                                : 'bg-blue-500/20 text-blue-400'
                                                                 }`}>
                                                                 {job.quality === 'e2fgvi_hq' ? 'HQ' : 'Fast'}
                                                             </span>

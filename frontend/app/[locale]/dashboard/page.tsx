@@ -1,5 +1,8 @@
 'use client';
 
+// Prevent static prerendering - this page requires Clerk auth
+export const dynamic = 'force-dynamic';
+
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
@@ -180,8 +183,8 @@ export default function DashboardPage() {
                                                     type="button"
                                                     onClick={() => setQuality('lama')}
                                                     className={`p-4 rounded-xl border transition-all text-left ${quality === 'lama'
-                                                            ? 'bg-primary/10 border-primary/50'
-                                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                                        ? 'bg-primary/10 border-primary/50'
+                                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3">
@@ -201,8 +204,8 @@ export default function DashboardPage() {
                                                     type="button"
                                                     onClick={() => setQuality('e2fgvi_hq')}
                                                     className={`p-4 rounded-xl border transition-all text-left ${quality === 'e2fgvi_hq'
-                                                            ? 'bg-accent/10 border-accent/50'
-                                                            : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                                        ? 'bg-accent/10 border-accent/50'
+                                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
                                                         }`}
                                                 >
                                                     <div className="flex items-center gap-3">
@@ -351,8 +354,8 @@ export default function DashboardPage() {
                                                     </div>
                                                 </div>
                                                 <span className={`px-2 py-1 rounded-full text-xs ${job.quality === 'e2fgvi_hq'
-                                                        ? 'bg-purple-500/20 text-purple-400'
-                                                        : 'bg-blue-500/20 text-blue-400'
+                                                    ? 'bg-purple-500/20 text-purple-400'
+                                                    : 'bg-blue-500/20 text-blue-400'
                                                     }`}>
                                                     {job.quality === 'e2fgvi_hq' ? 'HQ' : 'Fast'}
                                                 </span>
