@@ -93,9 +93,9 @@ function Navbar({ locale }: { locale: string }) {
     return (
         <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <div className="font-bold text-xl text-white">
+                <a href={`/${locale}`} className="font-bold text-xl text-white hover:text-primary transition-colors">
                     {locale === 'zh-CN' ? 'AI去水印工具' : 'AI Watermark Remover'}
-                </div>
+                </a>
                 <div className="flex items-center gap-4">
                     {/* Language Switcher */}
                     <LanguageSwitcher locale={locale} />
@@ -108,6 +108,18 @@ function Navbar({ locale }: { locale: string }) {
                         </SignInButton>
                     </SignedOut>
                     <SignedIn>
+                        <a
+                            href={`/${locale}/dashboard`}
+                            className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                        >
+                            {locale === 'zh-CN' ? '控制台' : 'Dashboard'}
+                        </a>
+                        <a
+                            href={`/${locale}/history`}
+                            className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                        >
+                            {locale === 'zh-CN' ? '历史' : 'History'}
+                        </a>
                         <UserButton
                             appearance={{
                                 elements: {
@@ -133,8 +145,8 @@ function LanguageSwitcher({ locale }: { locale: string }) {
             <a
                 href="/en"
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${locale === 'en'
-                        ? 'bg-primary text-white'
-                        : 'text-gray-400 hover:text-white'
+                    ? 'bg-primary text-white'
+                    : 'text-gray-400 hover:text-white'
                     }`}
             >
                 EN
@@ -142,8 +154,8 @@ function LanguageSwitcher({ locale }: { locale: string }) {
             <a
                 href="/zh-CN"
                 className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${locale === 'zh-CN'
-                        ? 'bg-primary text-white'
-                        : 'text-gray-400 hover:text-white'
+                    ? 'bg-primary text-white'
+                    : 'text-gray-400 hover:text-white'
                     }`}
             >
                 中文

@@ -224,7 +224,7 @@
     },
     "Dashboard": {
         "title": "Dashboard",
-        "subtitle": "Manage your videos and credits",
+        "subtitle": "Remove watermarks from your videos",
         "stats": {
             "credits": "Credits Remaining",
             "processed": "Videos Processed",
@@ -237,12 +237,50 @@
             "completed": "Completed",
             "failed": "Failed"
         },
-        "history": {
-            "title": "Processing History",
-            "newVideo": "New Video",
-            "empty": "No videos processed yet",
-            "uploadFirst": "Upload Your First Video"
+        "upload": {
+            "title": "Remove Watermark",
+            "success": "Video uploaded successfully!",
+            "error": "Failed to upload video. Please try again.",
+            "processing": "Processing...",
+            "submit": "Start Removal Magic",
+            "quality": {
+                "fast": {
+                    "title": "Fast Mode",
+                    "description": "LaMa • 1-2 min"
+                },
+                "hq": {
+                    "title": "High Quality",
+                    "description": "E2FGVI • 5-10 min"
+                }
+            }
         },
+        "recentJobs": {
+            "title": "Recent Jobs",
+            "viewAll": "View All",
+            "empty": "No videos processed yet"
+        }
+    },
+    "History": {
+        "title": "Processing History",
+        "subtitle": "View all your processed videos",
+        "backToDashboard": "Back to Dashboard",
+        "stats": {
+            "total": "Total",
+            "completed": "Completed",
+            "processing": "Processing",
+            "failed": "Failed"
+        },
+        "status": {
+            "pending": "Pending",
+            "processing": "Processing",
+            "completed": "Completed",
+            "failed": "Failed"
+        },
+        "filter": {
+            "all": "All"
+        },
+        "empty": "No videos found",
+        "goToDashboard": "Go to Dashboard",
         "table": {
             "status": "Status",
             "quality": "Quality",

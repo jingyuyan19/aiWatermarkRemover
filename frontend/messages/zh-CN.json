@@ -224,7 +224,7 @@
     },
     "Dashboard": {
         "title": "控制台",
-        "subtitle": "管理您的视频和积分",
+        "subtitle": "去除视频水印",
         "stats": {
             "credits": "剩余积分",
             "processed": "已处理视频",
@@ -237,12 +237,50 @@
             "completed": "已完成",
             "failed": "失败"
         },
-        "history": {
-            "title": "处理历史",
-            "newVideo": "新视频",
-            "empty": "暂无处理记录",
-            "uploadFirst": "上传您的第一个视频"
+        "upload": {
+            "title": "去除水印",
+            "success": "视频上传成功！",
+            "error": "上传失败，请重试。",
+            "processing": "处理中...",
+            "submit": "开始去水印",
+            "quality": {
+                "fast": {
+                    "title": "快速模式",
+                    "description": "LaMa • 1-2 分钟"
+                },
+                "hq": {
+                    "title": "高质量",
+                    "description": "E2FGVI • 5-10 分钟"
+                }
+            }
         },
+        "recentJobs": {
+            "title": "最近任务",
+            "viewAll": "查看全部",
+            "empty": "暂无处理记录"
+        }
+    },
+    "History": {
+        "title": "处理历史",
+        "subtitle": "查看所有已处理的视频",
+        "backToDashboard": "返回控制台",
+        "stats": {
+            "total": "总计",
+            "completed": "已完成",
+            "processing": "处理中",
+            "failed": "失败"
+        },
+        "status": {
+            "pending": "排队中",
+            "processing": "处理中",
+            "completed": "已完成",
+            "failed": "失败"
+        },
+        "filter": {
+            "all": "全部"
+        },
+        "empty": "暂无视频",
+        "goToDashboard": "返回控制台",
         "table": {
             "status": "状态",
             "quality": "质量",

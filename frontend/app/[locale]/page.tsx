@@ -1,90 +1,38 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
-    Sparkles, Zap, Clock, Lock, Shield, Upload, Download,
-    Cpu, Cloud, Film, Check, ChevronDown, ChevronUp,
-    ArrowRight, Play, Layers, Wand2, Image as ImageIcon
+    Sparkles, Zap, Clock, Shield, Upload, Download,
+    Cpu, Cloud, Check, ChevronDown, ChevronUp,
+    ArrowRight, Play, Layers, Wand2
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileUpload } from '@/components/ui/FileUpload';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
-import { toast } from 'sonner';
 import { useAuth, SignInButton } from '@clerk/nextjs';
-import { useTranslations } from 'next-intl';
-
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
-
-// Animation variants
-const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 }
-};
-
-const staggerContainer = {
-    animate: { transition: { staggerChildren: 0.1 } }
-};
+import { useTranslations, useLocale } from 'next-intl';
 
 export default function Home() {
     const t = useTranslations();
-    const { isLoaded, userId, getToken } = useAuth();
-    const [file, setFile] = useState<File | null>(null);
-    const [quality, setQuality] = useState<'lama' | 'e2fgvi_hq'>('lama');
-    const [uploading, setUploading] = useState(false);
+    const locale = useLocale();
+    const { isLoaded, userId } = useAuth();
     const [openFaq, setOpenFaq] = useState<string | null>(null);
     const router = useRouter();
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!file || !userId) return;
-
-        setUploading(true);
-        try {
-            const token = await getToken();
-
-            const formData = new FormData();
-            formData.append('file', file);
-
-            const uploadResponse = await fetch(`${API_URL}/api/upload`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData,
-            });
-
-            if (!uploadResponse.ok) throw new Error('Upload failed');
-            const { key } = await uploadResponse.json();
-
-            const jobResponse = await fetch(`${API_URL}/api/jobs?input_key=${encodeURIComponent(key)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
-                },
-                body: JSON.stringify({ quality }),
-            });
-
-            if (!jobResponse.ok) throw new Error('Job creation failed');
-            const job = await jobResponse.json();
-
-            toast.success('Video uploaded successfully!');
-            router.push(`/job/${job.id}`);
-        } catch (error) {
-            console.error('Error:', error);
-            toast.error('Failed to upload video. Please try again.');
-        } finally {
-            setUploading(false);
+    // Redirect logged-in users to dashboard
+    useEffect(() => {
+        if (isLoaded && userId) {
+            router.push(`/${locale}/dashboard`);
         }
-    };
+    }, [isLoaded, userId, locale, router]);
 
     const scrollToSection = (id: string) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    if (!isLoaded) return null;
+    if (!isLoaded || userId) return null; // Hide while redirecting
 
     const features = [
         { key: 'ai', icon: Wand2, colSpan: 'md:col-span-2' },
@@ -131,19 +79,12 @@ export default function Home() {
                             {t('HomePage.subtitle')}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
-                            {userId ? (
-                                <Button size="lg" variant="glow" onClick={() => scrollToSection('upload')} className="text-lg px-8 h-12 rounded-full">
+                            <SignInButton mode="modal">
+                                <Button size="lg" variant="glow" className="text-lg px-8 h-12 rounded-full">
                                     {t('HomePage.cta')}
                                     <ArrowRight className="ml-2 w-5 h-5" />
                                 </Button>
-                            ) : (
-                                <SignInButton mode="modal">
-                                    <Button size="lg" variant="glow" className="text-lg px-8 h-12 rounded-full">
-                                        {t('HomePage.cta')}
-                                        <ArrowRight className="ml-2 w-5 h-5" />
-                                    </Button>
-                                </SignInButton>
-                            )}
+                            </SignInButton>
                             <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
                                 <Play className="mr-2 w-5 h-5" />
                                 {t('HomePage.ctaSecondary')}
@@ -165,7 +106,6 @@ export default function Home() {
                                 <div className="w-3 h-3 rounded-full bg-green-500/20" />
                             </div>
                             <div className="p-1 pt-12 bg-gradient-to-b from-transparent to-black/80">
-                                {/* Placeholder for actual app screenshot or simplified UI representation */}
                                 <div className="aspect-video w-full bg-gradient-to-br from-gray-900 to-black rounded-lg flex items-center justify-center border border-white/5">
                                     <div className="text-center">
                                         <div className="w-20 h-20 mx-auto bg-primary/20 rounded-full flex items-center justify-center mb-4 animate-pulse">
@@ -176,7 +116,6 @@ export default function Home() {
                                 </div>
                             </div>
                         </div>
-                        {/* Glow effect behind mockup */}
                         <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent opacity-20 blur-3xl -z-10 rounded-[3rem]" />
                     </motion.div>
                 </div>
@@ -187,7 +126,6 @@ export default function Home() {
                 <div className="container max-w-6xl mx-auto text-center">
                     <p className="text-sm font-medium text-gray-500 mb-8 uppercase tracking-wider">{t('HomePage.trust.title')}</p>
                     <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
-                        {/* Placeholder Logos - using text for now but styled like logos */}
                         {trustCompanies.map((company) => (
                             <span key={company} className="text-xl font-bold text-white/40 hover:text-white transition-colors cursor-default">{company}</span>
                         ))}
@@ -229,7 +167,6 @@ export default function Home() {
                                         <p className="text-gray-400 leading-relaxed">
                                             {t(`Features.items.${key}.description`)}
                                         </p>
-                                        {/* Decorative gradient blob */}
                                         <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/20 to-transparent blur-3xl rounded-full group-hover:opacity-100 opacity-0 transition-opacity duration-500" />
                                     </CardContent>
                                 </Card>
@@ -253,7 +190,6 @@ export default function Home() {
                     </motion.div>
 
                     <div className="grid md:grid-cols-3 gap-12 relative">
-                        {/* Connecting line */}
                         <div className="absolute top-12 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent hidden md:block" />
 
                         {steps.map(({ key, icon: Icon, color }, index) => (
@@ -279,85 +215,6 @@ export default function Home() {
                                 </div>
                             </motion.div>
                         ))}
-                    </div>
-                </div>
-            </section>
-
-            {/* ===== UPLOAD SECTION ===== */}
-            <section id="upload" className="py-32 px-4 relative z-10">
-                <div className="container max-w-3xl mx-auto">
-                    <div className="relative">
-                        {/* Glow effect */}
-                        <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary opacity-30 blur-2xl rounded-[2rem]" />
-
-                        <Card className="border-white/10 bg-black/80 backdrop-blur-xl relative rounded-[2rem] overflow-hidden">
-                            <CardContent className="p-10 md:p-14">
-                                {!userId ? (
-                                    <div className="text-center py-8">
-                                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 border border-white/10">
-                                            <Lock className="w-8 h-8 text-gray-400" />
-                                        </div>
-                                        <h3 className="text-3xl font-bold text-white mb-4">{t('HomePage.signInPrompt.title')}</h3>
-                                        <p className="text-gray-400 mb-10 text-lg max-w-md mx-auto">{t('HomePage.signInPrompt.description')}</p>
-                                        <SignInButton mode="modal">
-                                            <Button size="lg" variant="glow" className="text-lg px-10 h-14 rounded-full w-full sm:w-auto">{t('HomePage.signInPrompt.button')}</Button>
-                                        </SignInButton>
-                                    </div>
-                                ) : (
-                                    <form onSubmit={handleSubmit} className="space-y-8">
-                                        <FileUpload onFileSelect={setFile} selectedFile={file} onClear={() => setFile(null)} />
-
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <button
-                                                type="button"
-                                                onClick={() => setQuality('lama')}
-                                                className={`p-6 rounded-2xl border transition-all text-left group ${quality === 'lama' ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'}`}>
-                                                        <Zap className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <div className={`font-semibold text-lg ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>
-                                                            {t('HomePage.quality.fast.title')}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">{t('HomePage.quality.fast.description')}</div>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={() => setQuality('e2fgvi_hq')}
-                                                className={`p-6 rounded-2xl border transition-all text-left group ${quality === 'e2fgvi_hq' ? 'bg-accent/10 border-accent/50' : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                                    }`}
-                                            >
-                                                <div className="flex items-center gap-4">
-                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'}`}>
-                                                        <Clock className="w-5 h-5" />
-                                                    </div>
-                                                    <div>
-                                                        <div className={`font-semibold text-lg ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>
-                                                            {t('HomePage.quality.hq.title')}
-                                                        </div>
-                                                        <div className="text-sm text-gray-500">{t('HomePage.quality.hq.description')}</div>
-                                                    </div>
-                                                </div>
-                                            </button>
-                                        </div>
-
-                                        <Button type="submit" className="w-full h-16 text-lg rounded-xl font-semibold" variant="glow" disabled={!file || uploading}>
-                                            {uploading ? (
-                                                <span className="flex items-center gap-3">
-                                                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                                    {t('HomePage.processing')}
-                                                </span>
-                                            ) : t('HomePage.submitButton')}
-                                        </Button>
-                                    </form>
-                                )}
-                            </CardContent>
-                        </Card>
                     </div>
                 </div>
             </section>
@@ -402,12 +259,14 @@ export default function Home() {
                                                 </li>
                                             ))}
                                         </ul>
-                                        <Button
-                                            className="w-full h-12 rounded-lg font-medium"
-                                            variant={plan === 'pro' ? 'glow' : 'outline'}
-                                        >
-                                            {t(`Pricing.${plan}.cta`)}
-                                        </Button>
+                                        <SignInButton mode="modal">
+                                            <Button
+                                                className="w-full h-12 rounded-lg font-medium"
+                                                variant={plan === 'pro' ? 'glow' : 'outline'}
+                                            >
+                                                {t(`Pricing.${plan}.cta`)}
+                                            </Button>
+                                        </SignInButton>
                                     </CardContent>
                                 </Card>
                             </motion.div>
@@ -476,12 +335,6 @@ export default function Home() {
                                 {t('Navbar.brand')}
                             </h4>
                             <p className="text-gray-400 text-sm leading-relaxed mb-6">{t('Footer.tagline')}</p>
-                            <div className="flex gap-4">
-                                {/* Social placeholders */}
-                                <div className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer" />
-                                <div className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer" />
-                                <div className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer" />
-                            </div>
                         </div>
                         <div>
                             <h5 className="font-semibold text-white mb-6">{t('Footer.product.title')}</h5>

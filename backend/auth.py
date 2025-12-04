@@ -5,6 +5,7 @@ This module provides a dependency for verifying Clerk JWT tokens.
 """
 import os
 import httpx
+from typing import Optional
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
@@ -89,7 +90,7 @@ async def get_current_user(
 
 async def get_optional_user(
     credentials: HTTPAuthorizationCredentials = Depends(security)
-) -> str | None:
+) -> Optional[str]:
     """
     Optionally verify the Clerk JWT token.
     Returns None if no token is provided, otherwise returns the user ID.

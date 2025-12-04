@@ -83,6 +83,29 @@ async def upload_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+@app.get("/api/jobs", response_model=list[JobResponse])
+async def list_jobs(
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user)
+):
+    """List all jobs for the current user (requires auth)"""
+    result = await db.execute(
+        select(Job).where(Job.user_id == user_id).order_by(Job.created_at.desc())
+    )
+    jobs = result.scalars().all()
+    return [
+        JobResponse(
+            id=job.id,
+            status=job.status,
+            input_url=f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key and PUBLIC_URL_BASE else None,
+            output_url=f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED and PUBLIC_URL_BASE else None,
+            quality=job.quality,
+            cost=job.cost if hasattr(job, 'cost') else 1,
+            created_at=job.created_at
+        )
+        for job in jobs
+    ]
+
 @app.post("/api/jobs", response_model=JobResponse)
 async def create_job(
     job_data: JobCreate,
