@@ -1,36 +1,150 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
 
 :root {
-  /* Cinematic Dark Theme Palette */
-  --background: #050505;
-  --foreground: #ededed;
-  
-  --card-bg: rgba(255, 255, 255, 0.03);
-  --card-border: rgba(255, 255, 255, 0.08);
-  
-  --primary: #3B82F6; /* Electric Blue */
+  /* Cinematic Dark Theme Palette - Mapped to shadcn variables */
+
+  /* Backgrounds */
+  --background: 0 0% 2%;
+  /* #050505 - Deep Black */
+  --foreground: 0 0% 93%;
+  /* #ededed - Light Gray */
+
+  --card: 0 0% 100%;
+  --card-foreground: 0 0% 3.9%;
+
+  --popover: 0 0% 100%;
+  --popover-foreground: 0 0% 3.9%;
+
+  /* Primary - Electric Blue #3B82F6 */
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 98%;
   --primary-glow: rgba(59, 130, 246, 0.5);
-  
-  --accent: #8B5CF6; /* Neon Purple */
+
+  /* Secondary - Dark Gray/Glass */
+  --secondary: 0 0% 96.1%;
+  --secondary-foreground: 0 0% 9%;
+
+  /* Muted */
+  --muted: 0 0% 96.1%;
+  --muted-foreground: 0 0% 45.1%;
+
+  /* Accent - Neon Purple #8B5CF6 */
+  --accent: 262 83% 58%;
+  --accent-foreground: 0 0% 9%;
   --accent-glow: rgba(139, 92, 246, 0.5);
+
+  --destructive: 0 84.2% 60.2%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 89.8%;
+  --input: 0 0% 89.8%;
+  --ring: 0 0% 3.9%;
+
+  --radius: 0.625rem;
+
+  --chart-1: 12 76% 61%;
+  --chart-2: 173 58% 39%;
+  --chart-3: 197 37% 24%;
+  --chart-4: 43 74% 66%;
+  --chart-5: 27 87% 67%;
+}
+
+.dark {
+  /* Cinematic Dark Mode Overrides */
+
+  --background: 0 0% 2%;
+  /* #050505 */
+  --foreground: 0 0% 93%;
+  /* #ededed */
+
+  /* Glassmorphism Cards */
+  --card: 0 0% 100%;
+  /* Using opacity in components */
+  --card-bg: rgba(255, 255, 255, 0.03);
+  --card-foreground: 0 0% 98%;
+  --card-border: rgba(255, 255, 255, 0.08);
+
+  --popover: 0 0% 3.9%;
+  --popover-foreground: 0 0% 98%;
+
+  --primary: 217 91% 60%;
+  --primary-foreground: 0 0% 98%;
+
+  --secondary: 0 0% 14.9%;
+  --secondary-foreground: 0 0% 98%;
+
+  --muted: 0 0% 14.9%;
+  --muted-foreground: 0 0% 63.9%;
+
+  --accent: 262 83% 58%;
+  --accent-foreground: 0 0% 98%;
+
+  --destructive: 0 62.8% 30.6%;
+  --destructive-foreground: 0 0% 98%;
+
+  --border: 0 0% 14.9%;
+  --input: 0 0% 14.9%;
+  --ring: 0 0% 83.1%;
+
+  --chart-1: 220 70% 50%;
+  --chart-2: 160 60% 45%;
+  --chart-3: 30 80% 55%;
+  --chart-4: 280 65% 60%;
+  --chart-5: 340 75% 55%;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: hsl(var(--background));
+  --color-foreground: hsl(var(--foreground));
+
+  --color-card: hsl(var(--card));
+  --color-card-foreground: hsl(var(--card-foreground));
   --color-card-bg: var(--card-bg);
   --color-card-border: var(--card-border);
-  --color-primary: var(--primary);
+
+  --color-popover: hsl(var(--popover));
+  --color-popover-foreground: hsl(var(--popover-foreground));
+
+  --color-primary: hsl(var(--primary));
+  --color-primary-foreground: hsl(var(--primary-foreground));
   --color-primary-glow: var(--primary-glow);
-  --color-accent: var(--accent);
+
+  --color-secondary: hsl(var(--secondary));
+  --color-secondary-foreground: hsl(var(--secondary-foreground));
+
+  --color-muted: hsl(var(--muted));
+  --color-muted-foreground: hsl(var(--muted-foreground));
+
+  --color-accent: hsl(var(--accent));
+  --color-accent-foreground: hsl(var(--accent-foreground));
   --color-accent-glow: var(--accent-glow);
+
+  --color-destructive: hsl(var(--destructive));
+  --color-destructive-foreground: hsl(var(--destructive-foreground));
+
+  --color-border: hsl(var(--border));
+  --color-input: hsl(var(--input));
+  --color-ring: hsl(var(--ring));
+
+  --color-chart-1: hsl(var(--chart-1));
+  --color-chart-2: hsl(var(--chart-2));
+  --color-chart-3: hsl(var(--chart-3));
+  --color-chart-4: hsl(var(--chart-4));
+  --color-chart-5: hsl(var(--chart-5));
+
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
   font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
   overflow-x: hidden;
+  @apply bg-background text-foreground;
 }
 
 /* Custom Utilities for Glow Effects */
@@ -40,4 +154,14 @@ body {
 
 .glow-box {
   box-shadow: 0 0 40px -10px var(--primary-glow);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
 }

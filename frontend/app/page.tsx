@@ -4,9 +4,10 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Sparkles, Zap, Clock } from 'lucide-react';
-import { Button } from '../components/ui/Button';
-import { Card } from '../components/ui/Card';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload } from '../components/ui/FileUpload';
+import { toast } from 'sonner';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 
@@ -42,10 +43,11 @@ export default function Home() {
       });
 
       const job = await jobResponse.json();
+      toast.success('Video uploaded successfully!');
       router.push(`/job/${job.id}`);
     } catch (error) {
       console.error('Error:', error);
-      alert('Failed to upload video. Please try again.');
+      toast.error('Failed to upload video. Please try again.');
     } finally {
       setUploading(false);
     }
@@ -83,81 +85,89 @@ export default function Home() {
         </div>
 
         {/* Main Interaction Card */}
-        <Card className="max-w-2xl mx-auto" hoverEffect>
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <FileUpload
-              onFileSelect={setFile}
-              selectedFile={file}
-              onClear={() => setFile(null)}
-            />
+        <Card className="max-w-2xl mx-auto border-white/10 hover:border-primary/30 transition-colors duration-300">
+          <CardContent className="pt-6">
+            <form onSubmit={handleSubmit} className="space-y-8">
+              <FileUpload
+                onFileSelect={setFile}
+                selectedFile={file}
+                onClear={() => setFile(null)}
+              />
 
-            {/* Quality Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <button
-                type="button"
-                onClick={() => setQuality('lama')}
-                className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'lama'
-                    ? 'bg-primary/10 border-primary/50'
-                    : 'bg-white/5 border-white/10 hover:bg-white/10'
-                  }`}
+              {/* Quality Selection */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <button
+                  type="button"
+                  onClick={() => setQuality('lama')}
+                  className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'lama'
+                      ? 'bg-primary/10 border-primary/50'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'}`}>
+                      <Zap className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold mb-1 ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>Fast Mode</h3>
+                      <p className="text-sm text-gray-500">LaMa Model • 1-2 min</p>
+                    </div>
+                  </div>
+                  {quality === 'lama' && (
+                    <motion.div
+                      layoutId="active-ring"
+                      className="absolute inset-0 border-2 border-primary rounded-xl pointer-events-none"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setQuality('e2fgvi_hq')}
+                  className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'e2fgvi_hq'
+                      ? 'bg-accent/10 border-accent/50'
+                      : 'bg-white/5 border-white/10 hover:bg-white/10'
+                    }`}
+                >
+                  <div className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'}`}>
+                      <Clock className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h3 className={`font-semibold mb-1 ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>High Quality</h3>
+                      <p className="text-sm text-gray-500">E2FGVI Model • 5-10 min</p>
+                    </div>
+                  </div>
+                  {quality === 'e2fgvi_hq' && (
+                    <motion.div
+                      layoutId="active-ring"
+                      className="absolute inset-0 border-2 border-accent rounded-xl pointer-events-none"
+                      initial={false}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    />
+                  )}
+                </button>
+              </div>
+
+              <Button
+                type="submit"
+                className="w-full text-lg h-14"
+                variant="glow"
+                disabled={!file || uploading}
               >
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'}`}>
-                    <Zap className="w-5 h-5" />
+                {uploading ? (
+                  <div className="flex items-center gap-2">
+                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                    <span>Processing Video...</span>
                   </div>
-                  <div>
-                    <h3 className={`font-semibold mb-1 ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>Fast Mode</h3>
-                    <p className="text-sm text-gray-500">LaMa Model • 1-2 min</p>
-                  </div>
-                </div>
-                {quality === 'lama' && (
-                  <motion.div
-                    layoutId="active-ring"
-                    className="absolute inset-0 border-2 border-primary rounded-xl pointer-events-none"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
+                ) : (
+                  'Start Removal Magic'
                 )}
-              </button>
-
-              <button
-                type="button"
-                onClick={() => setQuality('e2fgvi_hq')}
-                className={`relative p-4 rounded-xl border transition-all duration-300 text-left group ${quality === 'e2fgvi_hq'
-                    ? 'bg-accent/10 border-accent/50'
-                    : 'bg-white/5 border-white/10 hover:bg-white/10'
-                  }`}
-              >
-                <div className="flex items-start gap-3">
-                  <div className={`p-2 rounded-lg ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'}`}>
-                    <Clock className="w-5 h-5" />
-                  </div>
-                  <div>
-                    <h3 className={`font-semibold mb-1 ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>High Quality</h3>
-                    <p className="text-sm text-gray-500">E2FGVI Model • 5-10 min</p>
-                  </div>
-                </div>
-                {quality === 'e2fgvi_hq' && (
-                  <motion.div
-                    layoutId="active-ring"
-                    className="absolute inset-0 border-2 border-accent rounded-xl pointer-events-none"
-                    initial={false}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                )}
-              </button>
-            </div>
-
-            <Button
-              type="submit"
-              className="w-full"
-              size="lg"
-              disabled={!file || uploading}
-              isLoading={uploading}
-            >
-              {uploading ? 'Processing Video...' : 'Start Removal Magic'}
-            </Button>
-          </form>
+              </Button>
+            </form>
+          </CardContent>
         </Card>
 
         {/* Legal Notice */}
