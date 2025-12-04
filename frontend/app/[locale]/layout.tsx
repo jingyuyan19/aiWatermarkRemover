@@ -8,6 +8,9 @@ import { routing } from '@/i18n/routing';
 import { notFound } from 'next/navigation';
 import "../globals.css";
 
+// Force dynamic rendering - Clerk requires runtime env vars
+export const dynamic = 'force-dynamic';
+
 const geistSans = Geist({
     variable: "--font-geist-sans",
     subsets: ["latin"],
@@ -17,10 +20,6 @@ const geistMono = Geist_Mono({
     variable: "--font-geist-mono",
     subsets: ["latin"],
 });
-
-export function generateStaticParams() {
-    return routing.locales.map((locale) => ({ locale }));
-}
 
 type Props = {
     children: React.ReactNode;
