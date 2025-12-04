@@ -61,7 +61,8 @@
   /* #ededed */
 
   /* Glassmorphism Cards */
-  --card: 0 0% 100%;
+  --card: 0 0% 0%;
+  /* Black for dark glass effect */
   /* Using opacity in components */
   --card-bg: rgba(255, 255, 255, 0.03);
   --card-foreground: 0 0% 98%;
