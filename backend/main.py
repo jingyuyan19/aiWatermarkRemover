@@ -12,9 +12,17 @@ import boto3
 import runpod
 from dotenv import load_dotenv
 
-load_dotenv()
+from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import select
+from database import get_db, engine, Base
+import models
+import webhooks
 
 app = FastAPI()
+
+# Include routers
+app.include_router(webhooks.router)
 
 # CORS Configuration
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")

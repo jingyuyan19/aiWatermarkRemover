@@ -6,12 +6,12 @@ import { motion } from 'framer-motion';
 import {
     Sparkles, Zap, Clock, Lock, Shield, Upload, Download,
     Cpu, Cloud, Film, Check, ChevronDown, ChevronUp,
-    ArrowRight, Play
+    ArrowRight, Play, Layers, Wand2, Image as ImageIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload } from '@/components/ui/FileUpload';
-import { ParticleBackground } from '@/components/ui/ParticleBackground';
+import { AuroraBackground } from '@/components/ui/AuroraBackground';
 import { toast } from 'sonner';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
@@ -22,7 +22,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
 const fadeInUp = {
     initial: { opacity: 0, y: 20 },
     animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.6 }
+    transition: { duration: 0.5 }
 };
 
 const staggerContainer = {
@@ -87,12 +87,12 @@ export default function Home() {
     if (!isLoaded) return null;
 
     const features = [
-        { key: 'ai', icon: Cpu },
-        { key: 'fast', icon: Zap },
-        { key: 'privacy', icon: Shield },
-        { key: 'formats', icon: Film },
-        { key: 'noWatermark', icon: Check },
-        { key: 'cloud', icon: Cloud },
+        { key: 'ai', icon: Wand2, colSpan: 'md:col-span-2' },
+        { key: 'fast', icon: Zap, colSpan: 'md:col-span-1' },
+        { key: 'privacy', icon: Shield, colSpan: 'md:col-span-1' },
+        { key: 'formats', icon: Layers, colSpan: 'md:col-span-2' },
+        { key: 'noWatermark', icon: Check, colSpan: 'md:col-span-1' },
+        { key: 'cloud', icon: Cloud, colSpan: 'md:col-span-1' },
     ];
 
     const steps = [
@@ -102,117 +102,160 @@ export default function Home() {
     ];
 
     const faqKeys = ['quality', 'types', 'time', 'privacy', 'legal'];
+    const trustCompanies = ['Netflix', 'YouTube', 'Twitch', 'TikTok', 'Vimeo'];
 
     return (
-        <main className="min-h-screen relative overflow-hidden">
-            <ParticleBackground />
+        <main className="min-h-screen relative overflow-hidden bg-black text-white selection:bg-primary/30">
+            <AuroraBackground />
 
             {/* ===== HERO SECTION ===== */}
-            <section className="min-h-screen flex flex-col items-center justify-center py-20 px-4 relative z-10">
-                <div className="container max-w-6xl mx-auto">
-                    <div className="text-center mb-16">
-                        <motion.div {...fadeInUp}>
-                            <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white/5 border border-white/10 text-sm text-gray-300 mb-8 backdrop-blur-sm">
-                                <Sparkles className="w-4 h-4 text-accent" />
-                                <span>{t('HomePage.badge')}</span>
+            <section className="pt-32 pb-20 px-4 relative z-10">
+                <div className="container max-w-6xl mx-auto text-center">
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ duration: 0.6 }}
+                        className="mb-12"
+                    >
+                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/5 border border-white/10 text-xs font-medium text-primary mb-8 backdrop-blur-sm hover:bg-white/10 transition-colors cursor-default">
+                            <Sparkles className="w-3 h-3" />
+                            <span>{t('HomePage.badge')}</span>
+                        </span>
+                        <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold tracking-tight mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white via-white to-white/50">
+                            {t('HomePage.title')} <br />
+                            <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-purple-400 to-accent">
+                                {t('HomePage.titleHighlight')}
                             </span>
-                            <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold text-white mb-6 tracking-tight">
-                                {t('HomePage.title')} <br />
-                                <span className="text-transparent bg-clip-text bg-gradient-to-r from-primary via-blue-400 to-accent">
-                                    {t('HomePage.titleHighlight')}
-                                </span>
-                            </h1>
-                            <p className="text-xl md:text-2xl text-gray-400 max-w-3xl mx-auto leading-relaxed mb-10">
-                                {t('HomePage.subtitle')}
-                            </p>
-                            <div className="flex flex-col sm:flex-row gap-4 justify-center">
-                                {userId ? (
-                                    <Button size="lg" variant="glow" onClick={() => scrollToSection('upload')} className="text-lg px-8">
+                        </h1>
+                        <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
+                            {t('HomePage.subtitle')}
+                        </p>
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
+                            {userId ? (
+                                <Button size="lg" variant="glow" onClick={() => scrollToSection('upload')} className="text-lg px-8 h-12 rounded-full">
+                                    {t('HomePage.cta')}
+                                    <ArrowRight className="ml-2 w-5 h-5" />
+                                </Button>
+                            ) : (
+                                <SignInButton mode="modal">
+                                    <Button size="lg" variant="glow" className="text-lg px-8 h-12 rounded-full">
                                         {t('HomePage.cta')}
                                         <ArrowRight className="ml-2 w-5 h-5" />
                                     </Button>
-                                ) : (
-                                    <SignInButton mode="modal">
-                                        <Button size="lg" variant="glow" className="text-lg px-8">
-                                            {t('HomePage.cta')}
-                                            <ArrowRight className="ml-2 w-5 h-5" />
-                                        </Button>
-                                    </SignInButton>
-                                )}
-                                <Button size="lg" variant="outline" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 border-white/20 hover:bg-white/5">
-                                    <Play className="mr-2 w-5 h-5" />
-                                    {t('HomePage.ctaSecondary')}
-                                </Button>
-                            </div>
-                        </motion.div>
-                    </div>
-                </div>
+                                </SignInButton>
+                            )}
+                            <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
+                                <Play className="mr-2 w-5 h-5" />
+                                {t('HomePage.ctaSecondary')}
+                            </Button>
+                        </div>
+                    </motion.div>
 
-                {/* Scroll indicator */}
-                <motion.div
-                    className="absolute bottom-10 left-1/2 -translate-x-1/2"
-                    animate={{ y: [0, 10, 0] }}
-                    transition={{ repeat: Infinity, duration: 2 }}
-                >
-                    <ChevronDown className="w-8 h-8 text-gray-500" />
-                </motion.div>
+                    {/* App Preview Mockup */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 40, rotateX: 20 }}
+                        animate={{ opacity: 1, y: 0, rotateX: 0 }}
+                        transition={{ duration: 1, delay: 0.2, type: "spring" }}
+                        className="relative mx-auto max-w-5xl perspective-1000"
+                    >
+                        <div className="relative rounded-xl border border-white/10 bg-black/50 backdrop-blur-xl shadow-2xl shadow-primary/20 overflow-hidden transform-gpu">
+                            <div className="absolute top-0 left-0 right-0 h-10 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
+                                <div className="w-3 h-3 rounded-full bg-red-500/20" />
+                                <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
+                                <div className="w-3 h-3 rounded-full bg-green-500/20" />
+                            </div>
+                            <div className="p-1 pt-12 bg-gradient-to-b from-transparent to-black/80">
+                                {/* Placeholder for actual app screenshot or simplified UI representation */}
+                                <div className="aspect-video w-full bg-gradient-to-br from-gray-900 to-black rounded-lg flex items-center justify-center border border-white/5">
+                                    <div className="text-center">
+                                        <div className="w-20 h-20 mx-auto bg-primary/20 rounded-full flex items-center justify-center mb-4 animate-pulse">
+                                            <Upload className="w-10 h-10 text-primary" />
+                                        </div>
+                                        <p className="text-gray-500 font-mono text-sm">Drag & Drop Video Here</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {/* Glow effect behind mockup */}
+                        <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent opacity-20 blur-3xl -z-10 rounded-[3rem]" />
+                    </motion.div>
+                </div>
             </section>
 
-            {/* ===== FEATURES SECTION ===== */}
-            <section id="features" className="py-24 px-4 relative z-10">
+            {/* ===== TRUST SECTION ===== */}
+            <section className="py-12 border-y border-white/5 bg-white/[0.02]">
+                <div className="container max-w-6xl mx-auto text-center">
+                    <p className="text-sm font-medium text-gray-500 mb-8 uppercase tracking-wider">{t('HomePage.trust.title')}</p>
+                    <div className="flex flex-wrap justify-center gap-8 md:gap-16 opacity-50 grayscale hover:grayscale-0 transition-all duration-500">
+                        {/* Placeholder Logos - using text for now but styled like logos */}
+                        {trustCompanies.map((company) => (
+                            <span key={company} className="text-xl font-bold text-white/40 hover:text-white transition-colors cursor-default">{company}</span>
+                        ))}
+                    </div>
+                </div>
+            </section>
+
+            {/* ===== BENTO GRID FEATURES ===== */}
+            <section id="features" className="py-32 px-4 relative z-10">
                 <div className="container max-w-6xl mx-auto">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-20"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t('Features.title')}</h2>
-                        <p className="text-xl text-gray-400">{t('Features.subtitle')}</p>
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">{t('Features.title')}</h2>
+                        <p className="text-xl text-gray-400 max-w-2xl mx-auto">{t('Features.subtitle')}</p>
                     </motion.div>
 
-                    <motion.div
-                        className="grid md:grid-cols-2 lg:grid-cols-3 gap-6"
-                        variants={staggerContainer}
-                        initial="initial"
-                        whileInView="animate"
-                        viewport={{ once: true }}
-                    >
-                        {features.map(({ key, icon: Icon }) => (
-                            <motion.div key={key} variants={fadeInUp}>
-                                <Card className="h-full bg-white/5 border-white/10 hover:border-primary/50 transition-all duration-300 hover:bg-white/10">
-                                    <CardContent className="p-6">
-                                        <div className="w-12 h-12 rounded-xl bg-gradient-to-br from-primary/20 to-accent/20 flex items-center justify-center mb-4">
-                                            <Icon className="w-6 h-6 text-primary" />
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        {features.map(({ key, icon: Icon, colSpan }, index) => (
+                            <motion.div
+                                key={key}
+                                className={`${colSpan} group`}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                            >
+                                <Card className="h-full bg-white/[0.03] border-white/10 hover:border-white/20 transition-all duration-300 hover:bg-white/[0.06] overflow-hidden relative">
+                                    <CardContent className="p-8 h-full flex flex-col">
+                                        <div className="w-12 h-12 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:border-primary/50 group-hover:bg-primary/10">
+                                            <Icon className="w-6 h-6 text-gray-300 group-hover:text-primary transition-colors" />
                                         </div>
-                                        <h3 className="text-xl font-semibold text-white mb-2">
+                                        <h3 className="text-xl font-semibold text-white mb-3">
                                             {t(`Features.items.${key}.title`)}
                                         </h3>
-                                        <p className="text-gray-400">
+                                        <p className="text-gray-400 leading-relaxed">
                                             {t(`Features.items.${key}.description`)}
                                         </p>
+                                        {/* Decorative gradient blob */}
+                                        <div className="absolute -bottom-20 -right-20 w-40 h-40 bg-gradient-to-br from-primary/20 to-transparent blur-3xl rounded-full group-hover:opacity-100 opacity-0 transition-opacity duration-500" />
                                     </CardContent>
                                 </Card>
                             </motion.div>
                         ))}
-                    </motion.div>
+                    </div>
                 </div>
             </section>
 
             {/* ===== HOW IT WORKS SECTION ===== */}
-            <section id="how-it-works" className="py-24 px-4 relative z-10 bg-gradient-to-b from-transparent via-white/5 to-transparent">
+            <section id="how-it-works" className="py-32 px-4 relative z-10">
                 <div className="container max-w-6xl mx-auto">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-20"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t('HowItWorks.title')}</h2>
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6">{t('HowItWorks.title')}</h2>
                         <p className="text-xl text-gray-400">{t('HowItWorks.subtitle')}</p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-12 relative">
+                        {/* Connecting line */}
+                        <div className="absolute top-12 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent hidden md:block" />
+
                         {steps.map(({ key, icon: Icon, color }, index) => (
                             <motion.div
                                 key={key}
@@ -222,18 +265,15 @@ export default function Home() {
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.2 }}
                             >
-                                <div className="text-center">
-                                    <div className={`w-20 h-20 mx-auto rounded-2xl bg-gradient-to-br ${color} flex items-center justify-center mb-6 shadow-lg`}>
-                                        <Icon className="w-10 h-10 text-white" />
+                                <div className="text-center relative z-10">
+                                    <div className={`w-24 h-24 mx-auto rounded-2xl bg-black border border-white/10 flex items-center justify-center mb-8 shadow-2xl relative group`}>
+                                        <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-10 group-hover:opacity-20 transition-opacity rounded-2xl`} />
+                                        <Icon className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-300" />
                                     </div>
-                                    <div className="absolute top-10 left-1/2 w-full h-0.5 bg-gradient-to-r from-transparent via-white/20 to-transparent -z-10 hidden md:block" />
-                                    <span className="inline-block px-3 py-1 rounded-full bg-white/10 text-sm text-gray-400 mb-4">
-                                        Step {index + 1}
-                                    </span>
-                                    <h3 className="text-xl font-semibold text-white mb-2">
+                                    <h3 className="text-xl font-semibold text-white mb-3">
                                         {t(`HowItWorks.steps.${key}.title`)}
                                     </h3>
-                                    <p className="text-gray-400">
+                                    <p className="text-gray-400 leading-relaxed">
                                         {t(`HowItWorks.steps.${key}.description`)}
                                     </p>
                                 </div>
@@ -244,89 +284,98 @@ export default function Home() {
             </section>
 
             {/* ===== UPLOAD SECTION ===== */}
-            <section id="upload" className="py-24 px-4 relative z-10">
-                <div className="container max-w-2xl mx-auto">
-                    <Card className="border-white/10 bg-black/40 backdrop-blur-xl">
-                        <CardContent className="p-8">
-                            {!userId ? (
-                                <div className="text-center py-12">
-                                    <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
-                                        <Lock className="w-8 h-8 text-gray-400" />
-                                    </div>
-                                    <h3 className="text-2xl font-bold text-white mb-4">{t('HomePage.signInPrompt.title')}</h3>
-                                    <p className="text-gray-400 mb-8">{t('HomePage.signInPrompt.description')}</p>
-                                    <SignInButton mode="modal">
-                                        <Button size="lg" variant="glow">{t('HomePage.signInPrompt.button')}</Button>
-                                    </SignInButton>
-                                </div>
-                            ) : (
-                                <form onSubmit={handleSubmit} className="space-y-8">
-                                    <FileUpload onFileSelect={setFile} selectedFile={file} onClear={() => setFile(null)} />
+            <section id="upload" className="py-32 px-4 relative z-10">
+                <div className="container max-w-3xl mx-auto">
+                    <div className="relative">
+                        {/* Glow effect */}
+                        <div className="absolute -inset-1 bg-gradient-to-r from-primary via-accent to-primary opacity-30 blur-2xl rounded-[2rem]" />
 
-                                    <div className="grid grid-cols-2 gap-4">
-                                        <button
-                                            type="button"
-                                            onClick={() => setQuality('lama')}
-                                            className={`p-4 rounded-xl border transition-all text-left ${quality === 'lama' ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Zap className={`w-5 h-5 ${quality === 'lama' ? 'text-primary' : 'text-gray-400'}`} />
-                                                <div>
-                                                    <div className={`font-medium ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>
-                                                        {t('HomePage.quality.fast.title')}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">{t('HomePage.quality.fast.description')}</div>
-                                                </div>
-                                            </div>
-                                        </button>
-                                        <button
-                                            type="button"
-                                            onClick={() => setQuality('e2fgvi_hq')}
-                                            className={`p-4 rounded-xl border transition-all text-left ${quality === 'e2fgvi_hq' ? 'bg-accent/10 border-accent/50' : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                                }`}
-                                        >
-                                            <div className="flex items-center gap-3">
-                                                <Clock className={`w-5 h-5 ${quality === 'e2fgvi_hq' ? 'text-accent' : 'text-gray-400'}`} />
-                                                <div>
-                                                    <div className={`font-medium ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>
-                                                        {t('HomePage.quality.hq.title')}
-                                                    </div>
-                                                    <div className="text-sm text-gray-500">{t('HomePage.quality.hq.description')}</div>
-                                                </div>
-                                            </div>
-                                        </button>
+                        <Card className="border-white/10 bg-black/80 backdrop-blur-xl relative rounded-[2rem] overflow-hidden">
+                            <CardContent className="p-10 md:p-14">
+                                {!userId ? (
+                                    <div className="text-center py-8">
+                                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 border border-white/10">
+                                            <Lock className="w-8 h-8 text-gray-400" />
+                                        </div>
+                                        <h3 className="text-3xl font-bold text-white mb-4">{t('HomePage.signInPrompt.title')}</h3>
+                                        <p className="text-gray-400 mb-10 text-lg max-w-md mx-auto">{t('HomePage.signInPrompt.description')}</p>
+                                        <SignInButton mode="modal">
+                                            <Button size="lg" variant="glow" className="text-lg px-10 h-14 rounded-full w-full sm:w-auto">{t('HomePage.signInPrompt.button')}</Button>
+                                        </SignInButton>
                                     </div>
+                                ) : (
+                                    <form onSubmit={handleSubmit} className="space-y-8">
+                                        <FileUpload onFileSelect={setFile} selectedFile={file} onClear={() => setFile(null)} />
 
-                                    <Button type="submit" className="w-full h-14 text-lg" variant="glow" disabled={!file || uploading}>
-                                        {uploading ? (
-                                            <span className="flex items-center gap-2">
-                                                <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                                {t('HomePage.processing')}
-                                            </span>
-                                        ) : t('HomePage.submitButton')}
-                                    </Button>
-                                </form>
-                            )}
-                        </CardContent>
-                    </Card>
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <button
+                                                type="button"
+                                                onClick={() => setQuality('lama')}
+                                                className={`p-6 rounded-2xl border transition-all text-left group ${quality === 'lama' ? 'bg-primary/10 border-primary/50' : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'}`}>
+                                                        <Zap className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <div className={`font-semibold text-lg ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>
+                                                            {t('HomePage.quality.fast.title')}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">{t('HomePage.quality.fast.description')}</div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={() => setQuality('e2fgvi_hq')}
+                                                className={`p-6 rounded-2xl border transition-all text-left group ${quality === 'e2fgvi_hq' ? 'bg-accent/10 border-accent/50' : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                                    }`}
+                                            >
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-full flex items-center justify-center ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'}`}>
+                                                        <Clock className="w-5 h-5" />
+                                                    </div>
+                                                    <div>
+                                                        <div className={`font-semibold text-lg ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>
+                                                            {t('HomePage.quality.hq.title')}
+                                                        </div>
+                                                        <div className="text-sm text-gray-500">{t('HomePage.quality.hq.description')}</div>
+                                                    </div>
+                                                </div>
+                                            </button>
+                                        </div>
+
+                                        <Button type="submit" className="w-full h-16 text-lg rounded-xl font-semibold" variant="glow" disabled={!file || uploading}>
+                                            {uploading ? (
+                                                <span className="flex items-center gap-3">
+                                                    <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                    {t('HomePage.processing')}
+                                                </span>
+                                            ) : t('HomePage.submitButton')}
+                                        </Button>
+                                    </form>
+                                )}
+                            </CardContent>
+                        </Card>
+                    </div>
                 </div>
             </section>
 
             {/* ===== PRICING SECTION ===== */}
-            <section id="pricing" className="py-24 px-4 relative z-10">
+            <section id="pricing" className="py-32 px-4 relative z-10">
                 <div className="container max-w-6xl mx-auto">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-20"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t('Pricing.title')}</h2>
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6">{t('Pricing.title')}</h2>
                         <p className="text-xl text-gray-400">{t('Pricing.subtitle')}</p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-3 gap-8">
+                    <div className="grid md:grid-cols-3 gap-8 items-start">
                         {['free', 'pro', 'enterprise'].map((plan, index) => (
                             <motion.div
                                 key={plan}
@@ -335,28 +384,26 @@ export default function Home() {
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
                             >
-                                <Card className={`h-full ${plan === 'pro' ? 'border-primary/50 bg-primary/5' : 'border-white/10 bg-white/5'} relative overflow-hidden`}>
+                                <Card className={`h-full ${plan === 'pro' ? 'border-primary/50 bg-primary/[0.03] shadow-2xl shadow-primary/10 scale-105 z-10' : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04]'} transition-all duration-300 relative overflow-hidden`}>
                                     {plan === 'pro' && (
-                                        <div className="absolute top-0 right-0 bg-primary text-white text-xs font-bold px-3 py-1 rounded-bl-lg">
-                                            {t('Pricing.pro.badge')}
-                                        </div>
+                                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
                                     )}
                                     <CardContent className="p-8">
                                         <h3 className="text-xl font-bold text-white mb-2">{t(`Pricing.${plan}.name`)}</h3>
-                                        <div className="mb-6">
+                                        <div className="mb-6 flex items-baseline gap-1">
                                             <span className="text-4xl font-bold text-white">{t(`Pricing.${plan}.price`)}</span>
-                                            <span className="text-gray-400 ml-2">{t(`Pricing.${plan}.period`)}</span>
+                                            <span className="text-gray-400 text-sm">{t(`Pricing.${plan}.period`)}</span>
                                         </div>
-                                        <ul className="space-y-3 mb-8">
+                                        <ul className="space-y-4 mb-8">
                                             {(t.raw(`Pricing.${plan}.features`) as string[]).map((feature: string, i: number) => (
-                                                <li key={i} className="flex items-center gap-2 text-gray-300">
-                                                    <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                                                <li key={i} className="flex items-start gap-3 text-gray-300 text-sm">
+                                                    <Check className={`w-5 h-5 flex-shrink-0 ${plan === 'pro' ? 'text-primary' : 'text-gray-500'}`} />
                                                     {feature}
                                                 </li>
                                             ))}
                                         </ul>
                                         <Button
-                                            className="w-full"
+                                            className="w-full h-12 rounded-lg font-medium"
                                             variant={plan === 'pro' ? 'glow' : 'outline'}
                                         >
                                             {t(`Pricing.${plan}.cta`)}
@@ -370,15 +417,15 @@ export default function Home() {
             </section>
 
             {/* ===== FAQ SECTION ===== */}
-            <section id="faq" className="py-24 px-4 relative z-10">
+            <section id="faq" className="py-32 px-4 relative z-10 bg-white/[0.02]">
                 <div className="container max-w-3xl mx-auto">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-20"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{t('FAQ.title')}</h2>
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6">{t('FAQ.title')}</h2>
                     </motion.div>
 
                     <div className="space-y-4">
@@ -391,10 +438,10 @@ export default function Home() {
                             >
                                 <button
                                     onClick={() => setOpenFaq(openFaq === key ? null : key)}
-                                    className="w-full text-left p-6 rounded-xl bg-white/5 border border-white/10 hover:border-white/20 transition-all"
+                                    className="w-full text-left p-6 rounded-2xl bg-white/5 border border-white/10 hover:border-white/20 transition-all group"
                                 >
                                     <div className="flex items-center justify-between">
-                                        <span className="text-lg font-medium text-white">{t(`FAQ.items.${key}.question`)}</span>
+                                        <span className="text-lg font-medium text-white group-hover:text-primary transition-colors">{t(`FAQ.items.${key}.question`)}</span>
                                         {openFaq === key ? (
                                             <ChevronUp className="w-5 h-5 text-gray-400" />
                                         ) : (
@@ -405,7 +452,7 @@ export default function Home() {
                                         <motion.p
                                             initial={{ opacity: 0, height: 0 }}
                                             animate={{ opacity: 1, height: 'auto' }}
-                                            className="mt-4 text-gray-400"
+                                            className="mt-4 text-gray-400 leading-relaxed"
                                         >
                                             {t(`FAQ.items.${key}.answer`)}
                                         </motion.p>
@@ -418,38 +465,49 @@ export default function Home() {
             </section>
 
             {/* ===== FOOTER ===== */}
-            <footer className="py-16 px-4 border-t border-white/10 relative z-10">
+            <footer className="py-20 px-4 border-t border-white/10 relative z-10 bg-black">
                 <div className="container max-w-6xl mx-auto">
-                    <div className="grid md:grid-cols-4 gap-12 mb-12">
-                        <div>
-                            <h4 className="text-xl font-bold text-white mb-4">{t('Navbar.brand')}</h4>
-                            <p className="text-gray-400">{t('Footer.tagline')}</p>
+                    <div className="grid md:grid-cols-4 gap-12 mb-16">
+                        <div className="col-span-1 md:col-span-1">
+                            <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
+                                    <Sparkles className="w-4 h-4 text-primary" />
+                                </div>
+                                {t('Navbar.brand')}
+                            </h4>
+                            <p className="text-gray-400 text-sm leading-relaxed mb-6">{t('Footer.tagline')}</p>
+                            <div className="flex gap-4">
+                                {/* Social placeholders */}
+                                <div className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer" />
+                                <div className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer" />
+                                <div className="w-8 h-8 rounded-full bg-white/5 hover:bg-white/10 transition-colors cursor-pointer" />
+                            </div>
                         </div>
                         <div>
-                            <h5 className="font-semibold text-white mb-4">{t('Footer.product.title')}</h5>
-                            <ul className="space-y-2 text-gray-400">
-                                <li><a href="#features" className="hover:text-white transition">{t('Footer.product.features')}</a></li>
-                                <li><a href="#pricing" className="hover:text-white transition">{t('Footer.product.pricing')}</a></li>
-                                <li><a href="#" className="hover:text-white transition">{t('Footer.product.api')}</a></li>
+                            <h5 className="font-semibold text-white mb-6">{t('Footer.product.title')}</h5>
+                            <ul className="space-y-4 text-sm text-gray-400">
+                                <li><a href="#features" className="hover:text-primary transition-colors">{t('Footer.product.features')}</a></li>
+                                <li><a href="#pricing" className="hover:text-primary transition-colors">{t('Footer.product.pricing')}</a></li>
+                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.product.api')}</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h5 className="font-semibold text-white mb-4">{t('Footer.company.title')}</h5>
-                            <ul className="space-y-2 text-gray-400">
-                                <li><a href="#" className="hover:text-white transition">{t('Footer.company.about')}</a></li>
-                                <li><a href="#" className="hover:text-white transition">{t('Footer.company.contact')}</a></li>
-                                <li><a href="#" className="hover:text-white transition">{t('Footer.company.careers')}</a></li>
+                            <h5 className="font-semibold text-white mb-6">{t('Footer.company.title')}</h5>
+                            <ul className="space-y-4 text-sm text-gray-400">
+                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.company.about')}</a></li>
+                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.company.contact')}</a></li>
+                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.company.careers')}</a></li>
                             </ul>
                         </div>
                         <div>
-                            <h5 className="font-semibold text-white mb-4">{t('Footer.legal.title')}</h5>
-                            <ul className="space-y-2 text-gray-400">
-                                <li><a href="#" className="hover:text-white transition">{t('Footer.legal.privacy')}</a></li>
-                                <li><a href="#" className="hover:text-white transition">{t('Footer.legal.terms')}</a></li>
+                            <h5 className="font-semibold text-white mb-6">{t('Footer.legal.title')}</h5>
+                            <ul className="space-y-4 text-sm text-gray-400">
+                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.legal.privacy')}</a></li>
+                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.legal.terms')}</a></li>
                             </ul>
                         </div>
                     </div>
-                    <div className="pt-8 border-t border-white/10 text-center text-gray-500">
+                    <div className="pt-8 border-t border-white/10 text-center text-gray-600 text-sm">
                         {t('Footer.copyright')}
                     </div>
                 </div>

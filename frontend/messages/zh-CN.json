@@ -37,6 +37,16 @@
                 "description": "E2FGVI 模型 • 5-10 分钟"
             }
         },
+        "trust": {
+            "title": "超过 10,000+ 创作者的信赖",
+            "companies": [
+                "Netflix",
+                "YouTube",
+                "Twitch",
+                "TikTok",
+                "Vimeo"
+            ]
+        },
         "submitButton": "开始去除水印",
         "processing": "正在处理视频...",
         "legal": "使用本服务即表示您确认拥有修改所上传内容的权利。本工具仅供个人使用，用于处理您拥有的内容。"
@@ -211,6 +221,36 @@
             "created": "创建时间"
         },
         "error": "获取任务状态失败"
+    },
+    "Dashboard": {
+        "title": "控制台",
+        "subtitle": "管理您的视频和积分",
+        "stats": {
+            "credits": "剩余积分",
+            "processed": "已处理视频",
+            "buyCredits": "需要更多积分？",
+            "topUp": "立即充值 →"
+        },
+        "status": {
+            "pending": "排队中",
+            "processing": "处理中",
+            "completed": "已完成",
+            "failed": "失败"
+        },
+        "history": {
+            "title": "处理历史",
+            "newVideo": "新视频",
+            "empty": "暂无处理记录",
+            "uploadFirst": "上传您的第一个视频"
+        },
+        "table": {
+            "status": "状态",
+            "quality": "质量",
+            "date": "日期",
+            "actions": "操作",
+            "view": "查看",
+            "download": "下载"
+        }
     },
     "Common": {
         "loading": "加载中..."
