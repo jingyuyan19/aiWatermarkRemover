@@ -106,7 +106,10 @@ export default function DashboardPage() {
             const formData = new FormData();
             formData.append('file', file);
 
-            const uploadResponse = await fetch(`${API_URL}/api/upload`, {
+            // Use Direct Railway URL to bypass Vercel 4.5MB limit
+            const DIRECT_API = 'https://aiwatermarkremover-production.up.railway.app';
+
+            const uploadResponse = await fetch(`${DIRECT_API}/api/upload`, {
                 method: 'POST',
                 headers: { 'Authorization': `Bearer ${token}` },
                 body: formData,
