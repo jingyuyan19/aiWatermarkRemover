@@ -163,13 +163,21 @@ def verify_creem_webhook(payload: bytes, signature: str) -> bool:
     if not CREEM_WEBHOOK_SECRET:
         return False
     
+    secret = CREEM_WEBHOOK_SECRET.strip()
     expected = hmac.new(
-        CREEM_WEBHOOK_SECRET.encode(),
+        secret.encode(),
         payload,
         hashlib.sha256
     ).hexdigest()
     
-    return hmac.compare_digest(expected, signature)
+    is_valid = hmac.compare_digest(expected, signature)
+    if not is_valid:
+        print(f"[Creem Webhook] Signature Mismatch!")
+        print(f"Received: {signature}")
+        print(f"Expected: {expected}")
+        print(f"Secret used: {secret[:5]}...{secret[-5:]}")
+    
+    return is_valid
 
 
 @router.post("/creem/webhook")
