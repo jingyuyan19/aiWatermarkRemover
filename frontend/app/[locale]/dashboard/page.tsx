@@ -112,7 +112,11 @@ export default function DashboardPage() {
                 body: formData,
             });
 
-            if (!uploadResponse.ok) throw new Error('Upload failed');
+            if (!uploadResponse.ok) {
+                const errorText = await uploadResponse.text();
+                console.error("Upload failed details:", errorText);
+                throw new Error(`Upload failed: ${errorText}`);
+            }
             const { key } = await uploadResponse.json();
 
             const jobResponse = await fetch(`${API_URL}/api/jobs?input_key=${encodeURIComponent(key)}`, {

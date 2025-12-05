@@ -141,6 +141,7 @@ async def upload_file(
         
         return {"key": key}
     except Exception as e:
+        print(f"[ERROR] Upload failed: {e}")
         raise HTTPException(status_code=500, detail=str(e))
 
 
