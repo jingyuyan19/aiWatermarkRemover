@@ -53,16 +53,23 @@ async def fix_db():
 async def fix_jobs_db():
     try:
         async with engine.begin() as conn:
-            # Fix Jobs Table
+            # Fix Jobs Table - Ensure ALL columns exist
+            await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS user_id VARCHAR"))
+            await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS status VARCHAR DEFAULT 'pending'"))
+            await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS input_key VARCHAR"))
+            await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS output_key VARCHAR"))
             await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS quality VARCHAR DEFAULT 'lama'"))
             await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS cost INTEGER DEFAULT 1"))
+            
+            # Create index on user_id if possible (Postgres syntax)
+            # await conn.execute(text("CREATE INDEX IF NOT EXISTS ix_jobs_user_id ON jobs (user_id)"))
             
             # Data Cleanup: Fix potentially invalid status values (UPPERCASE to lowercase)
             await conn.execute(text("UPDATE jobs SET status = lower(status)"))
             # Ensure no null timestamps
             await conn.execute(text("UPDATE jobs SET created_at = NOW() WHERE created_at IS NULL"))
             
-            return {"status": "success", "message": "Jobs table schema patched AND data cleaned"}
+            return {"status": "success", "message": "Jobs table schema repair COMPLETE (user_id added)"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
