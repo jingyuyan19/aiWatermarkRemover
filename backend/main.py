@@ -48,6 +48,17 @@ async def fix_db():
             return {"status": "success", "message": "Database schema patched successfully"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+@app.get("/api/debug/fix_jobs_db")
+async def fix_jobs_db():
+    try:
+        async with engine.begin() as conn:
+            # Fix Jobs Table
+            await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS quality VARCHAR DEFAULT 'lama'"))
+            await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS cost INTEGER DEFAULT 1"))
+            return {"status": "success", "message": "Jobs table schema patched"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 app.include_router(creem.router)
 
 # CORS Configuration
@@ -154,7 +165,9 @@ async def create_job(
     return JobResponse(
         id=new_job.id,
         status=new_job.status,
-        created_at=new_job.created_at
+        created_at=new_job.created_at,
+        quality=new_job.quality or "lama",
+        cost=new_job.cost or 1
     )
 
 @app.get("/api/jobs/{job_id}", response_model=JobResponse)
@@ -200,8 +213,11 @@ async def get_job_status(
         id=job.id,
         status=job.status,
         input_url=input_url,
+        input_url=input_url,
         output_url=output_url,
-        created_at=job.created_at
+        created_at=job.created_at,
+        quality=job.quality or "lama",
+        cost=job.cost or 1
     )
 
 @app.get("/api/jobs", response_model=list[JobResponse])
@@ -221,7 +237,9 @@ async def list_user_jobs(
             status=job.status,
             input_url=f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None,
             output_url=f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED else None,
-            created_at=job.created_at
+            created_at=job.created_at,
+            quality=job.quality or "lama",
+            cost=job.cost or 1
         )
         for job in jobs
     ]
