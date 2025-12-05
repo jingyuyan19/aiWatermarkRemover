@@ -241,20 +241,29 @@ async def list_user_jobs(
     user_id: str = Depends(get_current_user)
 ):
     """List all jobs for the authenticated user"""
-    result = await db.execute(
-        select(Job).where(Job.user_id == user_id).order_by(Job.created_at.desc())
-    )
-    jobs = result.scalars().all()
-    
-    return [
-        JobResponse(
-            id=job.id,
-            status=job.status,
-            input_url=f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None,
-            output_url=f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED else None,
-            created_at=job.created_at,
-            quality=job.quality or "lama",
-            cost=job.cost or 1
+    try:
+        print(f"[DEBUG] list_jobs called for user {user_id}")
+        result = await db.execute(
+            select(Job).where(Job.user_id == user_id).order_by(Job.created_at.desc())
         )
-        for job in jobs
-    ]
+        jobs = result.scalars().all()
+        print(f"[DEBUG] Found {len(jobs)} jobs")
+        
+        response_data = [
+            JobResponse(
+                id=job.id,
+                status=job.status,
+                input_url=f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None,
+                output_url=f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED else None,
+                created_at=job.created_at,
+                quality=job.quality or "lama",
+                cost=job.cost or 1
+            )
+            for job in jobs
+        ]
+        return response_data
+    except Exception as e:
+        print(f"[ERROR] list_jobs failed: {e}")
+        import traceback
+        traceback.print_exc()
+        raise HTTPException(status_code=500, detail=f"List Jobs Error: {str(e)}")
