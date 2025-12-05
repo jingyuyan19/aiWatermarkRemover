@@ -12,12 +12,17 @@ import boto3
 import runpod
 from dotenv import load_dotenv
 
+import models
 import webhooks
 import admin
 import codes
 import creem
 
 app = FastAPI()
+
+@app.on_event("startup")
+async def startup_event():
+    print("Backend Application Starting...")
 
 # Include routers
 app.include_router(webhooks.router)
