@@ -188,6 +188,10 @@ async def handle_creem_webhook(
     """Handle Creem webhook events."""
     
     body = await request.body()
+    
+    # Debug: Print all headers to find the signature
+    print(f"[Creem Webhook] Headers: {request.headers}")
+    
     signature = request.headers.get("x-creem-signature", "")
     
     # Verify signature (skip in development if no secret configured)
