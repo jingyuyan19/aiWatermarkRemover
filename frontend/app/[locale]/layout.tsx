@@ -107,6 +107,14 @@ function Navbar({ locale }: { locale: string }) {
                     Vanishly
                 </a>
                 <div className="flex items-center gap-4">
+                    {/* Global Links */}
+                    <a
+                        href={`/${locale}/pricing`}
+                        className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                    >
+                        {locale === 'zh-CN' ? '价格' : 'Pricing'}
+                    </a>
+
                     {/* Language Switcher */}
                     <LanguageSwitcher locale={locale} />
 
@@ -130,12 +138,7 @@ function Navbar({ locale }: { locale: string }) {
                         >
                             {locale === 'zh-CN' ? '历史' : 'History'}
                         </a>
-                        <a
-                            href={`/${locale}/pricing`}
-                            className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
-                        >
-                            {locale === 'zh-CN' ? '价格' : 'Pricing'}
-                        </a>
+
                         <AdminLink locale={locale} />
                         <UserButton
                             appearance={{
