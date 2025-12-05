@@ -154,6 +154,30 @@ async def create_job(
     user_id: str = Depends(get_current_user)
 ):
     """Create a processing job (requires auth)"""
+    # 1. Get or create user
+    result = await db.execute(select(User).where(User.id == user_id))
+    user = result.scalars().first()
+    
+    if not user:
+        # First time user? Create with default credits (3)
+        user = User(id=user_id, credits=3)
+        db.add(user)
+        await db.commit()
+        await db.refresh(user)
+    
+    # 2. Check credits
+    cost = 1
+    if user.credits < cost:
+        raise HTTPException(
+            status_code=402,
+            detail=f"Insufficient credits. You have {user.credits}, but this job costs {cost}."
+        )
+    
+    # 3. Deduct credits
+    user.credits -= cost
+    db.add(user) # Mark as modified
+    # We will commit this along with the new job to ensure atomicity
+    
     job_id = str(uuid.uuid4())
     output_key = f"outputs/{user_id}/{job_id}.mp4"
     
@@ -163,6 +187,7 @@ async def create_job(
         input_key=input_key,
         output_key=output_key,
         quality=job_data.quality,
+        cost=cost,
         status=JobStatus.PENDING
     )
     
