@@ -195,7 +195,7 @@ async def handle_creem_webhook(
     except:
         raise HTTPException(status_code=400, detail="Invalid JSON")
     
-    event_type = event.get("type")
+    event_type = event.get("eventType")
     
     print(f"[Creem Webhook] Received event: {event_type}")
     
@@ -210,7 +210,7 @@ async def handle_creem_webhook(
 async def handle_checkout_completed(event: dict, db: AsyncSession):
     """Handle successful checkout completion."""
     
-    data = event.get("data", {})
+    data = event.get("object", {})
     metadata = data.get("metadata", {})
     
     user_id = metadata.get("user_id")
