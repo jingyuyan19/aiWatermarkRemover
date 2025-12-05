@@ -3,7 +3,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from database import get_db, engine, Base
-from models import Job, JobStatus
+from models import Job, JobStatus, User
 from schemas import JobCreate, JobResponse
 from auth import get_current_user
 import uuid
@@ -12,11 +12,6 @@ import boto3
 import runpod
 from dotenv import load_dotenv
 
-from fastapi.middleware.cors import CORSMiddleware
-from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select
-from database import get_db, engine, Base
-import models
 import webhooks
 import admin
 import codes
