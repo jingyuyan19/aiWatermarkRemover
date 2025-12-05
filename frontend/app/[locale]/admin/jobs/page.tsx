@@ -31,7 +31,8 @@ export default function JobsPage() {
         async function fetchJobs() {
             try {
                 const token = await getToken();
-                const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/jobs?limit=100`, {
+                const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
+                const res = await fetch(`${API_URL}/api/admin/jobs?limit=100`, {
                     headers: { Authorization: `Bearer ${token}` }
                 });
                 if (res.ok) {

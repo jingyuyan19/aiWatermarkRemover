@@ -16,7 +16,7 @@ import { useAuth } from '@clerk/nextjs';
 import { useTranslations, useLocale } from 'next-intl';
 import Link from 'next/link';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 interface Job {
     id: string;
