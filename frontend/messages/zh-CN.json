@@ -29,7 +29,11 @@
         "upload": {
             "clickToUpload": "点击上传",
             "dragAndDrop": "或拖拽文件到此处",
-            "formats": "支持 MP4、MOV、AVI 格式（最大 100MB）"
+            "formats": "支持 MP4、MOV、AVI 格式（最大 100MB）",
+            "success": "上传成功！开始处理。",
+            "error": "上传失败，请重试。",
+            "insufficient_funds": "积分不足！需要消耗1个积分。",
+            "buy_credits": "购买积分"
         },
         "quality": {
             "fast": {

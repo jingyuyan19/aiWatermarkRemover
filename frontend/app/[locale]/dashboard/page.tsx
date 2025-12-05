@@ -131,14 +131,29 @@ export default function DashboardPage() {
                 body: JSON.stringify({ quality }),
             });
 
-            if (!jobResponse.ok) throw new Error('Job creation failed');
+            if (!jobResponse.ok) {
+                if (jobResponse.status === 402) {
+                    toast.error(t('upload.insufficient_funds'), {
+                        action: {
+                            label: t('upload.buy_credits'),
+                            onClick: () => router.push(`/${locale}/pricing`)
+                        },
+                        duration: 5000,
+                    });
+                    return;
+                }
+                throw new Error('Job creation failed');
+            }
             const job = await jobResponse.json();
 
             toast.success(t('upload.success'));
             router.push(`/${locale}/job/${job.id}`);
         } catch (error) {
             console.error('Error:', error);
-            toast.error(t('upload.error'));
+            // Don't show generic error if we already handled 402
+            if (error instanceof Error && error.message !== 'Job creation failed') {
+                toast.error(t('upload.error'));
+            }
         } finally {
             setUploading(false);
         }

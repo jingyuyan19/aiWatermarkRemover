@@ -29,7 +29,11 @@
         "upload": {
             "clickToUpload": "Click to upload",
             "dragAndDrop": "or drag and drop",
-            "formats": "MP4, MOV, AVI (max 100MB)"
+            "formats": "MP4, MOV, AVI (max 100MB)",
+            "success": "Upload successful! Processing started.",
+            "error": "Upload failed. Please try again.",
+            "insufficient_funds": "Insufficient credits! 1 credit required.",
+            "buy_credits": "Buy Credits"
         },
         "quality": {
             "fast": {
