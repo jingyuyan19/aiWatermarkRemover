@@ -56,9 +56,25 @@ async def fix_jobs_db():
             # Fix Jobs Table
             await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS quality VARCHAR DEFAULT 'lama'"))
             await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS cost INTEGER DEFAULT 1"))
-            return {"status": "success", "message": "Jobs table schema patched"}
+            
+            # Data Cleanup: Fix potentially invalid status values (UPPERCASE to lowercase)
+            await conn.execute(text("UPDATE jobs SET status = lower(status)"))
+            # Ensure no null timestamps
+            await conn.execute(text("UPDATE jobs SET created_at = NOW() WHERE created_at IS NULL"))
+            
+            return {"status": "success", "message": "Jobs table schema patched AND data cleaned"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+@app.get("/api/debug/dump_jobs")
+async def dump_jobs(db: AsyncSession = Depends(get_db)):
+    """Dump raw jobs to check for validation errors."""
+    try:
+        result = await db.execute(text("SELECT * FROM jobs LIMIT 10"))
+        rows = result.mappings().all()
+        return [{"id": r.id, "status": r.status, "created_at": str(r.created_at), "quality": r.quality} for r in rows]
+    except Exception as e:
+        return {"error": str(e)}
 app.include_router(creem.router)
 
 # CORS Configuration
