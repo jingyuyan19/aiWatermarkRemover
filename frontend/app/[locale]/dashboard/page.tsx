@@ -11,6 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
+import { RedeemCodeCard } from '@/components/ui/RedeemCodeCard';
 import { toast } from 'sonner';
 import { useAuth } from '@clerk/nextjs';
 import { useTranslations, useLocale } from 'next-intl';
@@ -43,29 +44,40 @@ export default function DashboardPage() {
     const [quality, setQuality] = useState<'lama' | 'e2fgvi_hq'>('lama');
     const [uploading, setUploading] = useState(false);
 
+    const fetchData = async () => {
+        const token = await getToken();
+
+        // Fetch jobs (independent - don't let failure affect credits)
+        try {
+            const jobsRes = await fetch(`${API_URL}/api/jobs`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (jobsRes.ok) {
+                const jobsData = await jobsRes.json();
+                setJobs(jobsData);
+            }
+        } catch (error) {
+            console.error('Error fetching jobs:', error);
+        }
+
+        // Fetch credits (independent)
+        try {
+            const creditsRes = await fetch(`${API_URL}/api/codes/balance`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (creditsRes.ok) {
+                const creditsData = await creditsRes.json();
+                setCredits(creditsData.credits);
+            }
+        } catch (error) {
+            console.error('Error fetching credits:', error);
+        }
+
+        setLoading(false);
+    };
+
     useEffect(() => {
         if (!userId) return;
-
-        const fetchData = async () => {
-            try {
-                const token = await getToken();
-
-                const jobsRes = await fetch(`${API_URL}/api/jobs`, {
-                    headers: { 'Authorization': `Bearer ${token}` }
-                });
-                if (jobsRes.ok) {
-                    const jobsData = await jobsRes.json();
-                    setJobs(jobsData);
-                }
-
-                setCredits(3); // Placeholder
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchData();
     }, [userId, getToken]);
 
@@ -299,6 +311,22 @@ export default function DashboardPage() {
                                         </div>
                                     </CardContent>
                                 </Card>
+                            </motion.div>
+
+                            {/* Redeem Code */}
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.5 }}
+                            >
+                                <RedeemCodeCard onSuccess={(newBalance) => {
+                                    // Instantly update credits from the response
+                                    if (newBalance !== undefined) {
+                                        setCredits(newBalance);
+                                    }
+                                    // Also refresh other data
+                                    fetchData();
+                                }} />
                             </motion.div>
                         </div>
                     </div>

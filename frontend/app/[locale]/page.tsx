@@ -93,6 +93,7 @@ export default function Home() {
                     </motion.div>
 
                     {/* App Preview Mockup */}
+                    {/* App Preview Mockup - Comparison Slider */}
                     <motion.div
                         initial={{ opacity: 0, y: 40, rotateX: 20 }}
                         animate={{ opacity: 1, y: 0, rotateX: 0 }}
@@ -100,20 +101,21 @@ export default function Home() {
                         className="relative mx-auto max-w-5xl perspective-1000"
                     >
                         <div className="relative rounded-xl border border-white/10 bg-black/50 backdrop-blur-xl shadow-2xl shadow-primary/20 overflow-hidden transform-gpu">
-                            <div className="absolute top-0 left-0 right-0 h-10 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2">
+                            <div className="absolute top-0 left-0 right-0 h-10 bg-white/5 border-b border-white/5 flex items-center px-4 gap-2 z-30">
                                 <div className="w-3 h-3 rounded-full bg-red-500/20" />
                                 <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
                                 <div className="w-3 h-3 rounded-full bg-green-500/20" />
+                                <div className="ml-4 text-xs text-gray-500 font-mono">sample_vid.mp4</div>
                             </div>
-                            <div className="p-1 pt-12 bg-gradient-to-b from-transparent to-black/80">
-                                <div className="aspect-video w-full bg-gradient-to-br from-gray-900 to-black rounded-lg flex items-center justify-center border border-white/5">
-                                    <div className="text-center">
-                                        <div className="w-20 h-20 mx-auto bg-primary/20 rounded-full flex items-center justify-center mb-4 animate-pulse">
-                                            <Upload className="w-10 h-10 text-primary" />
-                                        </div>
-                                        <p className="text-gray-500 font-mono text-sm">Drag & Drop Video Here</p>
-                                    </div>
-                                </div>
+                            <div className="pt-10 bg-black/80">
+                                <video
+                                    src="/sample_vid.mp4"
+                                    className="w-full h-full object-cover"
+                                    autoPlay
+                                    loop
+                                    muted
+                                    playsInline
+                                />
                             </div>
                         </div>
                         <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent opacity-20 blur-3xl -z-10 rounded-[3rem]" />
@@ -233,40 +235,53 @@ export default function Home() {
                     </motion.div>
 
                     <div className="grid md:grid-cols-3 gap-8 items-start">
-                        {['free', 'pro', 'enterprise'].map((plan, index) => (
+                        {[
+                            { key: 'starter', credits: 10, priceUSD: '$4.99', priceCNY: '¥29', popular: false },
+                            { key: 'pro', credits: 50, priceUSD: '$19.99', priceCNY: '¥128', popular: true },
+                            { key: 'business', credits: 200, priceUSD: '$59.99', priceCNY: '¥398', popular: false },
+                        ].map((plan, index) => (
                             <motion.div
-                                key={plan}
+                                key={plan.key}
                                 initial={{ opacity: 0, y: 20 }}
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: index * 0.1 }}
                             >
-                                <Card className={`h-full ${plan === 'pro' ? 'border-primary/50 bg-primary/[0.03] shadow-2xl shadow-primary/10 scale-105 z-10' : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04]'} transition-all duration-300 relative overflow-hidden`}>
-                                    {plan === 'pro' && (
+                                <Card className={`h-full ${plan.popular ? 'border-primary/50 bg-primary/[0.03] shadow-2xl shadow-primary/10 scale-105 z-10' : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04]'} transition-all duration-300 relative overflow-hidden`}>
+                                    {plan.popular && (
                                         <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
                                     )}
                                     <CardContent className="p-8">
-                                        <h3 className="text-xl font-bold text-white mb-2">{t(`Pricing.${plan}.name`)}</h3>
-                                        <div className="mb-6 flex items-baseline gap-1">
-                                            <span className="text-4xl font-bold text-white">{t(`Pricing.${plan}.price`)}</span>
-                                            <span className="text-gray-400 text-sm">{t(`Pricing.${plan}.period`)}</span>
+                                        <h3 className="text-xl font-bold text-white mb-2">{t(`Pricing.plans.${plan.key}.name`)}</h3>
+                                        <div className="mb-4">
+                                            <span className="text-4xl font-bold text-white">{plan.priceUSD}</span>
+                                            <span className="text-gray-400 text-sm ml-2">{t('Pricing.oneTime')}</span>
                                         </div>
-                                        <ul className="space-y-4 mb-8">
-                                            {(t.raw(`Pricing.${plan}.features`) as string[]).map((feature: string, i: number) => (
-                                                <li key={i} className="flex items-start gap-3 text-gray-300 text-sm">
-                                                    <Check className={`w-5 h-5 flex-shrink-0 ${plan === 'pro' ? 'text-primary' : 'text-gray-500'}`} />
-                                                    {feature}
+                                        <p className="text-gray-400 mb-6">{plan.credits} {t('Pricing.credits')}</p>
+                                        <ul className="space-y-3 mb-8">
+                                            <li className="flex items-start gap-3 text-gray-300 text-sm">
+                                                <Check className={`w-5 h-5 flex-shrink-0 ${plan.popular ? 'text-primary' : 'text-gray-500'}`} />
+                                                {t('Pricing.features.noExpiry')}
+                                            </li>
+                                            <li className="flex items-start gap-3 text-gray-300 text-sm">
+                                                <Check className={`w-5 h-5 flex-shrink-0 ${plan.popular ? 'text-primary' : 'text-gray-500'}`} />
+                                                {t('Pricing.features.allModes')}
+                                            </li>
+                                            {plan.credits >= 50 && (
+                                                <li className="flex items-start gap-3 text-gray-300 text-sm">
+                                                    <Check className={`w-5 h-5 flex-shrink-0 ${plan.popular ? 'text-primary' : 'text-gray-500'}`} />
+                                                    {t('Pricing.features.priority')}
                                                 </li>
-                                            ))}
+                                            )}
                                         </ul>
-                                        <SignInButton mode="modal">
+                                        <a href={`/${locale}/pricing`}>
                                             <Button
                                                 className="w-full h-12 rounded-lg font-medium"
-                                                variant={plan === 'pro' ? 'glow' : 'outline'}
+                                                variant={plan.popular ? 'glow' : 'outline'}
                                             >
-                                                {t(`Pricing.${plan}.cta`)}
+                                                {t('Pricing.getStarted')}
                                             </Button>
-                                        </SignInButton>
+                                        </a>
                                     </CardContent>
                                 </Card>
                             </motion.div>
@@ -322,49 +337,6 @@ export default function Home() {
                     </div>
                 </div>
             </section>
-
-            {/* ===== FOOTER ===== */}
-            <footer className="py-20 px-4 border-t border-white/10 relative z-10 bg-black">
-                <div className="container max-w-6xl mx-auto">
-                    <div className="grid md:grid-cols-4 gap-12 mb-16">
-                        <div className="col-span-1 md:col-span-1">
-                            <h4 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
-                                <div className="w-8 h-8 rounded-lg bg-primary/20 flex items-center justify-center">
-                                    <Sparkles className="w-4 h-4 text-primary" />
-                                </div>
-                                {t('Navbar.brand')}
-                            </h4>
-                            <p className="text-gray-400 text-sm leading-relaxed mb-6">{t('Footer.tagline')}</p>
-                        </div>
-                        <div>
-                            <h5 className="font-semibold text-white mb-6">{t('Footer.product.title')}</h5>
-                            <ul className="space-y-4 text-sm text-gray-400">
-                                <li><a href="#features" className="hover:text-primary transition-colors">{t('Footer.product.features')}</a></li>
-                                <li><a href="#pricing" className="hover:text-primary transition-colors">{t('Footer.product.pricing')}</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.product.api')}</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h5 className="font-semibold text-white mb-6">{t('Footer.company.title')}</h5>
-                            <ul className="space-y-4 text-sm text-gray-400">
-                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.company.about')}</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.company.contact')}</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.company.careers')}</a></li>
-                            </ul>
-                        </div>
-                        <div>
-                            <h5 className="font-semibold text-white mb-6">{t('Footer.legal.title')}</h5>
-                            <ul className="space-y-4 text-sm text-gray-400">
-                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.legal.privacy')}</a></li>
-                                <li><a href="#" className="hover:text-primary transition-colors">{t('Footer.legal.terms')}</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                    <div className="pt-8 border-t border-white/10 text-center text-gray-600 text-sm">
-                        {t('Footer.copyright')}
-                    </div>
-                </div>
-            </footer>
         </main>
     );
 }

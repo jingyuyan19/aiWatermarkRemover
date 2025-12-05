@@ -11,12 +11,16 @@
         "faq": "FAQ"
     },
     "HomePage": {
-        "badge": "AI-Powered Video Magic",
         "title": "Remove Watermarks",
         "titleHighlight": "in Seconds",
         "subtitle": "Professional-grade watermark removal powered by advanced AI. Upload your video and let our neural networks do the magic.",
-        "cta": "Start Free Now",
+        "cta": "Start Removing Watermarks",
         "ctaSecondary": "See How It Works",
+        "badge": "New: AI Video Watermark Removal",
+        "slider": {
+            "before": "Original",
+            "after": "Removed"
+        },
         "signInPrompt": {
             "title": "Sign in to Start",
             "description": "Create a free account to upload videos and track your watermark removal history.",
@@ -104,51 +108,6 @@
         "before": "Before",
         "after": "After"
     },
-    "Pricing": {
-        "title": "Simple, Transparent Pricing",
-        "subtitle": "Choose the plan that fits your needs",
-        "free": {
-            "name": "Free",
-            "price": "$0",
-            "period": "forever",
-            "features": [
-                "3 videos per month",
-                "Max 50MB file size",
-                "Standard processing speed",
-                "720p output quality"
-            ],
-            "cta": "Get Started Free"
-        },
-        "pro": {
-            "name": "Pro",
-            "price": "$9.99",
-            "period": "per month",
-            "badge": "Most Popular",
-            "features": [
-                "Unlimited videos",
-                "Max 500MB file size",
-                "Priority processing",
-                "4K output quality",
-                "Batch processing",
-                "API access"
-            ],
-            "cta": "Start Pro Trial"
-        },
-        "enterprise": {
-            "name": "Enterprise",
-            "price": "Custom",
-            "period": "contact us",
-            "features": [
-                "Everything in Pro",
-                "Unlimited file size",
-                "Dedicated support",
-                "Custom integrations",
-                "SLA guarantee",
-                "On-premise option"
-            ],
-            "cta": "Contact Sales"
-        }
-    },
     "FAQ": {
         "title": "Frequently Asked Questions",
         "items": {
@@ -193,7 +152,10 @@
             "privacy": "Privacy Policy",
             "terms": "Terms of Service"
         },
-        "copyright": "© 2024 Vanishly. All rights reserved."
+        "contact": {
+            "title": "Contact"
+        },
+        "copyright": "© {year} Vanishly. All rights reserved."
     },
     "JobPage": {
         "backToHome": "← Back to Home",
@@ -290,7 +252,120 @@
             "download": "Download"
         }
     },
+    "Redeem": {
+        "title": "Redeem Code",
+        "subtitle": "Enter your purchase code",
+        "placeholder": "Enter code...",
+        "button": "Redeem",
+        "enterCode": "Please enter a code",
+        "success": "Code redeemed successfully!",
+        "invalidCode": "Invalid or already used code",
+        "error": "Failed to redeem code",
+        "newBalance": "New balance",
+        "credits": "credits"
+    },
     "Common": {
         "loading": "Loading..."
+    },
+    "Pricing": {
+        "title": "Simple, Transparent Pricing",
+        "subtitle": "Buy credits once, use anytime. No subscriptions, no hidden fees.",
+        "badge": "Credit-Based Pricing",
+        "credits": "credits",
+        "oneTime": "one-time",
+        "mostPopular": "Best Value",
+        "buyNow": "Buy Now",
+        "processing": "Processing...",
+        "getStarted": "Get Started",
+        "questions": "Have questions?",
+        "faqLink": "Check our FAQ",
+        "freeCredits": "New users get 3 FREE credits to try the service!",
+        "perCredit": "Cost per credit",
+        "videoCredits": "video credits",
+        "howCreditsWork": "How Credits Work",
+        "creditInfo": {
+            "fast": "credit = 1 Fast mode video (up to 5 min)",
+            "hq": "credits = 1 HQ mode video (up to 5 min)"
+        },
+        "features": {
+            "noExpiry": "Credits never expire",
+            "allModes": "Access all processing modes",
+            "priority": "Priority processing queue"
+        },
+        "plans": {
+            "starter": {
+                "name": "Starter"
+            },
+            "pro": {
+                "name": "Professional"
+            },
+            "business": {
+                "name": "Business"
+            }
+        }
+    },
+    "Privacy": {
+        "title": "Privacy Policy",
+        "lastUpdated": "Last Updated",
+        "sections": {
+            "intro": {
+                "title": "Introduction",
+                "content": "At Vanishly, we take your privacy seriously. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our video watermark removal service."
+            },
+            "dataCollection": {
+                "title": "Information We Collect",
+                "content": "We collect information you provide directly to us, such as when you create an account, upload videos, or contact us for support. This includes your email address, name, and the videos you upload for processing."
+            },
+            "dataUsage": {
+                "title": "How We Use Your Information",
+                "content": "We use the information we collect to provide, maintain, and improve our services, process your video watermark removal requests, communicate with you about your account, and send you technical notices and support messages."
+            },
+            "dataStorage": {
+                "title": "Data Storage and Security",
+                "content": "Your uploaded videos are temporarily stored for processing and are automatically deleted within 24 hours after processing is complete. We implement industry-standard security measures to protect your data."
+            },
+            "thirdParty": {
+                "title": "Third-Party Services",
+                "content": "We use third-party services for authentication (Clerk), payment processing (Stripe), and cloud storage (Cloudflare R2). These services have their own privacy policies governing their use of your information."
+            },
+            "contact": {
+                "title": "Contact Us",
+                "content": "If you have any questions about this Privacy Policy, please contact us at privacy@vanishly.io."
+            }
+        }
+    },
+    "Terms": {
+        "title": "Terms of Service",
+        "lastUpdated": "Last Updated",
+        "sections": {
+            "acceptance": {
+                "title": "Acceptance of Terms",
+                "content": "By accessing or using Vanishly, you agree to be bound by these Terms of Service. If you do not agree to these terms, please do not use our service."
+            },
+            "service": {
+                "title": "Description of Service",
+                "content": "Vanishly provides an AI-powered video watermark removal service. We use advanced machine learning algorithms to process and remove watermarks from your videos."
+            },
+            "accounts": {
+                "title": "User Accounts",
+                "content": "You must create an account to use our service. You are responsible for maintaining the confidentiality of your account credentials and for all activities that occur under your account."
+            },
+            "content": {
+                "title": "User Content",
+                "content": "You retain ownership of all videos you upload. By using our service, you warrant that you have the right to process the content you upload and that your use does not infringe on any third-party rights."
+            },
+            "payment": {
+                "title": "Payment Terms",
+                "content": "Credits are purchased on a one-time basis and do not expire. All purchases are final and non-refundable, except as required by law or at our sole discretion."
+            },
+            "liability": {
+                "title": "Limitation of Liability",
+                "content": "Vanishly is provided 'as is' without warranties of any kind. We are not liable for any indirect, incidental, special, or consequential damages arising from your use of the service."
+            },
+            "changes": {
+                "title": "Changes to Terms",
+                "content": "We reserve the right to modify these terms at any time. We will notify users of significant changes via email or through the service."
+            }
+        }
     }
 }

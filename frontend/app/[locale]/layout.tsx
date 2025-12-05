@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
+import NextImage from "next/image";
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
+import { Footer } from "@/components/ui/Footer";
 import { ClerkProvider, SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
@@ -77,9 +79,10 @@ export default async function LocaleLayout({ children, params }: Props) {
                 >
                     <NextIntlClientProvider messages={messages}>
                         <Navbar locale={locale} />
-                        <div className="pt-16">
+                        <div className="pt-16 min-h-screen">
                             {children}
                         </div>
+                        <Footer />
                         <Toaster />
                     </NextIntlClientProvider>
                 </body>
@@ -92,7 +95,15 @@ function Navbar({ locale }: { locale: string }) {
     return (
         <nav className="fixed top-0 w-full z-50 border-b border-white/10 bg-black/50 backdrop-blur-xl">
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-                <a href={`/${locale}`} className="font-bold text-xl text-white hover:text-primary transition-colors">
+                <a href={`/${locale}`} className="flex items-center gap-3 font-bold text-xl text-white hover:text-primary transition-colors">
+                    <div className="relative w-10 h-10">
+                        <NextImage
+                            src="/logo.png"
+                            alt="Vanishly Logo"
+                            fill
+                            className="object-contain"
+                        />
+                    </div>
                     Vanishly
                 </a>
                 <div className="flex items-center gap-4">
@@ -119,6 +130,7 @@ function Navbar({ locale }: { locale: string }) {
                         >
                             {locale === 'zh-CN' ? '历史' : 'History'}
                         </a>
+                        <AdminLink locale={locale} />
                         <UserButton
                             appearance={{
                                 elements: {
@@ -160,5 +172,18 @@ function LanguageSwitcher({ locale }: { locale: string }) {
                 中文
             </a>
         </div>
+    );
+}
+
+function AdminLink({ locale }: { locale: string }) {
+    // This will be a client component that checks for admin role
+    // For now, show the link - the admin layout will protect the route
+    return (
+        <a
+            href={`/${locale}/admin`}
+            className="px-3 py-1.5 rounded-lg text-sm font-medium text-amber-400 hover:text-amber-300 hover:bg-amber-500/10 transition-colors"
+        >
+            {locale === 'zh-CN' ? '管理' : 'Admin'}
+        </a>
     );
 }

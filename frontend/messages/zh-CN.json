@@ -11,12 +11,16 @@
         "faq": "常见问题"
     },
     "HomePage": {
-        "badge": "AI视频魔法",
+        "badge": "新功能：AI 视频去水印",
         "title": "一键去除水印",
         "titleHighlight": "秒级处理",
         "subtitle": "专业级水印去除，由先进的人工智能驱动。上传您的视频，让我们的神经网络为您施展魔法。",
-        "cta": "免费开始",
-        "ctaSecondary": "了解工作原理",
+        "cta": "开始去除水印",
+        "ctaSecondary": "查看演示",
+        "slider": {
+            "before": "原视频",
+            "after": "去水印后"
+        },
         "signInPrompt": {
             "title": "登录即可开始",
             "description": "创建免费账户，上传视频并追踪您的水印去除历史。",
@@ -104,51 +108,6 @@
         "before": "处理前",
         "after": "处理后"
     },
-    "Pricing": {
-        "title": "简单透明的定价",
-        "subtitle": "选择适合您需求的方案",
-        "free": {
-            "name": "免费版",
-            "price": "¥0",
-            "period": "永久免费",
-            "features": [
-                "每月3个视频",
-                "最大50MB文件",
-                "标准处理速度",
-                "720p输出质量"
-            ],
-            "cta": "免费开始"
-        },
-        "pro": {
-            "name": "专业版",
-            "price": "¥68",
-            "period": "每月",
-            "badge": "最受欢迎",
-            "features": [
-                "无限视频处理",
-                "最大500MB文件",
-                "优先处理队列",
-                "4K输出质量",
-                "批量处理",
-                "API接口"
-            ],
-            "cta": "开始专业版试用"
-        },
-        "enterprise": {
-            "name": "企业版",
-            "price": "定制",
-            "period": "联系我们",
-            "features": [
-                "专业版全部功能",
-                "无限文件大小",
-                "专属客服支持",
-                "定制集成",
-                "SLA保障",
-                "私有化部署"
-            ],
-            "cta": "联系销售"
-        }
-    },
     "FAQ": {
         "title": "常见问题",
         "items": {
@@ -193,7 +152,10 @@
             "privacy": "隐私政策",
             "terms": "服务条款"
         },
-        "copyright": "© 2024 Vanishly。保留所有权利。"
+        "contact": {
+            "title": "联系"
+        },
+        "copyright": "© {year} Vanishly。保留所有权利。"
     },
     "JobPage": {
         "backToHome": "← 返回首页",
@@ -290,7 +252,120 @@
             "download": "下载"
         }
     },
+    "Redeem": {
+        "title": "兑换码",
+        "subtitle": "输入您的购买码",
+        "placeholder": "输入兑换码...",
+        "button": "兑换",
+        "enterCode": "请输入兑换码",
+        "success": "兑换成功！",
+        "invalidCode": "无效或已使用的兑换码",
+        "error": "兑换失败",
+        "newBalance": "新余额",
+        "credits": "积分"
+    },
     "Common": {
         "loading": "加载中..."
+    },
+    "Pricing": {
+        "title": "简单透明的定价",
+        "subtitle": "一次购买积分，随时使用。无订阅，无隐藏费用。",
+        "badge": "积分制定价",
+        "credits": "积分",
+        "oneTime": "一次性",
+        "mostPopular": "最超值",
+        "buyNow": "立即购买",
+        "processing": "处理中...",
+        "getStarted": "立即开始",
+        "questions": "有问题？",
+        "faqLink": "查看常见问题",
+        "freeCredits": "新用户免费获得 3 个积分试用！",
+        "perCredit": "每积分价格",
+        "videoCredits": "个视频积分",
+        "howCreditsWork": "积分使用说明",
+        "creditInfo": {
+            "fast": "积分 = 1 个快速模式视频（最长 5 分钟）",
+            "hq": "积分 = 1 个高清模式视频（最长 5 分钟）"
+        },
+        "features": {
+            "noExpiry": "积分永不过期",
+            "allModes": "可使用所有处理模式",
+            "priority": "优先处理队列"
+        },
+        "plans": {
+            "starter": {
+                "name": "入门版"
+            },
+            "pro": {
+                "name": "专业版"
+            },
+            "business": {
+                "name": "企业版"
+            }
+        }
+    },
+    "Privacy": {
+        "title": "隐私政策",
+        "lastUpdated": "最后更新",
+        "sections": {
+            "intro": {
+                "title": "简介",
+                "content": "在 Vanishly，我们非常重视您的隐私。本隐私政策说明了我们如何在您使用视频水印去除服务时收集、使用、披露和保护您的信息。"
+            },
+            "dataCollection": {
+                "title": "我们收集的信息",
+                "content": "我们收集您直接提供给我们的信息，例如当您创建帐户、上传视频或联系我们寻求支持时。这包括您的电子邮件地址、姓名和您上传进行处理的视频。"
+            },
+            "dataUsage": {
+                "title": "我们如何使用您的信息",
+                "content": "我们使用收集的信息来提供、维护和改进我们的服务，处理您的视频水印去除请求，就您的帐户与您沟通，以及向您发送技术通知和支持消息。"
+            },
+            "dataStorage": {
+                "title": "数据存储和安全",
+                "content": "您上传的视频会暂时存储用于处理，并在处理完成后 24 小时内自动删除。我们采用行业标准的安全措施来保护您的数据。"
+            },
+            "thirdParty": {
+                "title": "第三方服务",
+                "content": "我们使用第三方服务进行身份验证 (Clerk)、支付处理 (Stripe) 和云存储 (Cloudflare R2)。这些服务有自己的隐私政策来管理其对您信息的使用。"
+            },
+            "contact": {
+                "title": "联系我们",
+                "content": "如果您对本隐私政策有任何疑问，请通过 privacy@vanishly.io 与我们联系。"
+            }
+        }
+    },
+    "Terms": {
+        "title": "服务条款",
+        "lastUpdated": "最后更新",
+        "sections": {
+            "acceptance": {
+                "title": "接受条款",
+                "content": "通过访问或使用 Vanishly，您同意受这些服务条款的约束。如果您不同意这些条款，请不要使用我们的服务。"
+            },
+            "service": {
+                "title": "服务描述",
+                "content": "Vanishly 提供 AI 驱动的视频水印去除服务。我们使用先进的机器学习算法来处理和去除您视频中的水印。"
+            },
+            "accounts": {
+                "title": "用户账户",
+                "content": "您必须创建帐户才能使用我们的服务。您有责任维护帐户凭据的机密性，并对您帐户下发生的所有活动负责。"
+            },
+            "content": {
+                "title": "用户内容",
+                "content": "您保留您上传的所有视频的所有权。使用我们的服务，即表示您保证您有权处理您上传的内容，并且您的使用不会侵犯任何第三方权利。"
+            },
+            "payment": {
+                "title": "付款条款",
+                "content": "积分是一次性购买的，不会过期。除法律要求或我们自行决定外，所有购买均为最终购买且不可退款。"
+            },
+            "liability": {
+                "title": "责任限制",
+                "content": "Vanishly 按「原样」提供，不提供任何形式的保证。我们对因您使用本服务而产生的任何间接、附带、特殊或后果性损害不承担责任。"
+            },
+            "changes": {
+                "title": "条款变更",
+                "content": "我们保留随时修改这些条款的权利。我们将通过电子邮件或服务通知用户重大变更。"
+            }
+        }
     }
 }

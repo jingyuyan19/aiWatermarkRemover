@@ -18,11 +18,17 @@ from sqlalchemy import select
 from database import get_db, engine, Base
 import models
 import webhooks
+import admin
+import codes
+import creem
 
 app = FastAPI()
 
 # Include routers
 app.include_router(webhooks.router)
+app.include_router(admin.router)
+app.include_router(codes.router)
+app.include_router(creem.router)
 
 # CORS Configuration
 ALLOWED_ORIGINS = os.getenv("ALLOWED_ORIGINS", "*").split(",")
