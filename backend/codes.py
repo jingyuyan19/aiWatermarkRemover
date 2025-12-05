@@ -77,15 +77,31 @@ async def get_credits(
     db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_current_user)
 ):
-    """Get current credit balance for the user."""
-    print(f"[DEBUG] get_credits called for user_id: {user_id}")
+    """Get current credit balance for the user, creating if missing."""
+    print(f"[DEBUG] get_credits request for user_id: '{user_id}'")
     
+    # Try to find user
     user_query = await db.execute(select(User).where(User.id == user_id))
     user = user_query.scalar_one_or_none()
     
-    if not user:
-        print(f"[DEBUG] User not found, returning default 3 credits")
-        return CreditsResponse(credits=3)  # Default for new users
-    
-    print(f"[DEBUG] User found with credits: {user.credits}")
-    return CreditsResponse(credits=user.credits)
+    if user:
+        print(f"[DEBUG] User {user_id} found. Credits: {user.credits}")
+        return CreditsResponse(credits=user.credits)
+        
+    # User not found, try to create
+    print(f"[DEBUG] User {user_id} NOT found. Creating with default credits.")
+    try:
+        new_user = User(id=user_id, credits=3)
+        db.add(new_user)
+        await db.commit()
+        print(f"[DEBUG] Created new user {user_id}")
+        return CreditsResponse(credits=3)
+    except Exception as e:
+        # Possible race condition (IntegrityError), retry fetch
+        print(f"[DEBUG] Error/Race creating user {user_id}: {e}")
+        await db.rollback()
+        user_query = await db.execute(select(User).where(User.id == user_id))
+        user = user_query.scalar_one_or_none()
+        if user:
+            return CreditsResponse(credits=user.credits)
+        return CreditsResponse(credits=3)
