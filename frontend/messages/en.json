@@ -160,6 +160,7 @@
     "JobPage": {
         "backToHome": "← Back to Home",
         "title": "Job Status",
+        "loading": "Loading job details...",
         "status": "Status",
         "statusLabels": {
             "pending": "PENDING",

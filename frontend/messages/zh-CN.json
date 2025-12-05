@@ -160,6 +160,7 @@
     "JobPage": {
         "backToHome": "← 返回首页",
         "title": "任务状态",
+        "loading": "正在加载任务详情...",
         "status": "状态",
         "statusLabels": {
             "pending": "排队中",
