@@ -11,7 +11,6 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileUpload } from '@/components/ui/FileUpload';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
-import { RedeemCodeCard } from '@/components/ui/RedeemCodeCard';
 import { toast } from 'sonner';
 import { useAuth } from '@clerk/nextjs';
 import { useTranslations, useLocale } from 'next-intl';
@@ -298,35 +297,21 @@ export default function DashboardPage() {
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
                             >
-                                <Card className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-                                                <Plus className="w-6 h-6 text-accent" />
+                                <Link href={`/${locale}/pricing`}>
+                                    <Card className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
+                                        <CardContent className="p-6">
+                                            <div className="flex items-center gap-4">
+                                                <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
+                                                    <Plus className="w-6 h-6 text-accent" />
+                                                </div>
+                                                <div>
+                                                    <p className="text-sm text-gray-400">{t('stats.buyCredits')}</p>
+                                                    <p className="text-lg font-semibold text-accent">{t('stats.topUp')}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <p className="text-sm text-gray-400">{t('stats.buyCredits')}</p>
-                                                <p className="text-lg font-semibold text-accent">{t('stats.topUp')}</p>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-
-                            {/* Redeem Code */}
-                            <motion.div
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                transition={{ delay: 0.5 }}
-                            >
-                                <RedeemCodeCard onSuccess={(newBalance) => {
-                                    // Instantly update credits from the response
-                                    if (newBalance !== undefined) {
-                                        setCredits(newBalance);
-                                    }
-                                    // Also refresh other data
-                                    fetchData();
-                                }} />
+                                        </CardContent>
+                                    </Card>
+                                </Link>
                             </motion.div>
                         </div>
                     </div>

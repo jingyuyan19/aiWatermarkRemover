@@ -221,74 +221,7 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ===== PRICING SECTION ===== */}
-            <section id="pricing" className="py-32 px-4 relative z-10">
-                <div className="container max-w-6xl mx-auto">
-                    <motion.div
-                        className="text-center mb-20"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                    >
-                        <h2 className="text-4xl md:text-5xl font-bold mb-6">{t('Pricing.title')}</h2>
-                        <p className="text-xl text-gray-400">{t('Pricing.subtitle')}</p>
-                    </motion.div>
 
-                    <div className="grid md:grid-cols-3 gap-8 items-start">
-                        {[
-                            { key: 'starter', credits: 10, priceUSD: '$4.99', priceCNY: '¥29', popular: false },
-                            { key: 'pro', credits: 50, priceUSD: '$19.99', priceCNY: '¥128', popular: true },
-                            { key: 'business', credits: 200, priceUSD: '$59.99', priceCNY: '¥398', popular: false },
-                        ].map((plan, index) => (
-                            <motion.div
-                                key={plan.key}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                            >
-                                <Card className={`h-full ${plan.popular ? 'border-primary/50 bg-primary/[0.03] shadow-2xl shadow-primary/10 scale-105 z-10' : 'border-white/10 bg-white/[0.02] hover:bg-white/[0.04]'} transition-all duration-300 relative overflow-hidden`}>
-                                    {plan.popular && (
-                                        <div className="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-primary to-transparent" />
-                                    )}
-                                    <CardContent className="p-8">
-                                        <h3 className="text-xl font-bold text-white mb-2">{t(`Pricing.plans.${plan.key}.name`)}</h3>
-                                        <div className="mb-4">
-                                            <span className="text-4xl font-bold text-white">{plan.priceUSD}</span>
-                                            <span className="text-gray-400 text-sm ml-2">{t('Pricing.oneTime')}</span>
-                                        </div>
-                                        <p className="text-gray-400 mb-6">{plan.credits} {t('Pricing.credits')}</p>
-                                        <ul className="space-y-3 mb-8">
-                                            <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                                <Check className={`w-5 h-5 flex-shrink-0 ${plan.popular ? 'text-primary' : 'text-gray-500'}`} />
-                                                {t('Pricing.features.noExpiry')}
-                                            </li>
-                                            <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                                <Check className={`w-5 h-5 flex-shrink-0 ${plan.popular ? 'text-primary' : 'text-gray-500'}`} />
-                                                {t('Pricing.features.allModes')}
-                                            </li>
-                                            {plan.credits >= 50 && (
-                                                <li className="flex items-start gap-3 text-gray-300 text-sm">
-                                                    <Check className={`w-5 h-5 flex-shrink-0 ${plan.popular ? 'text-primary' : 'text-gray-500'}`} />
-                                                    {t('Pricing.features.priority')}
-                                                </li>
-                                            )}
-                                        </ul>
-                                        <a href={`/${locale}/pricing`}>
-                                            <Button
-                                                className="w-full h-12 rounded-lg font-medium"
-                                                variant={plan.popular ? 'glow' : 'outline'}
-                                            >
-                                                {t('Pricing.getStarted')}
-                                            </Button>
-                                        </a>
-                                    </CardContent>
-                                </Card>
-                            </motion.div>
-                        ))}
-                    </div>
-                </div>
-            </section>
 
             {/* ===== FAQ SECTION ===== */}
             <section id="faq" className="py-32 px-4 relative z-10 bg-white/[0.02]">
