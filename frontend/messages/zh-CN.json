@@ -302,7 +302,9 @@
             "business": {
                 "name": "企业版"
             }
-        }
+        },
+        "redeemTitle": "拥有兑换码？",
+        "redeemSubtitle": "在下方输入您的优惠码或礼品卡即可立即增加积分。"
     },
     "Privacy": {
         "title": "隐私政策",

@@ -302,7 +302,9 @@
             "business": {
                 "name": "Business"
             }
-        }
+        },
+        "redeemTitle": "Have a Code?",
+        "redeemSubtitle": "Enter your promo code or gift card below to add credits instantly."
     },
     "Privacy": {
         "title": "Privacy Policy",
