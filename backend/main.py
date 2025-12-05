@@ -213,7 +213,6 @@ async def get_job_status(
         id=job.id,
         status=job.status,
         input_url=input_url,
-        input_url=input_url,
         output_url=output_url,
         created_at=job.created_at,
         quality=job.quality or "lama",
