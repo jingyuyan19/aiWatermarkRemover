@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
     Film, Clock, CheckCircle, XCircle, Loader2,
@@ -42,6 +42,21 @@ export default function DashboardPage() {
     const [file, setFile] = useState<File | null>(null);
     const [quality, setQuality] = useState<'lama' | 'e2fgvi_hq'>('lama');
     const [uploading, setUploading] = useState(false);
+
+    // Check for payment success
+    const searchParams = useSearchParams();
+
+    useEffect(() => {
+        if (searchParams.get('payment') === 'success') {
+            const added = searchParams.get('credits');
+            toast.success(t('payment.success'), {
+                description: t('payment.creditsAdded', { amount: added || '' })
+            });
+            // Remove params to prevent double toast
+            router.replace(`/${locale}/dashboard`);
+            // Data will be refreshed by fetchData
+        }
+    }, [searchParams, router, locale, t]);
 
     const fetchData = async () => {
         const token = await getToken();

@@ -28,6 +28,26 @@ app = FastAPI()
 app.include_router(webhooks.router)
 app.include_router(admin.router)
 app.include_router(codes.router)
+
+from sqlalchemy import text
+
+@app.get("/api/debug/fix_db")
+async def fix_db():
+    try:
+        async with engine.begin() as conn:
+            # Fix Users Table
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS is_admin INTEGER DEFAULT 0"))
+            await conn.execute(text("ALTER TABLE users ADD COLUMN IF NOT EXISTS stripe_customer_id VARCHAR"))
+            
+            # Fix Transactions Table
+            await conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS stripe_payment_id VARCHAR"))
+            
+            # Additional safety for defaults
+            await conn.execute(text("ALTER TABLE users ALTER COLUMN credits SET DEFAULT 0"))
+            
+            return {"status": "success", "message": "Database schema patched successfully"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
 app.include_router(creem.router)
 
 # CORS Configuration
