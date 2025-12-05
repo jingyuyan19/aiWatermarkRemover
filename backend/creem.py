@@ -170,14 +170,7 @@ def verify_creem_webhook(payload: bytes, signature: str) -> bool:
         hashlib.sha256
     ).hexdigest()
     
-    is_valid = hmac.compare_digest(expected, signature)
-    if not is_valid:
-        print(f"[Creem Webhook] Signature Mismatch!")
-        print(f"Received: {signature}")
-        print(f"Expected: {expected}")
-        print(f"Secret used: {secret[:5]}...{secret[-5:]}")
-    
-    return is_valid
+    return hmac.compare_digest(expected, signature)
 
 
 @router.post("/creem/webhook")
@@ -189,14 +182,13 @@ async def handle_creem_webhook(
     
     body = await request.body()
     
-    # Debug: Print all headers to find the signature
-    print(f"[Creem Webhook] Headers: {request.headers}")
-    
-    signature = request.headers.get("x-creem-signature", "")
+    signature = request.headers.get("creem-signature", "")
     
     # Verify signature (skip in development if no secret configured)
-    if CREEM_WEBHOOK_SECRET and not verify_creem_webhook(body, signature):
-        raise HTTPException(status_code=400, detail="Invalid signature")
+    if CREEM_WEBHOOK_SECRET:
+        if not verify_creem_webhook(body, signature):
+            print(f"[Creem Webhook] Invalid signature")
+            raise HTTPException(status_code=400, detail="Invalid signature")
     
     try:
         event = await request.json()
