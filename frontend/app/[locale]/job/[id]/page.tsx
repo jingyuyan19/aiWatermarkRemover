@@ -27,6 +27,62 @@ export default function JobPage() {
     const [job, setJob] = useState<Job | null>(null);
     const [error, setError] = useState<string>('');
 
+    // Fetch Job Data
+    useEffect(() => {
+        let isMounted = true;
+
+        const fetchJob = async () => {
+            if (!isLoaded || !userId || !jobId) return;
+
+            try {
+                const token = await getToken();
+                if (!token) return;
+
+                const res = await fetch(`${API_URL}/api/jobs/${jobId}`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+
+                if (!res.ok) {
+                    if (res.status === 404) {
+                        if (isMounted) setError('Job not found');
+                    } else {
+                        // Don't set error immediately on transient failures, maybe retry?
+                        // For now, simple error setting if it persists or is critical
+                        console.error('Failed to fetch job');
+                    }
+                    return;
+                }
+
+                const data = await res.json();
+                if (isMounted) {
+                    setJob(data);
+                    // Stop polling if completed/failed? 
+                    // The interval will run regardless, but that's fine for now, 
+                    // or we could clear it if status is terminal.
+                }
+
+            } catch (err) {
+                console.error(err);
+                if (isMounted) setError('An error occurred while fetching job details');
+            }
+        };
+
+        // Initial fetch
+        if (isLoaded && userId) {
+            fetchJob();
+        }
+
+        // Poll every 3 seconds
+        const interval = setInterval(() => {
+            if (isLoaded && userId) fetchJob();
+        }, 3000);
+
+        return () => {
+            isMounted = false;
+            clearInterval(interval);
+        };
+    }, [isLoaded, userId, jobId, getToken]);
+
     // Smart Progress Logic
     const [progress, setProgress] = useState(0);
 
