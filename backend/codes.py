@@ -9,6 +9,7 @@ from models import User, RedemptionCode
 from auth import get_current_user
 from datetime import datetime
 from pydantic import BaseModel
+import clerk_api
 
 router = APIRouter(prefix="/api/codes", tags=["codes"])
 
@@ -53,7 +54,12 @@ async def redeem_code(
     
     if not user:
         # Create user if doesn't exist (Clerk user first time)
-        user = User(id=user_id, credits=3)  # Default 3 credits
+        email = None
+        clerk_user = await clerk_api.get_clerk_user(user_id)
+        if clerk_user:
+            email = clerk_api.get_primary_email(clerk_user)
+        
+        user = User(id=user_id, email=email, credits=3)  # Default 3 credits
         db.add(user)
         await db.flush()
     
@@ -91,7 +97,12 @@ async def get_credits(
     # User not found, try to create
     print(f"[DEBUG] User {user_id} NOT found. Creating with default credits.")
     try:
-        new_user = User(id=user_id, credits=3)
+        email = None
+        clerk_user = await clerk_api.get_clerk_user(user_id)
+        if clerk_user:
+            email = clerk_api.get_primary_email(clerk_user)
+        
+        new_user = User(id=user_id, email=email, credits=3)
         db.add(new_user)
         await db.commit()
         print(f"[DEBUG] Created new user {user_id}")

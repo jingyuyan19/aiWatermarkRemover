@@ -17,6 +17,7 @@ import webhooks
 import admin
 import codes
 import creem
+import clerk_api
 
 app = FastAPI()
 
@@ -159,8 +160,13 @@ async def create_job(
     user = result.scalars().first()
     
     if not user:
-        # First time user? Create with default credits (3)
-        user = User(id=user_id, credits=3)
+        # First time user? Create with default credits and fetch email from Clerk
+        email = None
+        clerk_user = await clerk_api.get_clerk_user(user_id)
+        if clerk_user:
+            email = clerk_api.get_primary_email(clerk_user)
+        
+        user = User(id=user_id, email=email, credits=3)
         db.add(user)
         await db.commit()
         await db.refresh(user)

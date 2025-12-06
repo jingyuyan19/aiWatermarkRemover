@@ -18,6 +18,7 @@ from pydantic import BaseModel
 from typing import Optional
 import uuid
 from datetime import datetime
+import clerk_api
 
 router = APIRouter(prefix="/api/checkout", tags=["checkout"])
 
@@ -239,8 +240,13 @@ async def handle_checkout_completed(event: dict, db: AsyncSession):
         user.credits += int(credits_to_add)
         print(f"[Creem Webhook] Added {credits_to_add} credits to user {user_id}")
     else:
-        # Create user if doesn't exist
-        user = User(id=user_id, credits=int(credits_to_add))
+        # Create user if doesn't exist, fetch email from Clerk
+        email = None
+        clerk_user = await clerk_api.get_clerk_user(user_id)
+        if clerk_user:
+            email = clerk_api.get_primary_email(clerk_user)
+        
+        user = User(id=user_id, email=email, credits=int(credits_to_add))
         db.add(user)
         print(f"[Creem Webhook] Created user {user_id} with {credits_to_add} credits")
     

@@ -45,48 +45,33 @@ def get_jwks_client():
 def _extract_role_from_payload(payload: dict) -> Optional[str]:
     """Extract role from Clerk JWT payload.
     
-    Clerk stores publicMetadata in different locations depending on version:
-    - metadata.role
-    - public_metadata.role
-    - publicMetadata.role (frontend JS style, less common in JWT)
+    Clerk stores publicMetadata in the session token under 'metadata' key
+    when the session token template is customized to include it.
     """
-    import logging
-    logging.basicConfig(level=logging.INFO)
-    logger = logging.getLogger(__name__)
-    
-    # Log the full payload for debugging
-    logger.info(f"JWT Payload keys: {list(payload.keys())}")
-    logger.info(f"Full JWT Payload: {payload}")
-    
     # Try different paths where Clerk might store the role
     role = None
     
-    # Path 1: metadata.role (common in Clerk v4+)
+    # Path 1: metadata.role (when session token template includes publicMetadata)
     metadata = payload.get("metadata", {})
     if isinstance(metadata, dict):
         role = metadata.get("role")
-        logger.info(f"Checked metadata.role: {role}")
     
-    # Path 2: public_metadata.role
+    # Path 2: public_metadata.role (alternative naming)
     if not role:
         public_metadata = payload.get("public_metadata", {})
         if isinstance(public_metadata, dict):
             role = public_metadata.get("role")
-            logger.info(f"Checked public_metadata.role: {role}")
     
     # Path 3: publicMetadata.role (camelCase)
     if not role:
         public_metadata_camel = payload.get("publicMetadata", {})
         if isinstance(public_metadata_camel, dict):
             role = public_metadata_camel.get("role")
-            logger.info(f"Checked publicMetadata.role: {role}")
     
     # Path 4: Direct role claim (some setups)
     if not role:
         role = payload.get("role")
-        logger.info(f"Checked direct role: {role}")
     
-    logger.info(f"Final extracted role: {role}")
     return role
 
 
