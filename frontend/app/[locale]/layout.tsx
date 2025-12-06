@@ -67,6 +67,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                     headerTitle: 'text-white',
                     headerSubtitle: 'text-gray-400',
                     socialButtonsBlockButton: 'bg-white/5 border-white/10 text-white hover:bg-white/10',
+                    socialButtonsBlockButtonText: 'text-white',
                     formFieldLabel: 'text-gray-300',
                     formFieldInput: 'bg-[#1a1a1a] border-white/10 text-white',
                     footerActionLink: 'text-primary hover:text-blue-400',
