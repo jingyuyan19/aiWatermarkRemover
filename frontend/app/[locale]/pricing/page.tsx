@@ -135,46 +135,48 @@ export default function PricingPage() {
                                     </div>
                                 )}
                                 <Card className={`h-full ${plan.popular ? 'border-primary/50 shadow-lg shadow-primary/20' : 'border-white/10'} bg-white/5 backdrop-blur-xl hover:bg-white/10 transition-colors`}>
-                                    <CardContent className="p-8">
-                                        <div className="flex items-center gap-3 mb-6">
-                                            <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${plan.color}`}>
-                                                <Icon className="w-6 h-6 text-white" />
+                                    <CardContent className="p-8 h-full flex flex-col">
+                                        <div className="flex-1">
+                                            <div className="flex items-center gap-3 mb-6">
+                                                <div className={`w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br ${plan.color}`}>
+                                                    <Icon className="w-6 h-6 text-white" />
+                                                </div>
+                                                <div>
+                                                    <h3 className="text-xl font-bold text-white">{t(`plans.${plan.key}.name`)}</h3>
+                                                    <p className="text-sm text-gray-500">{plan.credits} {t('credits')}</p>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <h3 className="text-xl font-bold text-white">{t(`plans.${plan.key}.name`)}</h3>
-                                                <p className="text-sm text-gray-500">{plan.credits} {t('credits')}</p>
+
+                                            <div className="mb-6">
+                                                <span className="text-5xl font-bold text-white">{displayPrice}</span>
+                                                <span className="text-gray-500 ml-2">{t('oneTime')}</span>
                                             </div>
-                                        </div>
 
-                                        <div className="mb-6">
-                                            <span className="text-5xl font-bold text-white">{displayPrice}</span>
-                                            <span className="text-gray-500 ml-2">{t('oneTime')}</span>
-                                        </div>
+                                            <p className="text-sm text-gray-400 mb-6">
+                                                {t('perCredit')}: <span className="text-white font-medium">{perCredit}</span>
+                                            </p>
 
-                                        <p className="text-sm text-gray-400 mb-6">
-                                            {t('perCredit')}: <span className="text-white font-medium">{perCredit}</span>
-                                        </p>
-
-                                        <ul className="space-y-4 mb-8">
-                                            <li className="flex items-center gap-3 text-gray-300">
-                                                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                                                <span>{plan.credits} {t('videoCredits')}</span>
-                                            </li>
-                                            <li className="flex items-center gap-3 text-gray-300">
-                                                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                                                <span>{t('features.noExpiry')}</span>
-                                            </li>
-                                            <li className="flex items-center gap-3 text-gray-300">
-                                                <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                                                <span>{t('features.allModes')}</span>
-                                            </li>
-                                            {plan.credits >= 50 && (
+                                            <ul className="space-y-4 mb-8">
                                                 <li className="flex items-center gap-3 text-gray-300">
                                                     <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
-                                                    <span>{t('features.priority')}</span>
+                                                    <span>{plan.credits} {t('videoCredits')}</span>
                                                 </li>
-                                            )}
-                                        </ul>
+                                                <li className="flex items-center gap-3 text-gray-300">
+                                                    <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                                                    <span>{t('features.noExpiry')}</span>
+                                                </li>
+                                                <li className="flex items-center gap-3 text-gray-300">
+                                                    <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                                                    <span>{t('features.allModes')}</span>
+                                                </li>
+                                                {plan.credits >= 50 && (
+                                                    <li className="flex items-center gap-3 text-gray-300">
+                                                        <Check className="w-5 h-5 text-green-500 flex-shrink-0" />
+                                                        <span>{t('features.priority')}</span>
+                                                    </li>
+                                                )}
+                                            </ul>
+                                        </div>
 
                                         {isSignedIn ? (
                                             <Button
