@@ -1,7 +1,5 @@
-'use client';
-
 import NextImage from "next/image";
-import { SignInButton, SignedIn, SignedOut, UserButton } from '@clerk/nextjs';
+import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 
 export function Navbar({ locale }: { locale: string }) {
     return (
@@ -97,6 +95,13 @@ function LanguageSwitcher({ locale }: { locale: string }) {
 }
 
 function AdminLink({ locale }: { locale: string }) {
+    const { user } = useUser();
+
+    // Check for admin role
+    if (!user || user.publicMetadata?.role !== 'admin') {
+        return null;
+    }
+
     return (
         <a
             href={`/${locale}/admin`}
