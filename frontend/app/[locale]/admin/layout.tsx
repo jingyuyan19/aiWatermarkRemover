@@ -41,7 +41,6 @@ export default function AdminLayout({
         }
 
         if (user) {
-            // Check if user has admin role in publicMetadata
             const adminRole = user.publicMetadata?.role === 'admin';
             setIsAdmin(adminRole);
 
@@ -64,24 +63,38 @@ export default function AdminLayout({
     }
 
     return (
-        <div className="min-h-screen bg-gray-950 flex">
-            {/* Mobile sidebar toggle */}
-            <button
-                onClick={() => setSidebarOpen(!sidebarOpen)}
-                className="lg:hidden fixed top-20 left-4 z-50 p-2 bg-gray-900 rounded-lg"
-            >
-                {sidebarOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-            </button>
+        <div className="min-h-screen bg-gray-950">
+            {/* Mobile Header Bar */}
+            <div className="lg:hidden fixed top-16 left-0 right-0 z-30 bg-gray-900 border-b border-white/10 px-4 py-3 flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => setSidebarOpen(!sidebarOpen)}
+                        className="p-2 bg-gray-800 hover:bg-gray-700 rounded-lg transition-colors"
+                        aria-label="Toggle menu"
+                    >
+                        {sidebarOpen ? <X className="w-5 h-5 text-white" /> : <Menu className="w-5 h-5 text-white" />}
+                    </button>
+                    <h1 className="text-white font-semibold">Admin Panel</h1>
+                </div>
+            </div>
+
+            {/* Mobile Overlay */}
+            {sidebarOpen && (
+                <div
+                    className="lg:hidden fixed inset-0 bg-black/60 z-30 pt-16"
+                    onClick={() => setSidebarOpen(false)}
+                />
+            )}
 
             {/* Sidebar */}
             <aside className={`
                 fixed lg:static inset-y-0 left-0 z-40
                 w-64 bg-gray-900 border-r border-white/10
-                transform transition-transform duration-200
+                transform transition-transform duration-200 ease-out
                 ${sidebarOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'}
-                pt-20
+                pt-16 lg:pt-20
             `}>
-                <div className="p-4">
+                <div className="p-4 border-b border-white/10 lg:border-b-0">
                     <h2 className="text-lg font-bold text-white mb-1">Admin Panel</h2>
                     <p className="text-sm text-gray-500">Manage your platform</p>
                 </div>
@@ -93,6 +106,7 @@ export default function AdminLayout({
                             <a
                                 key={item.key}
                                 href={`/${locale}${item.href}`}
+                                onClick={() => setSidebarOpen(false)}
                                 className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-400 hover:text-white hover:bg-white/5 transition-colors"
                             >
                                 <Icon className="w-5 h-5" />
@@ -113,7 +127,7 @@ export default function AdminLayout({
             </aside>
 
             {/* Main content */}
-            <main className="flex-1 p-6 lg:p-8 pt-24 lg:pt-8">
+            <main className="lg:ml-64 p-4 lg:p-8 pt-32 lg:pt-24">
                 {children}
             </main>
         </div>

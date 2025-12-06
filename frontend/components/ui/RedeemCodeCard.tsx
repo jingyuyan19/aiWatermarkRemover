@@ -85,19 +85,20 @@ export function RedeemCodeCard({ onSuccess }: { onSuccess?: (newBalance: number)
                     </div>
                 </div>
 
-                <div className="flex gap-2">
+                <div className="flex flex-col sm:flex-row gap-2">
                     <input
                         type="text"
                         value={code}
                         onChange={(e) => setCode(e.target.value.toUpperCase())}
                         placeholder={t('placeholder')}
-                        className="flex-1 px-4 py-2 bg-black/50 border border-white/10 rounded-lg text-white font-mono uppercase tracking-wider placeholder:text-gray-500 focus:outline-none focus:border-primary"
+                        className="flex-1 px-4 py-3 bg-black/50 border border-white/10 rounded-lg text-white font-mono uppercase tracking-wider placeholder:text-gray-500 focus:outline-none focus:border-primary"
                         onKeyDown={(e) => e.key === 'Enter' && handleRedeem()}
                     />
                     <Button
                         variant="glow"
                         onClick={handleRedeem}
                         disabled={loading || !code.trim()}
+                        className="w-full sm:w-auto min-h-[44px] shrink-0"
                     >
                         {loading ? '...' : t('button')}
                     </Button>
