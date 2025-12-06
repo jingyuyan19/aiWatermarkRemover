@@ -22,6 +22,11 @@ export default function JobPage() {
     const router = useRouter();
     const jobId = params.id as string;
     const { isLoaded, userId, getToken } = useAuth();
+
+    // State
+    const [job, setJob] = useState<Job | null>(null);
+    const [error, setError] = useState<string>('');
+
     // Smart Progress Logic
     const [progress, setProgress] = useState(0);
 
@@ -116,41 +121,101 @@ export default function JobPage() {
 
                     <div className="grid lg:grid-cols-2 gap-12 items-start">
                         {/* Left Column: Result / Preview */}
-                        <div className="bg-black/40 border border-white/10 rounded-2xl p-6 backdrop-blur-xl relative overflow-hidden group">
-                            {/* Scanning Line Effect for Processing */}
+                        <div className="bg-black rounded-2xl relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 aspect-video">
+                            {/* 1. Underlying Video Layer */}
+                            <div className="absolute inset-0 z-0 bg-black">
+                                {(job.input_url || job.output_url) && (
+                                    <video
+                                        src={job.output_url || job.input_url}
+                                        controls={job.status === 'completed'}
+                                        className={`w-full h-full transition-all duration-500 ${job.status === 'completed' ? 'object-contain' : 'object-cover contrast-125'}`}
+                                        style={{
+                                            opacity: job.status !== 'completed' ? 0.5 : 1,
+                                            filter: job.status !== 'completed' ? 'grayscale(100%) saturate(0%)' : 'none'
+                                        }}
+                                        autoPlay
+                                        loop
+                                        muted={job.status !== 'completed'}
+                                        playsInline
+                                    />
+                                )}
+                                {/* Darkening overlay for text readability during processing */}
+                                {job.status !== 'completed' && (
+                                    <div className="absolute inset-0 bg-[#0a0a1a]/60 backdrop-blur-[2px]"></div>
+                                )}
+                            </div>
+
+                            {/* 2. Fluid Light Effect (Only when processing/pending) */}
                             {(job.status === 'processing' || job.status === 'pending') && (
-                                <div className="absolute inset-0 z-0 pointer-events-none">
-                                    <div className="absolute inset-0 bg-gradient-to-b from-transparent via-blue-500/10 to-transparent h-[50%] animate-[scan_3s_linear_infinite]"></div>
+                                <>
+                                    {/* Overlay controlled by opacity (50% default) */}
+                                    <div
+                                        className="absolute inset-0 z-10 bg-black transition-opacity duration-300"
+                                        style={{ opacity: 0.5 }} // User requested 50% opacity
+                                    ></div>
+
+                                    <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'normal' }}>
+                                        {/* Blob 1 - Deep Blue/Indigo */}
+                                        <div
+                                            className="absolute w-[80%] h-[80%] rounded-full bg-blue-600/80 transition-all duration-500"
+                                            style={{
+                                                top: '-10%',
+                                                left: '-10%',
+                                                filter: 'blur(60px)',
+                                                animation: 'fluid1 4.5s infinite ease-in-out' // Speed 4x (18/4)
+                                            }}
+                                        ></div>
+                                        {/* Blob 2 - Rich Violet */}
+                                        <div
+                                            className="absolute w-[80%] h-[80%] rounded-full bg-violet-600/80 transition-all duration-500"
+                                            style={{
+                                                bottom: '-10%',
+                                                right: '-10%',
+                                                filter: 'blur(60px)',
+                                                animation: 'fluid2 5.75s infinite ease-in-out' // Speed 4x (23/4)
+                                            }}
+                                        ></div>
+                                        {/* Blob 3 - Cyan Highlight */}
+                                        <div
+                                            className="absolute w-[60%] h-[60%] rounded-full bg-cyan-500/80 transition-all duration-500"
+                                            style={{
+                                                top: '20%',
+                                                right: '20%',
+                                                filter: 'blur(48px)', // 60 * 0.8
+                                                animation: 'fluid3 5.25s infinite ease-in-out' // Speed 4x (21/4)
+                                            }}
+                                        ></div>
+                                    </div>
+                                </>
+                            )}
+
+                            {/* 3. Content status Layer */}
+                            {job.status !== 'completed' && (
+                                <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
+                                    <div className="space-y-6">
+                                        {/* Minimalist Status */}
+                                        <div className="flex flex-col items-center gap-3">
+                                            <div className="flex gap-2 items-center">
+                                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></span>
+                                            </div>
+                                            <h3 className="text-2xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-md">
+                                                {job.status === 'pending' ? 'Queued' : 'Processing'}
+                                            </h3>
+                                            <p className="text-white/50 text-xs font-mono tracking-widest uppercase">
+                                                AI Restoration in Progress
+                                            </p>
+                                        </div>
+                                    </div>
                                 </div>
                             )}
 
-                            {job.status === 'completed' && job.output_url ? (
-                                <div className="space-y-6">
-                                    <div className="relative rounded-xl overflow-hidden border border-green-500/30 shadow-[0_0_30px_rgba(34,197,94,0.2)]">
-                                        <video src={job.output_url} controls className="w-full" autoPlay loop muted />
-                                    </div>
-                                    <h3 className="text-center text-green-400 font-medium flex items-center justify-center gap-2">
-                                        <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                        </svg>
+                            {job.status === 'completed' && job.output_url && (
+                                <div className="absolute bottom-6 left-0 right-0 text-center z-20 pointer-events-none">
+                                    <h3 className="inline-block px-4 py-2 bg-black/50 backdrop-blur-md rounded-full text-green-400 font-medium text-sm border border-green-500/30">
                                         {t('messages.completed')}
                                     </h3>
-                                </div>
-                            ) : (
-                                <div className="aspect-video bg-black/60 rounded-xl flex items-center justify-center border border-white/5 relative">
-                                    {/* Central Loader */}
-                                    <div className="text-center relative z-10">
-                                        <div className="w-20 h-20 mx-auto mb-6 relative">
-                                            <div className="absolute inset-0 border-4 border-blue-500/30 rounded-full"></div>
-                                            <div className="absolute inset-0 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                                            {/* Pulse Core */}
-                                            <div className="absolute inset-4 bg-blue-500/20 rounded-full animate-pulse"></div>
-                                        </div>
-                                        <h3 className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
-                                            {job.status === 'pending' ? 'Queued' : 'Removing Watermark'}
-                                        </h3>
-                                        <p className="text-gray-400 mt-2 text-sm">{job.status === 'pending' ? 'Waiting for GPU worker...' : 'AI Neural Network Active'}</p>
-                                    </div>
                                 </div>
                             )}
                         </div>
@@ -217,6 +282,25 @@ export default function JobPage() {
             </div>
 
             <style jsx global>{`
+                @keyframes fluid1 {
+                    0% { transform: translate(0, 0) scale(1); }
+                    25% { transform: translate(20%, -10%) scale(1.1); }
+                    50% { transform: translate(10%, 15%) scale(0.9); }
+                    75% { transform: translate(-15%, 25%) scale(1.05); }
+                    100% { transform: translate(0, 0) scale(1); }
+                }
+                @keyframes fluid2 {
+                    0% { transform: translate(0, 0) scale(1.1); }
+                    30% { transform: translate(-25%, -15%) scale(0.9); }
+                    60% { transform: translate(-10%, 20%) scale(1.2); }
+                    100% { transform: translate(0, 0) scale(1.1); }
+                }
+                @keyframes fluid3 {
+                    0% { transform: translate(0, 0) scale(0.9); }
+                    40% { transform: translate(25%, 25%) scale(1.1); }
+                    70% { transform: translate(5%, -20%) scale(0.85); }
+                    100% { transform: translate(0, 0) scale(0.9); }
+                }
                 @keyframes scan {
                     0% { top: -50%; }
                     100% { top: 150%; }
