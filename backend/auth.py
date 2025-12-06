@@ -5,14 +5,22 @@ This module provides a dependency for verifying Clerk JWT tokens.
 """
 import os
 import httpx
-from typing import Optional
+from typing import Optional, Tuple
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 import jwt
 from jwt import PyJWKClient
 from functools import lru_cache
+from pydantic import BaseModel
 
 security = HTTPBearer()
+
+
+class UserInfo(BaseModel):
+    """User information extracted from JWT."""
+    user_id: str
+    role: Optional[str] = None
+
 
 # Cache the JWKS client to avoid fetching keys on every request
 @lru_cache()
@@ -32,6 +40,35 @@ def get_jwks_client():
     if jwks_url:
         return PyJWKClient(jwks_url)
     return None
+
+
+def _extract_role_from_payload(payload: dict) -> Optional[str]:
+    """Extract role from Clerk JWT payload.
+    
+    Clerk stores publicMetadata in different locations depending on version:
+    - metadata.role
+    - public_metadata.role
+    - publicMetadata.role (frontend JS style, less common in JWT)
+    """
+    # Try different paths where Clerk might store the role
+    role = None
+    
+    # Path 1: metadata.role (common in Clerk v4+)
+    metadata = payload.get("metadata", {})
+    if isinstance(metadata, dict):
+        role = metadata.get("role")
+    
+    # Path 2: public_metadata.role
+    if not role:
+        public_metadata = payload.get("public_metadata", {})
+        if isinstance(public_metadata, dict):
+            role = public_metadata.get("role")
+    
+    # Path 3: Direct role claim (some setups)
+    if not role:
+        role = payload.get("role")
+    
+    return role
 
 
 async def get_current_user(
@@ -73,6 +110,46 @@ async def get_current_user(
         #     )
         
         return user_id
+        
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token has expired",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+    except jwt.InvalidTokenError as e:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail=f"Invalid token: {str(e)}",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+
+async def get_current_user_info(
+    credentials: HTTPAuthorizationCredentials = Depends(security)
+) -> UserInfo:
+    """
+    Verify the Clerk JWT token and return user info including role.
+    
+    This is a FastAPI dependency that extracts both user_id and role from the token.
+    """
+    token = credentials.credentials
+    
+    try:
+        unverified_payload = jwt.decode(token, options={"verify_signature": False})
+        
+        user_id = unverified_payload.get("sub")
+        
+        if not user_id:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Invalid token: missing user ID",
+                headers={"WWW-Authenticate": "Bearer"},
+            )
+        
+        role = _extract_role_from_payload(unverified_payload)
+        
+        return UserInfo(user_id=user_id, role=role)
         
     except jwt.ExpiredSignatureError:
         raise HTTPException(

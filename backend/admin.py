@@ -6,7 +6,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from database import get_db
 from models import User, Job, JobStatus, RedemptionCode, CreditPack
-from auth import get_current_user
+from auth import get_current_user, get_current_user_info, UserInfo
 import uuid
 import secrets
 import string
@@ -55,15 +55,10 @@ class StatsResponse(BaseModel):
 
 # ============ Helper Functions ============
 
-async def verify_admin(user_id: str, db: AsyncSession) -> User:
-    """Verify user is an admin, raise 403 if not."""
-    result = await db.execute(select(User).where(User.id == user_id))
-    user = result.scalar_one_or_none()
-    
-    if not user or user.is_admin != 1:
+def verify_admin_role(user_info: UserInfo) -> None:
+    """Verify user has admin role from JWT, raise 403 if not."""
+    if user_info.role != "admin":
         raise HTTPException(status_code=403, detail="Admin access required")
-    
-    return user
 
 
 def generate_code(prefix: str = "", length: int = 8) -> str:
@@ -79,10 +74,10 @@ def generate_code(prefix: str = "", length: int = 8) -> str:
 async def generate_codes(
     request: CodeGenerateRequest,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user)
+    user_info: UserInfo = Depends(get_current_user_info)
 ):
     """Generate redemption codes (admin only)."""
-    await verify_admin(user_id, db)
+    verify_admin_role(user_info)
     
     codes = []
     for _ in range(request.count):
@@ -134,10 +129,10 @@ async def list_codes(
     credits: Optional[int] = None,  # Filter by credit amount
     search: Optional[str] = None,  # Search by code
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user)
+    user_info: UserInfo = Depends(get_current_user_info)
 ):
     """List redemption codes with pagination and filters (admin only)."""
-    await verify_admin(user_id, db)
+    verify_admin_role(user_info)
     
     # Build base query
     query = select(RedemptionCode)
@@ -195,10 +190,10 @@ async def list_codes(
 @router.get("/users", response_model=list[UserResponse])
 async def list_users(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user)
+    user_info: UserInfo = Depends(get_current_user_info)
 ):
     """List all users (admin only)."""
-    await verify_admin(user_id, db)
+    verify_admin_role(user_info)
     
     result = await db.execute(
         select(User).order_by(User.created_at.desc())
@@ -222,10 +217,10 @@ async def update_user_credits(
     target_user_id: str,
     update: UserCreditUpdate,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user)
+    user_info: UserInfo = Depends(get_current_user_info)
 ):
     """Update a user's credits (admin only)."""
-    await verify_admin(user_id, db)
+    verify_admin_role(user_info)
     
     result = await db.execute(select(User).where(User.id == target_user_id))
     target_user = result.scalar_one_or_none()
@@ -245,10 +240,10 @@ async def update_user_credits(
 async def list_all_jobs(
     limit: int = 50,
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user)
+    user_info: UserInfo = Depends(get_current_user_info)
 ):
     """List all jobs across all users (admin only)."""
-    await verify_admin(user_id, db)
+    verify_admin_role(user_info)
     
     result = await db.execute(
         select(Job).order_by(Job.created_at.desc()).limit(limit)
@@ -273,10 +268,10 @@ async def list_all_jobs(
 @router.get("/stats", response_model=StatsResponse)
 async def get_stats(
     db: AsyncSession = Depends(get_db),
-    user_id: str = Depends(get_current_user)
+    user_info: UserInfo = Depends(get_current_user_info)
 ):
     """Get dashboard statistics (admin only)."""
-    await verify_admin(user_id, db)
+    verify_admin_role(user_info)
     
     # Total users
     total_users = await db.execute(select(func.count(User.id)))
