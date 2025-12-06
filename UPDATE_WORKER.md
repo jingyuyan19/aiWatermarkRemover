@@ -227,15 +227,91 @@ docker push <user>/watermark-worker:latest
 
 ## Files You've Modified
 
-These files have custom modifications - be careful during merges:
+**Total: ~101 files changed** - but all for the same reason.
 
+### Why These Files Were Modified
+
+Your Dockerfile sets:
+```dockerfile
+ENV PYTHONPATH=/app/demark_world_code/src
 ```
-src/demark_world/iopaint/model/anytext/cldm/
-├── ddim_hacked.py       ← Modified
-├── embedding_manager.py ← Modified
-├── hack.py              ← Modified
-└── model.py             ← Modified
+
+This means Python's import root is `/app/demark_world_code/src/`, so imports must be:
+- ✅ `from demark_world.xxx` (your version)
+- ❌ `from src.demark_world.xxx` (original upstream)
+
+### The Fix Applied
+
+Every modified file has the same pattern:
+
+```python
+# Original (upstream)
+from src.demark_world.xxx import yyy
+import src.demark_world.xxx
+
+# Your version (fixed for PYTHONPATH)
+from demark_world.xxx import yyy
+import demark_world.xxx
 ```
 
-When merging upstream, always check these files for conflicts.
+### Files With Import Path Changes
 
+**Core modules:**
+```
+src/demark_world/
+├── watermark_cleaner.py
+├── watermark_detector.py
+├── schemas.py
+├── cleaner/lama_cleaner.py
+├── cleaner/e2fgvi_hq_cleaner.py
+├── models/model/e2fgvi.py
+├── models/model/e2fgvi_hq.py
+├── models/model/modules/feat_prop.py
+├── models/model/modules/flow_comp.py
+├── utils/download_utils.py
+├── utils/imputation_utils.py
+├── utils/watermark_utls.py
+└── ... (~90 more files with same import fix)
+```
+
+**IOPaint submodule:**
+```
+src/demark_world/iopaint/
+├── model/anytext/cldm/*.py
+├── tests/*.py
+├── schema.py
+├── web_config.py
+└── ... (many more)
+```
+
+### New Files in Upstream (Dec 2025)
+
+These files are **missing** from your local copy:
+```
+src/demark_world/constants.py          ← NEW
+src/demark_world/utils/mem_constants.py ← NEW (memory-aware feature)
+src/demark_world/utils/mem_utils.py     ← NEW (memory-aware feature)
+```
+
+⚠️ **These new files are needed for the memory-aware chunksize feature!**
+
+### How to Apply Changes After Merge
+
+After pulling upstream changes, run this find-replace:
+
+```bash
+# In your DeMark-World fork
+find src -type f -name "*.py" -exec sed -i '' 's/from src\.demark_world/from demark_world/g' {} \;
+find src -type f -name "*.py" -exec sed -i '' 's/import src\.demark_world/import demark_world/g' {} \;
+```
+
+This automatically fixes all import paths.
+
+### Summary
+
+| Aspect | Status |
+|--------|--------|
+| **Functional changes** | ❌ None |
+| **Import path fixes** | ✅ ~101 files |
+| **Logic/algorithm changes** | ❌ None |
+| **Safe to auto-fix after merge** | ✅ Yes (sed command above) |
