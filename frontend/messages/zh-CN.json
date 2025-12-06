@@ -112,6 +112,33 @@
         "before": "处理前",
         "after": "处理后"
     },
+    "Stats": {
+        "videosProcessed": "已处理视频",
+        "happyUsers": "满意用户",
+        "successRate": "成功率",
+        "availability": "全天候服务"
+    },
+    "Testimonials": {
+        "title": "用户评价",
+        "subtitle": "加入数千名满意的内容创作者",
+        "items": {
+            "creator": {
+                "name": "陈明",
+                "role": "YouTube创作者",
+                "quote": "Vanishly为我节省了大量手动编辑时间。AI完美去除水印，不影响视频质量。"
+            },
+            "editor": {
+                "name": "李雪",
+                "role": "专业视频编辑",
+                "quote": "作为专业编辑，质量就是一切。Vanishly每次都能交付干净的效果。"
+            },
+            "agency": {
+                "name": "王强",
+                "role": "创意工作室负责人",
+                "quote": "我们工作室每月处理数百个视频。Vanishly的速度和可靠性使它成为我们的首选工具。"
+            }
+        }
+    },
     "FAQ": {
         "title": "常见问题",
         "items": {
@@ -374,5 +401,35 @@
                 "content": "我们保留随时修改这些条款的权利。我们将通过电子邮件或服务通知用户重大变更。"
             }
         }
+    },
+    "Contact": {
+        "title": "联系我们",
+        "subtitle": "有问题或需要帮助？我们很乐意为您解答。",
+        "email": {
+            "title": "邮件支持"
+        },
+        "response": {
+            "title": "响应时间",
+            "time": "通常在24小时内"
+        },
+        "faq": {
+            "title": "快速解答",
+            "link": "查看常见问题 →"
+        },
+        "form": {
+            "name": "您的姓名",
+            "namePlaceholder": "张三",
+            "email": "电子邮箱",
+            "emailPlaceholder": "zhangsan@example.com",
+            "subject": "主题",
+            "subjectPlaceholder": "我们能帮您什么？",
+            "message": "消息内容",
+            "messagePlaceholder": "请详细描述您的问题...",
+            "submit": "发送消息"
+        },
+        "sending": "发送中...",
+        "successTitle": "消息已发送！",
+        "successMessage": "感谢您的来信，我们会尽快回复您。",
+        "sendAnother": "发送另一条消息"
     }
 }

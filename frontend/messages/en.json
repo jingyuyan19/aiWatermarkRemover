@@ -112,6 +112,33 @@
         "before": "Before",
         "after": "After"
     },
+    "Stats": {
+        "videosProcessed": "Videos Processed",
+        "happyUsers": "Happy Users",
+        "successRate": "Success Rate",
+        "availability": "Availability"
+    },
+    "Testimonials": {
+        "title": "What Creators Say",
+        "subtitle": "Join thousands of satisfied content creators",
+        "items": {
+            "creator": {
+                "name": "Alex Chen",
+                "role": "YouTube Creator",
+                "quote": "Vanishly saved me hours of manual editing. The AI removes watermarks perfectly without affecting video quality."
+            },
+            "editor": {
+                "name": "Sarah Miller",
+                "role": "Video Editor",
+                "quote": "As a professional editor, quality is everything. Vanishly delivers clean results every single time."
+            },
+            "agency": {
+                "name": "Marcus Johnson",
+                "role": "Creative Agency Owner",
+                "quote": "Our agency processes hundreds of videos monthly. Vanishly's speed and reliability made it our go-to tool."
+            }
+        }
+    },
     "FAQ": {
         "title": "Frequently Asked Questions",
         "items": {
@@ -374,5 +401,35 @@
                 "content": "We reserve the right to modify these terms at any time. We will notify users of significant changes via email or through the service."
             }
         }
+    },
+    "Contact": {
+        "title": "Contact Us",
+        "subtitle": "Have a question or need help? We'd love to hear from you.",
+        "email": {
+            "title": "Email Support"
+        },
+        "response": {
+            "title": "Response Time",
+            "time": "Usually within 24 hours"
+        },
+        "faq": {
+            "title": "Quick Answers",
+            "link": "Check our FAQ →"
+        },
+        "form": {
+            "name": "Your Name",
+            "namePlaceholder": "John Doe",
+            "email": "Email Address",
+            "emailPlaceholder": "john@example.com",
+            "subject": "Subject",
+            "subjectPlaceholder": "How can we help?",
+            "message": "Message",
+            "messagePlaceholder": "Tell us more about your question...",
+            "submit": "Send Message"
+        },
+        "sending": "Sending...",
+        "successTitle": "Message Sent!",
+        "successMessage": "Thank you for reaching out. We'll get back to you soon.",
+        "sendAnother": "Send Another Message"
     }
 }
