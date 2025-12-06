@@ -26,12 +26,14 @@ export function Navbar({ locale }: { locale: string }) {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-4">
+                <SignedOut>
                     <a
                         href={`/${locale}/pricing`}
                         className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
                     >
                         {locale === 'zh-CN' ? '价格' : 'Pricing'}
                     </a>
+                </SignedOut>
 
                     <LanguageSwitcher locale={locale} />
 
@@ -54,6 +56,12 @@ export function Navbar({ locale }: { locale: string }) {
                             className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
                         >
                             {locale === 'zh-CN' ? '历史' : 'History'}
+                        </a>
+                        <a
+                            href={`/${locale}/pricing`}
+                            className="px-3 py-1.5 rounded-lg text-sm font-medium text-green-400 hover:text-green-300 hover:bg-green-500/10 transition-colors"
+                        >
+                            {locale === 'zh-CN' ? '购买额度' : 'Buy Credits'}
                         </a>
 
                         <AdminLink locale={locale} />
@@ -89,13 +97,15 @@ export function Navbar({ locale }: { locale: string }) {
             {mobileMenuOpen && (
                 <div className="md:hidden bg-black/95 backdrop-blur-xl border-b border-white/10">
                     <div className="container mx-auto px-4 py-4 space-y-3">
-                        <a
-                            href={`/${locale}/pricing`}
-                            className="block px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors"
-                            onClick={() => setMobileMenuOpen(false)}
-                        >
-                            {locale === 'zh-CN' ? '价格' : 'Pricing'}
-                        </a>
+                        <SignedOut>
+                            <a
+                                href={`/${locale}/pricing`}
+                                className="block px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                {locale === 'zh-CN' ? '价格' : 'Pricing'}
+                            </a>
+                        </SignedOut>
 
                         <SignedOut>
                             <SignInButton mode="modal">

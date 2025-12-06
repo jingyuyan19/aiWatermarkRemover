@@ -203,23 +203,25 @@ export default function PricingPage() {
                     })}
                 </div>
 
-                {/* Redeem Code Section */}
-                <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.4 }}
-                    className="mt-16 max-w-lg mx-auto"
-                >
-                    <div className="text-center mb-6">
-                        <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/5 mb-4">
-                            <Gift className="w-6 h-6 text-primary" />
+                {/* Redeem Code Section - Only for logged-in users */}
+                {isSignedIn && (
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        transition={{ delay: 0.4 }}
+                        className="mt-16 max-w-lg mx-auto"
+                    >
+                        <div className="text-center mb-6">
+                            <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-white/5 mb-4">
+                                <Gift className="w-6 h-6 text-primary" />
+                            </div>
+                            <h2 className="text-2xl font-bold">{t('redeemTitle')}</h2>
+                            <p className="text-gray-400 mt-2">{t('redeemSubtitle')}</p>
                         </div>
-                        <h2 className="text-2xl font-bold">{t('redeemTitle')}</h2>
-                        <p className="text-gray-400 mt-2">{t('redeemSubtitle')}</p>
-                    </div>
 
-                    <RedeemCodeCard />
-                </motion.div>
+                        <RedeemCodeCard />
+                    </motion.div>
+                )}
 
                 {/* Credit Info */}
                 <motion.div
