@@ -130,13 +130,13 @@ export default function Home() {
                                     ))}
                                 </div>
                             </div>
-                            <div className="pt-10 bg-black/80 relative">
+                            <div className="pt-10 bg-black relative aspect-video">
                                 {/* Video Carousel with Crossfade */}
                                 {['/sample_vid.mp4', '/sample_2.mp4', '/sample_3.mp4'].map((videoSrc, idx) => (
                                     <video
                                         key={videoSrc}
                                         src={videoSrc}
-                                        className={`w-full h-full object-cover transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
+                                        className={`w-full h-full object-contain transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
                                             } ${activeVideo === idx ? 'opacity-100' : 'opacity-0'}`}
                                         autoPlay
                                         loop
