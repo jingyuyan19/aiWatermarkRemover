@@ -193,6 +193,16 @@ body {
   color: white !important;
 }
 
+
 .cl-userPreviewSecondaryIdentifier {
   color: #9ca3af !important;
+}
+
+/* Clerk Social Button Fixes for Dark Theme */
+.cl-socialButtonsBlockButton {
+  color: white !important;
+}
+
+.cl-socialButtonsBlockButtonText {
+  color: white !important;
 }
