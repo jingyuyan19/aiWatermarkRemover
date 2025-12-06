@@ -19,7 +19,16 @@ export default function Home() {
     const locale = useLocale();
     const { isLoaded, userId } = useAuth();
     const [openFaq, setOpenFaq] = useState<string | null>(null);
+    const [activeVideo, setActiveVideo] = useState(0);
     const router = useRouter();
+
+    // Auto-rotate videos every 8 seconds
+    useEffect(() => {
+        const timer = setInterval(() => {
+            setActiveVideo((prev) => (prev + 1) % 3);
+        }, 8000);
+        return () => clearInterval(timer);
+    }, []);
 
     // Redirect logged-in users to dashboard
     useEffect(() => {
@@ -92,8 +101,7 @@ export default function Home() {
                         </div>
                     </motion.div>
 
-                    {/* App Preview Mockup */}
-                    {/* App Preview Mockup - Comparison Slider */}
+                    {/* App Preview Mockup - Video Carousel */}
                     <motion.div
                         initial={{ opacity: 0, y: 40, rotateX: 20 }}
                         animate={{ opacity: 1, y: 0, rotateX: 0 }}
@@ -105,17 +113,37 @@ export default function Home() {
                                 <div className="w-3 h-3 rounded-full bg-red-500/20" />
                                 <div className="w-3 h-3 rounded-full bg-yellow-500/20" />
                                 <div className="w-3 h-3 rounded-full bg-green-500/20" />
-                                <div className="ml-4 text-xs text-gray-500 font-mono">sample_vid.mp4</div>
+                                <div className="ml-4 text-xs text-gray-500 font-mono">
+                                    {['sample_vid.mp4', 'sample_2.mp4', 'sample_3.mp4'][activeVideo]}
+                                </div>
+                                {/* Video Indicators */}
+                                <div className="ml-auto flex gap-2">
+                                    {[0, 1, 2].map((idx) => (
+                                        <button
+                                            key={idx}
+                                            onClick={() => setActiveVideo(idx)}
+                                            className={`w-2 h-2 rounded-full transition-all duration-300 ${activeVideo === idx
+                                                ? 'bg-primary w-6'
+                                                : 'bg-white/30 hover:bg-white/50'
+                                                }`}
+                                        />
+                                    ))}
+                                </div>
                             </div>
-                            <div className="pt-10 bg-black/80">
-                                <video
-                                    src="/sample_vid.mp4"
-                                    className="w-full h-full object-cover"
-                                    autoPlay
-                                    loop
-                                    muted
-                                    playsInline
-                                />
+                            <div className="pt-10 bg-black/80 relative">
+                                {/* Video Carousel with Crossfade */}
+                                {['/sample_vid.mp4', '/sample_2.mp4', '/sample_3.mp4'].map((videoSrc, idx) => (
+                                    <video
+                                        key={videoSrc}
+                                        src={videoSrc}
+                                        className={`w-full h-full object-cover transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
+                                            } ${activeVideo === idx ? 'opacity-100' : 'opacity-0'}`}
+                                        autoPlay
+                                        loop
+                                        muted
+                                        playsInline
+                                    />
+                                ))}
                             </div>
                         </div>
                         <div className="absolute -inset-4 bg-gradient-to-r from-primary to-accent opacity-20 blur-3xl -z-10 rounded-[3rem]" />
