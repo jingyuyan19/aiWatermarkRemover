@@ -27,6 +27,28 @@ export default function JobPage() {
     const [job, setJob] = useState<Job | null>(null);
     const [error, setError] = useState<string>('');
 
+    // Activity Log Simulation
+    const [activityStep, setActivityStep] = useState(0);
+    const activitySteps = [
+        'Allocating dedicated GPU resource...',
+        'Analyzing video frames...',
+        'Detecting watermark patterns...',
+        'Inpainting texture data...',
+        'Refining temporal consistency...',
+        'Upscaling final output...',
+        'Finalizing video render...'
+    ];
+
+    useEffect(() => {
+        if (!job || job.status === 'completed') return;
+
+        const interval = setInterval(() => {
+            setActivityStep(prev => (prev + 1) % activitySteps.length);
+        }, 3000); // Change step every 3 seconds
+
+        return () => clearInterval(interval);
+    }, [job?.status]);
+
     // Fetch Job Data
     useEffect(() => {
         let isMounted = true;
@@ -135,8 +157,10 @@ export default function JobPage() {
                         </div>
                     </div>
 
-                    <div className="grid lg:grid-cols-2 gap-12 items-start">
-                        {/* Left Column: Result / Preview */}
+                    {/* Main Content - Centered Single Column */}
+                    <div className="max-w-4xl mx-auto space-y-8">
+
+                        {/* Video / Result Area */}
                         <div className="bg-black rounded-2xl relative overflow-hidden group shadow-[0_0_50px_rgba(0,0,0,0.5)] border border-white/10 aspect-video">
                             {/* 1. Underlying Video Layer */}
                             <div className="absolute inset-0 z-0 bg-black">
@@ -167,38 +191,32 @@ export default function JobPage() {
                                     {/* Overlay controlled by opacity (50% default) */}
                                     <div
                                         className="absolute inset-0 z-10 bg-black transition-opacity duration-300"
-                                        style={{ opacity: 0.5 }} // User requested 50% opacity
+                                        style={{ opacity: 0.5 }}
                                     ></div>
 
                                     <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'normal' }}>
-                                        {/* Blob 1 - Deep Blue/Indigo */}
+                                        {/* Blob 1 */}
                                         <div
                                             className="absolute w-[80%] h-[80%] rounded-full bg-blue-600/80 transition-all duration-500"
                                             style={{
-                                                top: '-10%',
-                                                left: '-10%',
-                                                filter: 'blur(60px)',
-                                                animation: 'fluid1 4.5s infinite ease-in-out' // Speed 4x (18/4)
+                                                top: '-10%', left: '-10%', filter: 'blur(60px)',
+                                                animation: 'fluid1 4.5s infinite ease-in-out'
                                             }}
                                         ></div>
-                                        {/* Blob 2 - Rich Violet */}
+                                        {/* Blob 2 */}
                                         <div
                                             className="absolute w-[80%] h-[80%] rounded-full bg-violet-600/80 transition-all duration-500"
                                             style={{
-                                                bottom: '-10%',
-                                                right: '-10%',
-                                                filter: 'blur(60px)',
-                                                animation: 'fluid2 5.75s infinite ease-in-out' // Speed 4x (23/4)
+                                                bottom: '-10%', right: '-10%', filter: 'blur(60px)',
+                                                animation: 'fluid2 5.75s infinite ease-in-out'
                                             }}
                                         ></div>
-                                        {/* Blob 3 - Cyan Highlight */}
+                                        {/* Blob 3 */}
                                         <div
                                             className="absolute w-[60%] h-[60%] rounded-full bg-cyan-500/80 transition-all duration-500"
                                             style={{
-                                                top: '20%',
-                                                right: '20%',
-                                                filter: 'blur(48px)', // 60 * 0.8
-                                                animation: 'fluid3 5.25s infinite ease-in-out' // Speed 4x (21/4)
+                                                top: '20%', right: '20%', filter: 'blur(48px)',
+                                                animation: 'fluid3 5.25s infinite ease-in-out'
                                             }}
                                         ></div>
                                     </div>
@@ -209,19 +227,25 @@ export default function JobPage() {
                             {job.status !== 'completed' && (
                                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
                                     <div className="space-y-6">
-                                        {/* Minimalist Status */}
-                                        <div className="flex flex-col items-center gap-3">
-                                            <div className="flex gap-2 items-center">
-                                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                                <span className="w-1.5 h-1.5 bg-white rounded-full animate-bounce"></span>
+                                        {/* Animated Activity Log */}
+                                        <div className="flex flex-col items-center gap-4">
+                                            {/* Pulse Indicator */}
+                                            <div className="flex gap-2 items-center mb-2">
+                                                <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></span>
                                             </div>
-                                            <h3 className="text-2xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-md">
+
+                                            <h3 className="text-3xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse">
                                                 {job.status === 'pending' ? 'Queued' : 'Processing'}
                                             </h3>
-                                            <p className="text-white/50 text-xs font-mono tracking-widest uppercase">
-                                                AI Restoration in Progress
-                                            </p>
+
+                                            {/* Dynamic Step Text */}
+                                            <div className="h-8 overflow-hidden relative w-full flex justify-center">
+                                                <p key={activityStep} className="text-blue-200/80 text-sm font-mono tracking-widest uppercase animate-[slideUp_0.5s_ease-out]">
+                                                    {activitySteps[activityStep]}
+                                                </p>
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -236,59 +260,23 @@ export default function JobPage() {
                             )}
                         </div>
 
-                        {/* Right Column: Status & Actions */}
-                        <div className="space-y-8">
-                            {/* Status Card */}
-                            {/* Status Card */}
-                            <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md">
-                                <div className="flex justify-between items-center mb-6">
-                                    <div>
-                                        <h2 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Status</h2>
-                                        <div className="flex items-center gap-3">
-                                            {job.status === 'processing' && (
-                                                <span className="relative flex h-3 w-3">
-                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
-                                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
-                                                </span>
-                                            )}
-                                            <span className="text-2xl font-bold text-white capitalize">
-                                                {job.status}
-                                            </span>
-                                        </div>
-                                    </div>
-                                    <div className={`text-4xl ${job.status === 'completed' ? 'text-green-500 grayscale-0' : 'text-blue-500/50 grayscale'} transition-all duration-500`}>
-                                        {job.status === 'completed' ? '✓' : job.status === 'failed' ? '❌' : '⚡'}
-                                    </div>
-                                </div>
-
-                                {/* Dynamic Messages */}
-                                <div className="h-16 flex items-center">
-                                    {job.status === 'pending' && <p className="text-yellow-200/80 animate-pulse">⏳ Allocating dedicated GPU processor...</p>}
-                                    {job.status === 'processing' && (
-                                        <div className="space-y-1">
-                                            <p className="text-blue-200/90 font-medium">✨ AI Processing in progress...</p>
-                                            <p className="text-xs text-blue-300/50">Analyzing frames • Inpainting textures • Upscaling</p>
-                                        </div>
-                                    )}
-                                    {job.status === 'completed' && <p className="text-green-400 font-bold text-lg">🎉 Your video is ready!</p>}
-                                    {job.status === 'failed' && <p className="text-red-400">❌ Error: Processing failed. Please try again.</p>}
-                                </div>
-                            </div>
-
-                            {/* Actions */}
-                            {job.status === 'completed' && job.output_url && (
+                        {/* Actions Area */}
+                        {job.status === 'completed' && job.output_url && (
+                            <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                                 <a
                                     href={job.output_url}
                                     download
-                                    className="block w-full group relative overflow-hidden rounded-xl bg-gradient-to-r from-blue-600 to-purple-600 p-[1px] shadow-[0_0_40px_rgba(59,130,246,0.5)] hover:shadow-[0_0_60px_rgba(59,130,246,0.7)] transition-all transform hover:-translate-y-1"
+                                    className="group relative overflow-hidden rounded-full bg-white text-black px-12 py-4 shadow-[0_0_40px_rgba(255,255,255,0.2)] hover:shadow-[0_0_60px_rgba(255,255,255,0.4)] transition-all transform hover:-translate-y-1 hover:scale-105"
                                 >
-                                    <div className="relative bg-black/50 group-hover:bg-transparent transition-colors rounded-xl px-8 py-4 flex items-center justify-center gap-3">
-                                        <span className="text-xl">⬇️</span>
-                                        <span className="font-bold text-lg">Download Unwatermarked Video</span>
+                                    <div className="relative font-bold text-lg flex items-center gap-3">
+                                        <span>Download Video</span>
+                                        <svg className="w-5 h-5 group-hover:translate-y-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                                        </svg>
                                     </div>
                                 </a>
-                            )}
-                        </div>
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>
@@ -319,6 +307,10 @@ export default function JobPage() {
                 }
                 @keyframes shimmer {
                     100% { transform: translateX(100%); }
+                }
+                @keyframes slideUp {
+                    0% { transform: translateY(100%); opacity: 0; }
+                    100% { transform: translateY(0); opacity: 1; }
                 }
             `}</style>
         </main>
