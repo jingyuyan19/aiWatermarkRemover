@@ -277,7 +277,7 @@ export default function JobPage() {
                                     Hang tight! This usually takes about <span className="text-white/60 font-medium">45 seconds</span>.
                                 </p>
                                 <p className="text-white/20 text-xs mt-1">
-                                    You can safely leave this page and come back later.
+                                    You can safely leave this page. Your video will be saved in your <Link href="/dashboard" className="hover:text-white/40 underline decoration-white/20 transition-colors">Dashboard</Link>.
                                 </p>
                             </div>
                         )}
