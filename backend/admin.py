@@ -33,14 +33,6 @@ class CodeResponse(BaseModel):
     redeemed_at: Optional[datetime] = None
 
 
-class UserResponse(BaseModel):
-    id: str
-    email: str
-    credits: int
-    is_admin: int
-    created_at: datetime
-
-
 class UserCreditUpdate(BaseModel):
     credits: int
 
@@ -187,29 +179,69 @@ async def list_codes(
 
 # ============ User Management ============
 
-@router.get("/users", response_model=list[UserResponse])
+class UserResponse(BaseModel):
+    id: str
+    email: str
+    credits: int
+    is_admin: int
+    created_at: datetime
+    total_jobs: int = 0
+    completed_jobs: int = 0
+
+
+@router.get("/users")
 async def list_users(
+    search: Optional[str] = None,  # Search by email
+    role: Optional[str] = None,  # "admin" or "user"
     db: AsyncSession = Depends(get_db),
     user_info: UserInfo = Depends(get_current_user_info)
 ):
-    """List all users (admin only)."""
+    """List all users with stats (admin only)."""
     verify_admin_role(user_info)
     
-    result = await db.execute(
-        select(User).order_by(User.created_at.desc())
-    )
+    # Build query with optional filters
+    query = select(User)
+    
+    if search:
+        query = query.where(User.email.ilike(f"%{search}%"))
+    
+    if role == "admin":
+        query = query.where(User.is_admin == 1)
+    elif role == "user":
+        query = query.where((User.is_admin == 0) | (User.is_admin == None))
+    
+    result = await db.execute(query.order_by(User.created_at.desc()))
     users = result.scalars().all()
     
-    return [
-        UserResponse(
-            id=u.id,
-            email=u.email or "",
-            credits=u.credits,
-            is_admin=u.is_admin or 0,
-            created_at=u.created_at
+    # Get job stats for each user
+    user_stats = []
+    for u in users:
+        # Count total jobs
+        total_jobs_result = await db.execute(
+            select(func.count(Job.id)).where(Job.user_id == u.id)
         )
-        for u in users
-    ]
+        total_jobs = total_jobs_result.scalar() or 0
+        
+        # Count completed jobs
+        completed_jobs_result = await db.execute(
+            select(func.count(Job.id)).where(
+                Job.user_id == u.id,
+                Job.status == JobStatus.COMPLETED
+            )
+        )
+        completed_jobs = completed_jobs_result.scalar() or 0
+        
+        user_stats.append({
+            "id": u.id,
+            "email": u.email or "",
+            "credits": u.credits,
+            "is_admin": u.is_admin or 0,
+            "created_at": u.created_at,
+            "total_jobs": total_jobs,
+            "completed_jobs": completed_jobs
+        })
+    
+    return user_stats
 
 
 @router.patch("/users/{target_user_id}/credits")
