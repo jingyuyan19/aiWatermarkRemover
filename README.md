@@ -14,6 +14,7 @@ A full-stack SaaS platform for removing watermarks from AI-generated videos usin
 
 - **[Deployment Guide](DEPLOYMENT.md)** - Step-by-step production deployment
 - **[API Documentation](API.md)** - Complete API reference
+- **[Admin Setup](ADMIN_SETUP.md)** - How to grant admin privileges
 - **[Contributing Guide](CONTRIBUTING.md)** - How to contribute to the project
 
 ## 🏗️ Architecture
