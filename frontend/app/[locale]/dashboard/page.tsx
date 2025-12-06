@@ -68,7 +68,9 @@ export default function DashboardPage() {
             });
             if (jobsRes.ok) {
                 const jobsData = await jobsRes.json();
-                setJobs(jobsData);
+                // Handle both array (old) and object (new paginated) formats
+                const jobsList = Array.isArray(jobsData) ? jobsData : (jobsData.jobs || []);
+                setJobs(jobsList);
             }
         } catch (error) {
             console.error('Error fetching jobs:', error);
