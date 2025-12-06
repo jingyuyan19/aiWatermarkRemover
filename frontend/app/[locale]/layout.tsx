@@ -1,4 +1,4 @@
-```typescript
+
 import type { Metadata } from "next";
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
@@ -42,4 +42,4 @@ export default async function LocaleLayout({ children, params }: Props) {
         </AppLayout>
     );
 }
-```
+
