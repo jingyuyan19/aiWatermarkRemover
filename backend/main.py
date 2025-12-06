@@ -207,6 +207,12 @@ async def create_job(
                 }
             })
             print(f"RunPod job started: {runpod_job()}")
+            
+            # Mark as PROCESSING immediately so frontend shows progress
+            new_job.status = JobStatus.PROCESSING
+            db.add(new_job)
+            await db.commit()
+            
         except Exception as e:
             print(f"Error starting RunPod job: {e}")
             # Job will stay in PENDING status - can be retried later
