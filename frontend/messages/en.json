@@ -184,7 +184,8 @@
             "terms": "Terms of Service"
         },
         "contact": {
-            "title": "Contact"
+            "title": "Contact",
+            "contactUs": "Contact Us"
         },
         "copyright": "© {year} Vanishly. All rights reserved."
     },

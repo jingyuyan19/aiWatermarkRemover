@@ -184,7 +184,8 @@
             "terms": "服务条款"
         },
         "contact": {
-            "title": "联系"
+            "title": "联系",
+            "contactUs": "联系我们"
         },
         "copyright": "© {year} Vanishly。保留所有权利。"
     },
