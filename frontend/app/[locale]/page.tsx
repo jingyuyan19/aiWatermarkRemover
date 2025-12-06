@@ -66,6 +66,7 @@ export default function Home() {
         { name: 'Pika', subtitle: 'Labs' },
         { name: 'Kling', subtitle: 'by Kuaishou' },
         { name: 'Hailuo', subtitle: 'MiniMax' },
+        { name: 'Luma', subtitle: 'Dream Machine' },
     ];
 
     return (
