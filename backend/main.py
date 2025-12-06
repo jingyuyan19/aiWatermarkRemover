@@ -280,35 +280,65 @@ async def get_job_status(
         cost=job.cost or 1
     )
 
-@app.get("/api/jobs", response_model=list[JobResponse])
+@app.get("/api/jobs")
 async def list_user_jobs(
+    page: int = 1,
+    page_size: int = 20,
+    status: str = None,
     db: AsyncSession = Depends(get_db),
     user_id: str = Depends(get_current_user)
 ):
-    """List all jobs for the authenticated user"""
+    """List all jobs for the authenticated user with pagination"""
+    from sqlalchemy import func
     try:
         print(f"[DEBUG] list_jobs called for user {user_id}")
+        
+        # Build base query
+        base_query = select(Job).where(Job.user_id == user_id)
+        
+        if status and status != 'all':
+            base_query = base_query.where(Job.status == status)
+        
+        # Get total count
+        count_query = select(func.count()).select_from(base_query.subquery())
+        total_result = await db.execute(count_query)
+        total = total_result.scalar() or 0
+        
+        # Calculate pagination
+        total_pages = (total + page_size - 1) // page_size if total > 0 else 1
+        offset = (page - 1) * page_size
+        
+        # Get paginated results
         result = await db.execute(
-            select(Job).where(Job.user_id == user_id).order_by(Job.created_at.desc())
+            base_query.order_by(Job.created_at.desc())
+            .offset(offset)
+            .limit(page_size)
         )
         jobs = result.scalars().all()
-        print(f"[DEBUG] Found {len(jobs)} jobs")
+        print(f"[DEBUG] Found {len(jobs)} jobs (page {page}/{total_pages})")
         
         response_data = [
-            JobResponse(
-                id=job.id,
-                status=job.status,
-                input_url=f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None,
-                output_url=f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED else None,
-                created_at=job.created_at,
-                quality=job.quality or "lama",
-                cost=job.cost or 1
-            )
+            {
+                "id": job.id,
+                "status": job.status,
+                "input_url": f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None,
+                "output_url": f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED else None,
+                "created_at": job.created_at.isoformat(),
+                "quality": job.quality or "lama",
+                "cost": job.cost or 1
+            }
             for job in jobs
         ]
-        return response_data
+        return {
+            "jobs": response_data,
+            "total": total,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": total_pages
+        }
     except Exception as e:
         print(f"[ERROR] list_jobs failed: {e}")
         import traceback
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"List Jobs Error: {str(e)}")
+

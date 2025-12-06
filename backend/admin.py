@@ -189,40 +189,62 @@ class UserResponse(BaseModel):
     completed_jobs: int = 0
 
 
+class PaginatedUsersResponse(BaseModel):
+    users: list
+    total: int
+    page: int
+    page_size: int
+    total_pages: int
+
+
 @router.get("/users")
 async def list_users(
+    page: int = 1,
+    page_size: int = 20,
     search: Optional[str] = None,  # Search by email
     role: Optional[str] = None,  # "admin" or "user"
     db: AsyncSession = Depends(get_db),
     user_info: UserInfo = Depends(get_current_user_info)
 ):
-    """List all users with stats (admin only)."""
+    """List all users with stats and pagination (admin only)."""
     verify_admin_role(user_info)
     
-    # Build query with optional filters
-    query = select(User)
+    # Build base query with optional filters
+    base_query = select(User)
     
     if search:
-        query = query.where(User.email.ilike(f"%{search}%"))
+        base_query = base_query.where(User.email.ilike(f"%{search}%"))
     
     if role == "admin":
-        query = query.where(User.is_admin == 1)
+        base_query = base_query.where(User.is_admin == 1)
     elif role == "user":
-        query = query.where((User.is_admin == 0) | (User.is_admin == None))
+        base_query = base_query.where((User.is_admin == 0) | (User.is_admin == None))
     
-    result = await db.execute(query.order_by(User.created_at.desc()))
+    # Get total count
+    count_query = select(func.count()).select_from(base_query.subquery())
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+    
+    # Calculate pagination
+    total_pages = (total + page_size - 1) // page_size if total > 0 else 1
+    offset = (page - 1) * page_size
+    
+    # Get paginated results
+    result = await db.execute(
+        base_query.order_by(User.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
+    )
     users = result.scalars().all()
     
     # Get job stats for each user
     user_stats = []
     for u in users:
-        # Count total jobs
         total_jobs_result = await db.execute(
             select(func.count(Job.id)).where(Job.user_id == u.id)
         )
         total_jobs = total_jobs_result.scalar() or 0
         
-        # Count completed jobs
         completed_jobs_result = await db.execute(
             select(func.count(Job.id)).where(
                 Job.user_id == u.id,
@@ -241,7 +263,13 @@ async def list_users(
             "completed_jobs": completed_jobs
         })
     
-    return user_stats
+    return {
+        "users": user_stats,
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages
+    }
 
 
 @router.patch("/users/{target_user_id}/credits")
@@ -270,29 +298,55 @@ async def update_user_credits(
 
 @router.get("/jobs")
 async def list_all_jobs(
-    limit: int = 50,
+    page: int = 1,
+    page_size: int = 20,
+    status: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
     user_info: UserInfo = Depends(get_current_user_info)
 ):
-    """List all jobs across all users (admin only)."""
+    """List all jobs with pagination (admin only)."""
     verify_admin_role(user_info)
     
+    # Build base query
+    base_query = select(Job)
+    
+    if status:
+        base_query = base_query.where(Job.status == status)
+    
+    # Get total count
+    count_query = select(func.count()).select_from(base_query.subquery())
+    total_result = await db.execute(count_query)
+    total = total_result.scalar() or 0
+    
+    # Calculate pagination
+    total_pages = (total + page_size - 1) // page_size if total > 0 else 1
+    offset = (page - 1) * page_size
+    
+    # Get paginated results
     result = await db.execute(
-        select(Job).order_by(Job.created_at.desc()).limit(limit)
+        base_query.order_by(Job.created_at.desc())
+        .offset(offset)
+        .limit(page_size)
     )
     jobs = result.scalars().all()
     
-    return [
-        {
-            "id": j.id,
-            "user_id": j.user_id,
-            "status": j.status,
-            "quality": j.quality,
-            "cost": j.cost,
-            "created_at": j.created_at
-        }
-        for j in jobs
-    ]
+    return {
+        "jobs": [
+            {
+                "id": j.id,
+                "user_id": j.user_id,
+                "status": j.status,
+                "quality": j.quality,
+                "cost": j.cost,
+                "created_at": j.created_at
+            }
+            for j in jobs
+        ],
+        "total": total,
+        "page": page,
+        "page_size": page_size,
+        "total_pages": total_pages
+    }
 
 
 # ============ Dashboard Stats ============
