@@ -148,37 +148,58 @@ export function Navbar({ locale }: { locale: string }) {
 }
 
 function LanguageSwitcher({ locale, compact }: { locale: string; compact?: boolean }) {
-    if (compact) {
-        return (
-            <a
-                href={locale === 'en' ? '/zh-CN' : '/en'}
-                className="px-2 py-1 rounded-md text-sm font-medium text-gray-400 hover:text-white transition-colors"
-            >
-                {locale === 'en' ? '中文' : 'EN'}
-            </a>
-        );
-    }
+    const [isOpen, setIsOpen] = useState(false);
+
+    const languages = [
+        { code: 'en', label: 'English', flag: '🇺🇸' },
+        { code: 'zh-CN', label: '中文', flag: '🇨🇳' },
+    ];
+
+    const currentLang = languages.find(l => l.code === locale) || languages[0];
 
     return (
-        <div className="flex items-center gap-1 bg-white/5 rounded-lg p-1">
-            <a
-                href="/en"
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${locale === 'en'
-                    ? 'bg-primary text-white'
-                    : 'text-gray-400 hover:text-white'
+        <div className="relative">
+            <button
+                onClick={() => setIsOpen(!isOpen)}
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${isOpen ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
                     }`}
             >
-                EN
-            </a>
-            <a
-                href="/zh-CN"
-                className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${locale === 'zh-CN'
-                    ? 'bg-primary text-white'
-                    : 'text-gray-400 hover:text-white'
-                    }`}
-            >
-                中文
-            </a>
+                <span className="text-base">{currentLang.flag}</span>
+                {!compact && <span>{currentLang.code === 'en' ? 'EN' : '中文'}</span>}
+                <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+            </button>
+
+            {isOpen && (
+                <>
+                    <div
+                        className="fixed inset-0 z-40"
+                        onClick={() => setIsOpen(false)}
+                    />
+                    <div className="absolute right-0 top-full mt-2 py-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[140px]">
+                        {languages.map((lang) => (
+                            <a
+                                key={lang.code}
+                                href={`/${lang.code}`}
+                                className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${lang.code === locale
+                                        ? 'bg-primary/20 text-primary'
+                                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                    }`}
+                                onClick={() => setIsOpen(false)}
+                            >
+                                <span>{lang.flag}</span>
+                                <span>{lang.label}</span>
+                                {lang.code === locale && (
+                                    <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                                    </svg>
+                                )}
+                            </a>
+                        ))}
+                    </div>
+                </>
+            )}
         </div>
     );
 }
