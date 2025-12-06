@@ -83,47 +83,7 @@ export default function JobPage() {
         };
     }, [isLoaded, userId, jobId, getToken]);
 
-    // Smart Progress Logic
-    const [progress, setProgress] = useState(0);
 
-    useEffect(() => {
-        if (!job) return;
-
-        if (job.status === 'completed') {
-            setProgress(100);
-            return;
-        }
-
-        if (job.status === 'failed') {
-            setProgress(100); // Or 0?
-            return;
-        }
-
-        // Calculate progress based on time elapsed since creation
-        // Average job takes ~45 seconds
-        const calculateProgress = () => {
-            const now = new Date().getTime();
-            const created = new Date(job.created_at).getTime();
-            const elapsed = (now - created) / 1000; // seconds
-
-            // Expected duration in seconds
-            const expectedDuration = 45;
-
-            // Logarithmic-ish curve that slows down as it approaches 90%
-            // 90% is the max "fake" progress until completion
-            let calculated = (elapsed / expectedDuration) * 90;
-
-            if (calculated > 90) calculated = 90 + ((elapsed - expectedDuration) * 0.1); // Very slow crawl after 90%
-            if (calculated > 95) calculated = 95; // Hard cap at 95%
-
-            setProgress(Math.max(5, Math.min(Math.floor(calculated), 95)));
-        };
-
-        calculateProgress(); // Initial calc
-        const timer = setInterval(calculateProgress, 1000); // Update every second
-
-        return () => clearInterval(timer);
-    }, [job?.status, job?.created_at]);
 
     if (error) {
         return (
@@ -279,29 +239,25 @@ export default function JobPage() {
                         {/* Right Column: Status & Actions */}
                         <div className="space-y-8">
                             {/* Status Card */}
+                            {/* Status Card */}
                             <div className="bg-white/5 border border-white/10 rounded-2xl p-8 backdrop-blur-md">
-                                <div className="flex justify-between items-end mb-4">
+                                <div className="flex justify-between items-center mb-6">
                                     <div>
-                                        <h2 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-1">Status</h2>
-                                        <div className="text-3xl font-bold text-white flex items-center gap-3">
-                                            {progress}%
-                                            <span className="text-sm font-normal text-gray-500 py-1.5 px-3 rounded-md bg-white/5 border border-white/5">
-                                                {job.status.toUpperCase()}
+                                        <h2 className="text-gray-400 text-sm font-medium uppercase tracking-wider mb-2">Status</h2>
+                                        <div className="flex items-center gap-3">
+                                            {job.status === 'processing' && (
+                                                <span className="relative flex h-3 w-3">
+                                                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                                                    <span className="relative inline-flex rounded-full h-3 w-3 bg-blue-500"></span>
+                                                </span>
+                                            )}
+                                            <span className="text-2xl font-bold text-white capitalize">
+                                                {job.status}
                                             </span>
                                         </div>
                                     </div>
-                                    <div className={`text-5xl ${job.status === 'completed' ? 'text-green-500 grayscale-0' : 'text-blue-500 grayscale'} transition-all duration-500`}>
-                                        {job.status === 'completed' ? '✓' : '⚡'}
-                                    </div>
-                                </div>
-
-                                {/* Progress Bar */}
-                                <div className="relative h-4 bg-gray-800 rounded-full overflow-hidden mb-6 shadow-inner">
-                                    <div
-                                        className="absolute top-0 left-0 h-full bg-gradient-to-r from-blue-600 via-purple-600 to-blue-600 transition-all duration-1000 ease-out flex items-center justify-end pr-1"
-                                        style={{ width: `${progress}%` }}
-                                    >
-                                        <div className="w-full h-full animate-[shimmer_2s_infinite] bg-gradient-to-r from-transparent via-white/30 to-transparent -translate-x-full"></div>
+                                    <div className={`text-4xl ${job.status === 'completed' ? 'text-green-500 grayscale-0' : 'text-blue-500/50 grayscale'} transition-all duration-500`}>
+                                        {job.status === 'completed' ? '✓' : job.status === 'failed' ? '❌' : '⚡'}
                                     </div>
                                 </div>
 
