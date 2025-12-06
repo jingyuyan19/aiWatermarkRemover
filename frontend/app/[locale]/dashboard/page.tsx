@@ -46,6 +46,13 @@ export default function DashboardPage() {
     // Check for payment success
     const searchParams = useSearchParams();
 
+    // Redirect unauthenticated users to home page
+    useEffect(() => {
+        if (isLoaded && !userId) {
+            router.push(`/${locale}`);
+        }
+    }, [isLoaded, userId, router, locale]);
+
     useEffect(() => {
         if (searchParams.get('payment') === 'success') {
             const added = searchParams.get('credits');
