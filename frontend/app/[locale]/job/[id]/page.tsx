@@ -30,13 +30,22 @@ export default function JobPage() {
     // Activity Log Simulation
     const [activityStep, setActivityStep] = useState(0);
     const activitySteps = [
-        'Allocating dedicated GPU resource...',
-        'Analyzing video frames...',
-        'Detecting watermark patterns...',
-        'Inpainting texture data...',
-        'Refining temporal consistency...',
-        'Upscaling final output...',
-        'Finalizing video render...'
+        'Initializing secure environment...',
+        'Allocating dedicated GPU vRAM...',
+        'Loading LaMa-Inpaint v2 model...',
+        'Analysing video structure...',
+        'Detecting static overlays...',
+        'Mapping temporal coordinates...',
+        'Generating occlusion masks...',
+        'Synthesizing texture patches...',
+        'Applying flow-guided propagation...',
+        'Refinement pass 1/3 (Coarse)...',
+        'Refinement pass 2/3 (Detail)...',
+        'Refinement pass 3/3 (Temporal)...',
+        'Color matching frames...',
+        'Re-encoding video stream...',
+        'Verifying output quality...',
+        'Finalizing render...'
     ];
 
     useEffect(() => {
@@ -44,7 +53,7 @@ export default function JobPage() {
 
         const interval = setInterval(() => {
             setActivityStep(prev => (prev + 1) % activitySteps.length);
-        }, 3000); // Change step every 3 seconds
+        }, 2500); // Change step every 2.5 seconds
 
         return () => clearInterval(interval);
     }, [job?.status]);
@@ -237,7 +246,7 @@ export default function JobPage() {
                                             </div>
 
                                             <h3 className="text-3xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse">
-                                                {job.status === 'pending' ? 'Queued' : 'Processing'}
+                                                {job.status === 'pending' ? 'Preparing' : 'Restoring'}
                                             </h3>
 
                                             {/* Dynamic Step Text */}
@@ -259,6 +268,19 @@ export default function JobPage() {
                                 </div>
                             )}
                         </div>
+
+                        {/* Footer Note - Processing State only */}
+                        {job.status !== 'completed' && job.status !== 'failed' && (
+                            <div className="text-center animate-in fade-in duration-1000 delay-500">
+                                <p className="text-white/40 text-sm font-light">
+                                    <span className="mr-2">⏳</span>
+                                    Hang tight! This usually takes about <span className="text-white/60 font-medium">45 seconds</span>.
+                                </p>
+                                <p className="text-white/20 text-xs mt-1">
+                                    You can safely leave this page and come back later.
+                                </p>
+                            </div>
+                        )}
 
                         {/* Actions Area */}
                         {job.status === 'completed' && job.output_url && (
