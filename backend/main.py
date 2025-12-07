@@ -424,3 +424,32 @@ async def list_user_jobs(
         traceback.print_exc()
         raise HTTPException(status_code=500, detail=f"List Jobs Error: {str(e)}")
 
+
+@app.get("/api/debug/job/{job_id}")
+async def debug_job_status(job_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Debug endpoint to see raw RunPod status
+    """
+    job = await db.get(Job, job_id)
+    if not job:
+        raise HTTPException(status_code=404, detail="Job not found")
+        
+    if not job.runpod_job_id:
+        return {"error": "No RunPod ID for this job", "local_job": {"id": job.id, "status": job.status}}
+        
+    import httpx
+    async with httpx.AsyncClient() as client:
+        rp_resp = await client.get(
+            f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job.runpod_job_id}",
+            headers={"Authorization": f"Bearer {RUNPOD_API_KEY}"}
+        )
+        return {
+            "runpod_status": rp_resp.status_code,
+            "runpod_body": rp_resp.json(),
+            "local_job": {
+                "id": job.id,
+                "status": job.status,
+                "progress": job.progress,
+                "runpod_id": job.runpod_job_id
+            }
+        }
