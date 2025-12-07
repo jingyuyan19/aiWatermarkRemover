@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Callable
+from typing import Any, Callable
 
 import numpy as np
 from loguru import logger
@@ -15,6 +15,7 @@ from demark_world.utils.imputation_utils import (
 from demark_world.utils.video_utils import VideoLoader, merge_frames_with_overlap
 from demark_world.watermark_cleaner import WaterMarkCleaner
 from demark_world.watermark_detector import DeMarkWorldDetector
+from demark_world.utils.imputation_utils import refine_bkps_by_chunk_size
 
 VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm"]
 
@@ -223,17 +224,20 @@ class DeMarkWorld:
             ## 2. E2FGVI_HQ Cleaner Strategy with overlap blending.
             input_video_loader = VideoLoader(input_video_path)
             frame_counter = 0
-            overlap_ratio = self.cleaner.config.overlap_ratio
+            overlap_ratio: Any | int = self.cleaner.config.overlap_ratio
             all_cleaned_frames = None
             logger.debug(f"bkps_full:{bkps_full}")
-            if len(bkps_full) == 2 and total_frames >= 100:
-                # fallabck segmenation strategy other wise out of memory
-                # This is a comprise...... sorry abot that...
-                sep = 50 
-                bkps_full: list[int] = [ i for i in range(0, total_frames, sep)]
-                if bkps_full[-1] < total_frames:
-                    # bkps_full.append(total_frames)
-                    bkps_full[-1] = total_frames
+            bkps_full = refine_bkps_by_chunk_size(bkps_full, self.cleaner.chunk_size)
+            # [0, np.int32(25), np.int32(253), np.int32(398), np.int32(625), np.int32(853), np.int32(1004), np.int32(1231), np.int32(1459), 1602]
+            # 50 frames at most
+            # if len(bkps_full) == 2 and total_frames >= 100:
+            #     # fallabck segmenation strategy other wise out of memory
+            #     # This is a comprise...... sorry abot that...
+            #     sep = 50 
+            #     bkps_full: list[int] = [ i for i in range(0, total_frames, sep)]
+            #     if bkps_full[-1] < total_frames:
+            #         # bkps_full.append(total_frames)
+            #         bkps_full[-1] = total_frames
             # Create overlapping segments for smooth transitions
             num_segments = len(bkps_full) - 1
             for segment_idx in range(num_segments):
