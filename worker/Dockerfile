@@ -14,8 +14,7 @@ RUN pip install mmcv-full==1.7.2 -f https://download.openmmlab.com/mmcv/dist/cu1
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies using Tsinghua mirror (faster in China)
-RUN pip config set global.index-url https://pypi.tuna.tsinghua.edu.cn/simple && \
-    pip install --no-cache-dir -r requirements.txt
+RUN pip install --no-cache-dir -r requirements.txt
 
 # Copy application code
 # Copy application code
