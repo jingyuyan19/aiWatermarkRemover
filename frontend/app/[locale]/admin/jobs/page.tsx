@@ -148,7 +148,10 @@ export default function JobsPage() {
                                                     className="border-b border-white/5 hover:bg-white/5"
                                                 >
                                                     <td className="py-3 px-4">
-                                                        <code className="text-xs text-gray-400 font-mono">
+                                                        <code
+                                                            className="text-xs text-gray-400 font-mono cursor-help"
+                                                            title={job.id}
+                                                        >
                                                             {job.id.substring(0, 8)}...
                                                         </code>
                                                     </td>
