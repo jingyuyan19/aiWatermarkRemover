@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { FileVideo, Clock, CheckCircle, XCircle, Loader, Search } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { Pagination, PaginationInfo } from '@/components/ui/Pagination';
+import { toast } from 'sonner';
 
 interface Job {
     id: string;
@@ -149,8 +150,12 @@ export default function JobsPage() {
                                                 >
                                                     <td className="py-3 px-4">
                                                         <code
-                                                            className="text-xs text-gray-400 font-mono cursor-help"
-                                                            title={job.id}
+                                                            className="text-xs text-gray-400 font-mono cursor-pointer hover:text-white transition-colors"
+                                                            title="Click to copy full ID"
+                                                            onClick={() => {
+                                                                navigator.clipboard.writeText(job.id);
+                                                                toast.success('Job ID copied to clipboard');
+                                                            }}
                                                         >
                                                             {job.id.substring(0, 8)}...
                                                         </code>
