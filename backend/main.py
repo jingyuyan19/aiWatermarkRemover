@@ -203,16 +203,23 @@ async def create_job(
     
     # Trigger RunPod Serverless Job
     if RUNPOD_ENDPOINT_ID:
+        print(f"[DEBUG] RUNPOD_ENDPOINT_ID is set: {RUNPOD_ENDPOINT_ID[:4]}***")
         try:
-            runpod_job = runpod.Endpoint(RUNPOD_ENDPOINT_ID).run({
+            payload = {
                 "input": {
                     "job_id": job_id,
                     "input_key": input_key,
                     "output_key": output_key,
                     "quality": job_data.quality
                 }
-            })
-            # Save RunPod Job ID for progress tracking
+            }
+            print(f"[DEBUG] Sending payload to RunPod: {payload}")
+            
+            runpod_job = runpod.Endpoint(RUNPOD_ENDPOINT_ID).run(payload)
+            
+            print(f"[DEBUG] RunPod Raw Response Type: {type(runpod_job)}")
+            print(f"[DEBUG] RunPod Raw Response Content: {runpod_job}")
+
             # Robust ID extraction
             rp_id = None
             if isinstance(runpod_job, dict):
@@ -222,7 +229,7 @@ async def create_job(
             
             if rp_id:
                 new_job.runpod_job_id = rp_id
-                print(f"RunPod job started: {rp_id}")
+                print(f"[DEBUG] RunPod job started successfully with ID: {rp_id}")
             else:
                 # CRITICAL: Log the raw response if ID is missing so we can debug
                 import json
@@ -238,8 +245,12 @@ async def create_job(
             await db.commit()
             
         except Exception as e:
-            print(f"Error starting RunPod job: {e}")
+            print(f"[ERROR] starting RunPod job: {e}")
+            import traceback
+            traceback.print_exc()
             # Job will stay in PENDING status - can be retried later
+    else:
+        print("[WARNING] RUNPOD_ENDPOINT_ID is NOT set. Skipping RunPod trigger.")
     
     return JobResponse(
         id=new_job.id,
