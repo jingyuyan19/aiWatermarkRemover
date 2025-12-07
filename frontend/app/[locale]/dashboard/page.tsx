@@ -1,15 +1,16 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
     Film, Clock, CheckCircle, XCircle, Loader2,
-    Zap, History, Plus, Upload
+    Zap, History, Plus, Upload, PlayCircle
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { FileUpload } from '@/components/ui/FileUpload';
+import { MultiFileUpload } from '@/components/ui/MultiFileUpload';
+import { UploadQueue, QueueItem } from '@/components/ui/UploadQueue';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
 import { toast } from 'sonner';
 import { useAuth } from '@clerk/nextjs';
@@ -38,10 +39,11 @@ export default function DashboardPage() {
     const [credits, setCredits] = useState<number>(3);
     const [loading, setLoading] = useState(true);
 
-    // Upload state
-    const [file, setFile] = useState<File | null>(null);
+    // Multi-file upload state
+    const [files, setFiles] = useState<File[]>([]);
+    const [queue, setQueue] = useState<QueueItem[]>([]);
     const [quality, setQuality] = useState<'lama' | 'e2fgvi_hq'>('lama');
-    const [uploading, setUploading] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
 
     // Check for payment success
     const searchParams = useSearchParams();
@@ -104,68 +106,141 @@ export default function DashboardPage() {
         fetchData();
     }, [userId, getToken]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!file || !userId) return;
+    // Generate unique ID for queue items
+    const generateId = () => Math.random().toString(36).substring(2, 9);
 
-        setUploading(true);
-        try {
-            const token = await getToken();
+    // Add files to queue
+    const handleFilesChange = useCallback((newFiles: File[]) => {
+        setFiles(newFiles);
+    }, []);
 
-            const formData = new FormData();
-            formData.append('file', file);
+    // Start processing all files in queue
+    const handleProcessAll = async () => {
+        if (files.length === 0 || !userId) return;
 
-            // Use Direct Railway URL to bypass Vercel 4.5MB limit
-            const DIRECT_API = 'https://aiwatermarkremover-production.up.railway.app';
-
-            const uploadResponse = await fetch(`${DIRECT_API}/api/upload`, {
-                method: 'POST',
-                headers: { 'Authorization': `Bearer ${token}` },
-                body: formData,
-            });
-
-            if (!uploadResponse.ok) {
-                const errorText = await uploadResponse.text();
-                console.error("Upload failed details:", errorText);
-                throw new Error(`Upload failed: ${errorText}`);
-            }
-            const { key } = await uploadResponse.json();
-
-            const jobResponse = await fetch(`${API_URL}/api/jobs?input_key=${encodeURIComponent(key)}`, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'Authorization': `Bearer ${token}`,
+        // Check credits
+        const totalCost = files.length * (quality === 'e2fgvi_hq' ? 2 : 1);
+        if (credits < totalCost) {
+            toast.error(t('upload.insufficient_funds'), {
+                description: `Need ${totalCost} credits, you have ${credits}`,
+                action: {
+                    label: t('upload.buy_credits'),
+                    onClick: () => router.push(`/${locale}/pricing`)
                 },
-                body: JSON.stringify({ quality }),
+                duration: 5000,
             });
-
-            if (!jobResponse.ok) {
-                if (jobResponse.status === 402) {
-                    toast.error(t('upload.insufficient_funds'), {
-                        action: {
-                            label: t('upload.buy_credits'),
-                            onClick: () => router.push(`/${locale}/pricing`)
-                        },
-                        duration: 5000,
-                    });
-                    return;
-                }
-                throw new Error('Job creation failed');
-            }
-            const job = await jobResponse.json();
-
-            toast.success(t('upload.success'));
-            router.push(`/${locale}/job/${job.id}`);
-        } catch (error) {
-            console.error('Error:', error);
-            // Don't show generic error if we already handled 402
-            if (error instanceof Error && error.message !== 'Job creation failed') {
-                toast.error(t('upload.error'));
-            }
-        } finally {
-            setUploading(false);
+            return;
         }
+
+        // Create queue items from files
+        const queueItems: QueueItem[] = files.map(file => ({
+            id: generateId(),
+            file,
+            status: 'pending' as const,
+        }));
+        setQueue(queueItems);
+        setFiles([]); // Clear file picker
+        setIsProcessing(true);
+
+        const token = await getToken();
+        const DIRECT_API = 'https://aiwatermarkremover-production.up.railway.app';
+        let successCount = 0;
+        let errorCount = 0;
+
+        // Process each file sequentially
+        for (let i = 0; i < queueItems.length; i++) {
+            const item = queueItems[i];
+
+            // Update status to uploading
+            setQueue(prev => prev.map(q =>
+                q.id === item.id ? { ...q, status: 'uploading' as const } : q
+            ));
+
+            try {
+                // Upload file
+                const formData = new FormData();
+                formData.append('file', item.file);
+
+                const uploadResponse = await fetch(`${DIRECT_API}/api/upload`, {
+                    method: 'POST',
+                    headers: { 'Authorization': `Bearer ${token}` },
+                    body: formData,
+                });
+
+                if (!uploadResponse.ok) {
+                    throw new Error('Upload failed');
+                }
+                const { key } = await uploadResponse.json();
+
+                // Create job
+                const jobResponse = await fetch(`${API_URL}/api/jobs?input_key=${encodeURIComponent(key)}`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`,
+                    },
+                    body: JSON.stringify({ quality }),
+                });
+
+                if (!jobResponse.ok) {
+                    if (jobResponse.status === 402) {
+                        throw new Error('Insufficient credits');
+                    }
+                    throw new Error('Job creation failed');
+                }
+
+                const job = await jobResponse.json();
+
+                // Update status to done
+                setQueue(prev => prev.map(q =>
+                    q.id === item.id ? { ...q, status: 'done' as const, jobId: job.id } : q
+                ));
+                successCount++;
+
+                // Update credits display
+                setCredits(prev => prev - (quality === 'e2fgvi_hq' ? 2 : 1));
+
+            } catch (error) {
+                console.error('Error processing file:', item.file.name, error);
+                setQueue(prev => prev.map(q =>
+                    q.id === item.id ? {
+                        ...q,
+                        status: 'error' as const,
+                        error: error instanceof Error ? error.message : 'Failed'
+                    } : q
+                ));
+                errorCount++;
+            }
+        }
+
+        setIsProcessing(false);
+
+        // Show result toast
+        if (successCount > 0 && errorCount === 0) {
+            toast.success(`${successCount} video${successCount > 1 ? 's' : ''} queued for processing!`, {
+                action: {
+                    label: 'View History',
+                    onClick: () => router.push(`/${locale}/history`)
+                }
+            });
+        } else if (successCount > 0 && errorCount > 0) {
+            toast.warning(`${successCount} succeeded, ${errorCount} failed`);
+        } else if (errorCount > 0) {
+            toast.error(`All ${errorCount} uploads failed`);
+        }
+
+        // Refresh data
+        fetchData();
+    };
+
+    // Remove item from queue
+    const handleRemoveFromQueue = (id: string) => {
+        setQueue(prev => prev.filter(q => q.id !== id));
+    };
+
+    // Clear completed items from queue
+    const handleClearCompleted = () => {
+        setQueue(prev => prev.filter(q => q.status !== 'done'));
     };
 
     const getStatusIcon = (status: string) => {
@@ -225,72 +300,106 @@ export default function DashboardPage() {
                                             {t('upload.title')}
                                         </h2>
 
-                                        <form onSubmit={handleSubmit} className="space-y-6">
-                                            <FileUpload
-                                                onFileSelect={setFile}
-                                                selectedFile={file}
-                                                onClear={() => setFile(null)}
+                                        <div className="space-y-6">
+                                            {/* File Upload Zone */}
+                                            <MultiFileUpload
+                                                onFilesChange={handleFilesChange}
+                                                files={files}
+                                                maxFiles={10}
+                                                disabled={isProcessing}
                                             />
 
-                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setQuality('lama')}
-                                                    className={`p-4 rounded-xl border transition-all text-left ${quality === 'lama'
-                                                        ? 'bg-primary/10 border-primary/50'
-                                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'
-                                                            }`}>
-                                                            <Zap className="w-4 h-4" />
-                                                        </div>
-                                                        <div>
-                                                            <div className={`font-semibold ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>
-                                                                {t('upload.quality.fast.title')}
-                                                            </div>
-                                                            <div className="text-xs text-gray-500">{t('upload.quality.fast.description')}</div>
-                                                        </div>
-                                                    </div>
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setQuality('e2fgvi_hq')}
-                                                    className={`p-4 rounded-xl border transition-all text-left ${quality === 'e2fgvi_hq'
-                                                        ? 'bg-accent/10 border-accent/50'
-                                                        : 'bg-white/5 border-white/10 hover:bg-white/10'
-                                                        }`}
-                                                >
-                                                    <div className="flex items-center gap-3">
-                                                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'
-                                                            }`}>
-                                                            <Clock className="w-4 h-4" />
-                                                        </div>
-                                                        <div>
-                                                            <div className={`font-semibold ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>
-                                                                {t('upload.quality.hq.title')}
-                                                            </div>
-                                                            <div className="text-xs text-gray-500">{t('upload.quality.hq.description')}</div>
-                                                        </div>
-                                                    </div>
-                                                </button>
-                                            </div>
+                                            {/* Upload Queue (shows during/after processing) */}
+                                            {queue.length > 0 && (
+                                                <UploadQueue
+                                                    items={queue}
+                                                    onRemove={handleRemoveFromQueue}
+                                                    onClearCompleted={handleClearCompleted}
+                                                    isProcessing={isProcessing}
+                                                />
+                                            )}
 
-                                            <Button
-                                                type="submit"
-                                                className="w-full h-14 text-lg rounded-xl font-semibold"
-                                                variant="glow"
-                                                disabled={!file || uploading}
-                                            >
-                                                {uploading ? (
-                                                    <span className="flex items-center gap-3">
-                                                        <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
-                                                        {t('upload.processing')}
-                                                    </span>
-                                                ) : t('upload.submit')}
-                                            </Button>
-                                        </form>
+                                            {/* Quality Selection */}
+                                            {files.length > 0 && (
+                                                <>
+                                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setQuality('lama')}
+                                                            disabled={isProcessing}
+                                                            className={`p-4 rounded-xl border transition-all text-left ${quality === 'lama'
+                                                                ? 'bg-primary/10 border-primary/50'
+                                                                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                                                } disabled:opacity-50`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${quality === 'lama' ? 'bg-primary/20 text-primary' : 'bg-white/10 text-gray-400'
+                                                                    }`}>
+                                                                    <Zap className="w-4 h-4" />
+                                                                </div>
+                                                                <div>
+                                                                    <div className={`font-semibold ${quality === 'lama' ? 'text-white' : 'text-gray-300'}`}>
+                                                                        {t('upload.quality.fast.title')}
+                                                                    </div>
+                                                                    <div className="text-xs text-gray-500">{t('upload.quality.fast.description')}</div>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => setQuality('e2fgvi_hq')}
+                                                            disabled={isProcessing}
+                                                            className={`p-4 rounded-xl border transition-all text-left ${quality === 'e2fgvi_hq'
+                                                                ? 'bg-accent/10 border-accent/50'
+                                                                : 'bg-white/5 border-white/10 hover:bg-white/10'
+                                                                } disabled:opacity-50`}
+                                                        >
+                                                            <div className="flex items-center gap-3">
+                                                                <div className={`w-8 h-8 rounded-full flex items-center justify-center ${quality === 'e2fgvi_hq' ? 'bg-accent/20 text-accent' : 'bg-white/10 text-gray-400'
+                                                                    }`}>
+                                                                    <Clock className="w-4 h-4" />
+                                                                </div>
+                                                                <div>
+                                                                    <div className={`font-semibold ${quality === 'e2fgvi_hq' ? 'text-white' : 'text-gray-300'}`}>
+                                                                        {t('upload.quality.hq.title')}
+                                                                    </div>
+                                                                    <div className="text-xs text-gray-500">{t('upload.quality.hq.description')}</div>
+                                                                </div>
+                                                            </div>
+                                                        </button>
+                                                    </div>
+
+                                                    {/* Cost Preview */}
+                                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl text-sm">
+                                                        <span className="text-gray-400">
+                                                            {files.length} video{files.length > 1 ? 's' : ''} × {quality === 'e2fgvi_hq' ? '2' : '1'} credit{quality === 'e2fgvi_hq' ? 's' : ''}
+                                                        </span>
+                                                        <span className="font-semibold text-white">
+                                                            Total: {files.length * (quality === 'e2fgvi_hq' ? 2 : 1)} credits
+                                                        </span>
+                                                    </div>
+
+                                                    {/* Process Button */}
+                                                    <Button
+                                                        type="button"
+                                                        onClick={handleProcessAll}
+                                                        className="w-full h-14 text-lg rounded-xl font-semibold"
+                                                        variant="glow"
+                                                        disabled={files.length === 0 || isProcessing}
+                                                    >
+                                                        <PlayCircle className="w-5 h-5 mr-2" />
+                                                        {isProcessing ? (
+                                                            <span className="flex items-center gap-3">
+                                                                <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                                                {t('upload.processing')}
+                                                            </span>
+                                                        ) : (
+                                                            `Process ${files.length} Video${files.length > 1 ? 's' : ''}`
+                                                        )}
+                                                    </Button>
+                                                </>
+                                            )}
+                                        </div>
                                     </CardContent>
                                 </Card>
                             </motion.div>
