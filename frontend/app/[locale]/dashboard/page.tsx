@@ -105,6 +105,45 @@ export default function DashboardPage() {
     useEffect(() => {
         if (!userId) return;
         fetchData();
+
+        // Poll for active jobs
+        const interval = setInterval(async () => {
+            // We use the functional update to get the latest jobs state without adding it to deps
+            setJobs(currentJobs => {
+                const activeJobs = currentJobs.filter(j =>
+                    j.status === 'processing' || j.status === 'pending'
+                );
+
+                if (activeJobs.length === 0) return currentJobs;
+
+                // Fire off updates for active jobs
+                // We don't await this inside the state updater, but we trigger the fetches
+                (async () => {
+                    const token = await getToken();
+                    if (!token) return;
+
+                    await Promise.all(activeJobs.map(async (job) => {
+                        try {
+                            const res = await fetch(`${API_URL}/api/jobs/${job.id}`, {
+                                headers: { 'Authorization': `Bearer ${token}` }
+                            });
+                            if (res.ok) {
+                                const updatedJob = await res.json();
+                                setJobs(prev => prev.map(j =>
+                                    j.id === updatedJob.id ? updatedJob : j
+                                ));
+                            }
+                        } catch (err) {
+                            console.error(`Error polling job ${job.id}:`, err);
+                        }
+                    }));
+                })();
+
+                return currentJobs;
+            });
+        }, 4000); // Poll every 4 seconds
+
+        return () => clearInterval(interval);
     }, [userId, getToken]);
 
     // Generate unique ID for queue items
