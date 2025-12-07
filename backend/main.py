@@ -213,16 +213,24 @@ async def create_job(
                 }
             })
             # Save RunPod Job ID for progress tracking
-            # runpod_job is a Job object or dict with 'id'
-            rp_id = getattr(runpod_job, "id", None)
-            if not rp_id and isinstance(runpod_job, dict):
+            # Robust ID extraction
+            rp_id = None
+            if isinstance(runpod_job, dict):
                 rp_id = runpod_job.get("id")
+            elif hasattr(runpod_job, "id"):
+                rp_id = runpod_job.id
             
             if rp_id:
                 new_job.runpod_job_id = rp_id
                 print(f"RunPod job started: {rp_id}")
             else:
-                print(f"RunPod job started (ID unknown): {runpod_job}")
+                # CRITICAL: Log the raw response if ID is missing so we can debug
+                import json
+                try:
+                    debug_str = json.dumps(runpod_job, default=str)
+                except:
+                    debug_str = str(runpod_job)
+                print(f"[ERROR] RunPod job started but ID unknown. Raw response: {debug_str}")
             
             # Mark as PROCESSING immediately so frontend shows progress
             new_job.status = JobStatus.PROCESSING
