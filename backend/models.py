@@ -46,6 +46,7 @@ class Job(Base):
     output_key = Column(String, nullable=True)
     quality = Column(String, default="lama")
     cost = Column(Integer, default=1)
+    refunded = Column(Integer, default=0)  # 1 = credits refunded (for failed jobs)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

@@ -18,6 +18,10 @@ async def migrate_users():
         print("Checking transactions.stripe_payment_id...")
         await conn.execute(text("ALTER TABLE transactions ADD COLUMN IF NOT EXISTS stripe_payment_id VARCHAR"))
         
+        # Add refunded to jobs (for tracking credit refunds on failed jobs)
+        print("Checking jobs.refunded...")
+        await conn.execute(text("ALTER TABLE jobs ADD COLUMN IF NOT EXISTS refunded INTEGER DEFAULT 0"))
+        
         print("Migration complete!")
 
 if __name__ == "__main__":

@@ -246,25 +246,42 @@ async def get_job_status(
     if not job:
         raise HTTPException(status_code=404, detail="Job not found")
     
-    # If job is still pending, check RunPod for updates
-    if job.status == JobStatus.PENDING and RUNPOD_ENDPOINT_ID:
+    # If job is pending/processing, check for completion or failure
+    if job.status in [JobStatus.PENDING, JobStatus.PROCESSING] and job.output_key:
         try:
-            endpoint = runpod.Endpoint(RUNPOD_ENDPOINT_ID)
-            # RunPod stores job ID as the UUID we passed
-            runpod_status = endpoint.health()  # This will get all jobs
-            # Since we don't store the RunPod job ID, we check if output_key exists in R2
-            # If the file exists, the job completed successfully
-            try:
-                s3_client.head_object(Bucket=BUCKET_NAME, Key=job.output_key)
-                # File exists! Job is complete
-                job.status = JobStatus.COMPLETED
+            # Check if output file exists in R2
+            s3_client.head_object(Bucket=BUCKET_NAME, Key=job.output_key)
+            # File exists! Job is complete
+            job.status = JobStatus.COMPLETED
+            await db.commit()
+            await db.refresh(job)
+            print(f"[Job {job_id}] Marked as COMPLETED - output file exists")
+        except Exception as e:
+            # File doesn't exist yet
+            # Check if job is too old (> 30 min) - likely failed
+            from datetime import datetime, timedelta, timezone
+            job_age = datetime.now(timezone.utc) - job.created_at.replace(tzinfo=timezone.utc)
+            if job_age > timedelta(minutes=30):
+                # Job is stale, mark as failed
+                job.status = JobStatus.FAILED
                 await db.commit()
                 await db.refresh(job)
-            except:
-                # File doesn't exist yet, job still processing
-                pass
+                print(f"[Job {job_id}] Marked as FAILED - stale job (age: {job_age})")
+    
+    # If job failed and not yet refunded, refund credits
+    if job.status == JobStatus.FAILED and not job.refunded:
+        try:
+            # Get user and refund credits
+            user_result = await db.execute(select(User).where(User.id == user_id))
+            user = user_result.scalar_one_or_none()
+            if user:
+                user.credits += job.cost
+                job.refunded = 1
+                await db.commit()
+                await db.refresh(job)
+                print(f"[Job {job_id}] Refunded {job.cost} credits to user {user_id}")
         except Exception as e:
-            print(f"Error checking RunPod status: {e}")
+            print(f"[Job {job_id}] Error refunding credits: {e}")
         
     # Construct public URLs
     input_url = f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None
