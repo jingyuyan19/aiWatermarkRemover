@@ -223,21 +223,28 @@ async def create_job(
             # Robust ID extraction
             rp_id = None
             if isinstance(runpod_job, dict):
-                rp_id = runpod_job.get("id")
+                rp_id = runpod_job.get("id") or runpod_job.get("job_id")
             elif hasattr(runpod_job, "id"):
                 rp_id = runpod_job.id
+            elif hasattr(runpod_job, "job_id"):
+                rp_id = runpod_job.job_id
             
             if rp_id:
                 new_job.runpod_job_id = rp_id
                 print(f"[DEBUG] RunPod job started successfully with ID: {rp_id}")
             else:
                 # CRITICAL: Log the raw response if ID is missing so we can debug
-                import json
+                # Print ALL attributes to find where the ID is hiding
                 try:
-                    debug_str = json.dumps(runpod_job, default=str)
-                except:
-                    debug_str = str(runpod_job)
-                print(f"[ERROR] RunPod job started but ID unknown. Raw response: {debug_str}")
+                    debug_attrs = dir(runpod_job)
+                    print(f"[ERROR] ID missing. Available attributes: {debug_attrs}")
+                    # Try to dump dict if possible
+                    if hasattr(runpod_job, "__dict__"):
+                         print(f"[ERROR] Object __dict__: {runpod_job.__dict__}")
+                except Exception as e:
+                    print(f"[ERROR] Failed to inspect object: {e}")
+                
+                print(f"[ERROR] RunPod job started but ID unknown.")
             
             # Mark as PROCESSING immediately so frontend shows progress
             new_job.status = JobStatus.PROCESSING
