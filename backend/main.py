@@ -311,23 +311,19 @@ async def get_job_status(
                     )
                     if rp_resp.status_code == 200:
                         data = rp_resp.json()
+                        # Trace level logging for polling (limit output noise if needed, but critical here)
+                        print(f"[DEBUG-POLL] RunPod Status for {job.runpod_job_id}: {data.get('status')}, Messages: {data.get('messages')}")
                         
-                        # Extract progress messages
                         messages = data.get("messages", [])
                         if messages and len(messages) > 0:
-                            # Last message is latest update
                             latest = messages[-1]
                             if isinstance(latest, str) and "%" in latest:
                                 try:
-                                    # Parse "50%" -> 50
                                     pct = int(latest.strip().replace("%", ""))
-                                    job.progress = pct
-                                    # Don't commit every percent to DB to avoid thrashing? 
-                                    # But we need it for next poll. Okay to commit.
-                                    # Actually, let's just commit if it changed significant amount?
-                                    # For simplicity, commit.
+                                    # Only update if progress has increased
                                     if pct > (job.progress or 0):
-                                         await db.commit()
+                                        job.progress = pct
+                                        await db.commit() # Commit progress updates
                                 except:
                                     pass
 
