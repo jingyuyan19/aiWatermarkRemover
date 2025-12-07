@@ -12,6 +12,12 @@ import boto3
 import runpod
 from dotenv import load_dotenv
 
+import logging
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
+
 import models
 import webhooks
 import admin
@@ -311,8 +317,9 @@ async def get_job_status(
                     )
                     if rp_resp.status_code == 200:
                         data = rp_resp.json()
-                        # Trace level logging for polling (limit output noise if needed, but critical here)
-                        print(f"[DEBUG-POLL] RunPod Status for {job.runpod_job_id}: {data.get('status')}, Messages: {data.get('messages')}")
+                        # Use logger to ensure output appears
+                        logger.info(f"[DEBUG-POLL] RunPod Status for {job.runpod_job_id}: {data.get('status')}")
+                        logger.info(f"[DEBUG-POLL] Messages: {data.get('messages')}")
                         
                         messages = data.get("messages", [])
                         if messages and len(messages) > 0:
