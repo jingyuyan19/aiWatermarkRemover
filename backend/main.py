@@ -212,7 +212,17 @@ async def create_job(
                     "quality": job_data.quality
                 }
             })
-            print(f"RunPod job started: {runpod_job()}")
+            # Save RunPod Job ID for progress tracking
+            # runpod_job is a Job object or dict with 'id'
+            rp_id = getattr(runpod_job, "id", None)
+            if not rp_id and isinstance(runpod_job, dict):
+                rp_id = runpod_job.get("id")
+            
+            if rp_id:
+                new_job.runpod_job_id = rp_id
+                print(f"RunPod job started: {rp_id}")
+            else:
+                print(f"RunPod job started (ID unknown): {runpod_job}")
             
             # Mark as PROCESSING immediately so frontend shows progress
             new_job.status = JobStatus.PROCESSING
@@ -228,8 +238,10 @@ async def create_job(
         status=new_job.status,
         created_at=new_job.created_at,
         quality=new_job.quality or "lama",
-        cost=new_job.cost or 1
+        cost=new_job.cost or 1,
+        progress=new_job.progress or 0
     )
+
 
 @app.get("/api/jobs/{job_id}", response_model=JobResponse)
 async def get_job_status(
@@ -247,26 +259,77 @@ async def get_job_status(
         raise HTTPException(status_code=404, detail="Job not found")
     
     # If job is pending/processing, check for completion or failure
-    if job.status in [JobStatus.PENDING, JobStatus.PROCESSING] and job.output_key:
-        try:
-            # Check if output file exists in R2
-            s3_client.head_object(Bucket=BUCKET_NAME, Key=job.output_key)
-            # File exists! Job is complete
-            job.status = JobStatus.COMPLETED
-            await db.commit()
-            await db.refresh(job)
-            print(f"[Job {job_id}] Marked as COMPLETED - output file exists")
-        except Exception as e:
-            # File doesn't exist yet
-            # Check if job is too old (> 30 min) - likely failed
-            from datetime import datetime, timedelta, timezone
-            job_age = datetime.now(timezone.utc) - job.created_at.replace(tzinfo=timezone.utc)
-            if job_age > timedelta(minutes=30):
-                # Job is stale, mark as failed
-                job.status = JobStatus.FAILED
+    if job.status in [JobStatus.PENDING, JobStatus.PROCESSING]:
+        # 1. Check for progress from RunPod API if we have an ID
+        if job.runpod_job_id and RUNPOD_ENDPOINT_ID:
+            try:
+                # Poll RunPod for status/progress
+                # Note: This requires the runpod library to be configured with API key
+                endpoint = runpod.Endpoint(RUNPOD_ENDPOINT_ID)
+                # Currently SDK doesn't have a direct "get_job" on endpoint?
+                # User's guide says GET /status/{id}
+                # We'll use the low-level api_request if SDK wrappers don't fit, 
+                # OR assume we can check status via standard SDK calls if available.
+                # Actually, standard RunPod SDK usage:
+                # job = endpoint.run(...) returns a Job object.
+                # But here we are in a new request, so we don't have the job object.
+                
+                # We'll rely on our stored ID and manual requests or assume SDK helper.
+                # Since SDK documentation is scarce, let's implement the HTTP request manually as user suggested
+                # to be safe and precise.
+                import httpx
+                async with httpx.AsyncClient() as client:
+                    rp_resp = await client.get(
+                        f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job.runpod_job_id}",
+                        headers={"Authorization": f"Bearer {RUNPOD_API_KEY}"}
+                    )
+                    if rp_resp.status_code == 200:
+                        data = rp_resp.json()
+                        
+                        # Extract progress messages
+                        messages = data.get("messages", [])
+                        if messages and len(messages) > 0:
+                            # Last message is latest update
+                            latest = messages[-1]
+                            if isinstance(latest, str) and "%" in latest:
+                                try:
+                                    # Parse "50%" -> 50
+                                    pct = int(latest.strip().replace("%", ""))
+                                    job.progress = pct
+                                    # Don't commit every percent to DB to avoid thrashing? 
+                                    # But we need it for next poll. Okay to commit.
+                                    # Actually, let's just commit if it changed significant amount?
+                                    # For simplicity, commit.
+                                    if pct > (job.progress or 0):
+                                         await db.commit()
+                                except:
+                                    pass
+
+            except Exception as e:
+                print(f"[Job {job_id}] Error polling RunPod progress: {e}")
+
+        # 2. Check for completion (Output file exists in R2)
+        if job.output_key:
+            try:
+                # Check if output file exists in R2
+                s3_client.head_object(Bucket=BUCKET_NAME, Key=job.output_key)
+                # File exists! Job is complete
+                job.status = JobStatus.COMPLETED
+                job.progress = 100
                 await db.commit()
                 await db.refresh(job)
-                print(f"[Job {job_id}] Marked as FAILED - stale job (age: {job_age})")
+                print(f"[Job {job_id}] Marked as COMPLETED - output file exists")
+            except Exception as e:
+                # File doesn't exist yet
+                # Check if job is too old (> 30 min) - likely failed
+                from datetime import datetime, timedelta, timezone
+                job_age = datetime.now(timezone.utc) - job.created_at.replace(tzinfo=timezone.utc)
+                if job_age > timedelta(minutes=30):
+                    # Job is stale, mark as failed
+                    job.status = JobStatus.FAILED
+                    await db.commit()
+                    await db.refresh(job)
+                    print(f"[Job {job_id}] Marked as FAILED - stale job (age: {job_age})")
     
     # If job failed and not yet refunded, refund credits
     if job.status == JobStatus.FAILED and not job.refunded:
@@ -294,7 +357,8 @@ async def get_job_status(
         output_url=output_url,
         created_at=job.created_at,
         quality=job.quality or "lama",
-        cost=job.cost or 1
+        cost=job.cost or 1,
+        progress=job.progress or 0
     )
 
 @app.get("/api/jobs")
@@ -342,7 +406,8 @@ async def list_user_jobs(
                 "output_url": f"{PUBLIC_URL_BASE}/{job.output_key}" if job.output_key and job.status == JobStatus.COMPLETED else None,
                 "created_at": job.created_at.isoformat(),
                 "quality": job.quality or "lama",
-                "cost": job.cost or 1
+                "cost": job.cost or 1,
+                "progress": job.progress or 0
             }
             for job in jobs
         ]

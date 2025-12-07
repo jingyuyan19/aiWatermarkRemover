@@ -47,6 +47,8 @@ class Job(Base):
     quality = Column(String, default="lama")
     cost = Column(Integer, default=1)
     refunded = Column(Integer, default=0)  # 1 = credits refunded (for failed jobs)
+    runpod_job_id = Column(String, nullable=True)
+    progress = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), onupdate=func.now())
 

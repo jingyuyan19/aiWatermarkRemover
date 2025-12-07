@@ -26,6 +26,7 @@ interface Job {
     output_url: string | null;
     quality: string;
     cost: number;
+    progress: number;
     created_at: string;
 }
 
@@ -509,13 +510,28 @@ export default function DashboardPage() {
                                                 href={`/${locale}/job/${job.id}`}
                                                 className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
                                             >
-                                                <div className="flex items-center gap-3">
+                                                <div className="flex items-center gap-3 flex-1">
                                                     {getStatusIcon(job.status)}
-                                                    <div>
-                                                        <span className="text-sm font-medium">{getStatusText(job.status)}</span>
-                                                        <p className="text-xs text-gray-500">
-                                                            {new Date(job.created_at).toLocaleDateString()}
-                                                        </p>
+                                                    <div className="flex-1 max-w-md">
+                                                        <div className="flex items-center justify-between mb-1">
+                                                            <span className="text-sm font-medium">{getStatusText(job.status)}</span>
+                                                            {(job.status === 'processing' || job.status === 'pending') && (
+                                                                <span className="text-xs text-primary font-medium">{job.progress}%</span>
+                                                            )}
+                                                        </div>
+
+                                                        {(job.status === 'processing' || job.status === 'pending') ? (
+                                                            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                                <div
+                                                                    className="h-full bg-primary transition-all duration-500 ease-out"
+                                                                    style={{ width: `${Math.max(5, job.progress)}%` }}
+                                                                />
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-xs text-gray-500">
+                                                                {new Date(job.created_at).toLocaleDateString()}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                 </div>
                                                 <span className={`px-2 py-1 rounded-full text-xs ${job.quality === 'e2fgvi_hq'

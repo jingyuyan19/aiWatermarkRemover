@@ -27,6 +27,7 @@ class JobResponse(BaseModel):
     output_url: Optional[str] = None
     quality: str
     cost: int
+    progress: int = 0
     created_at: datetime
 
     class Config:
