@@ -15,13 +15,17 @@ interface MultiFileUploadProps {
     files: File[];
     maxFiles?: number;
     disabled?: boolean;
+    className?: string;
+    dropzoneClassName?: string;
 }
 
 export function MultiFileUpload({
     onFilesChange,
     files,
     maxFiles = 10,
-    disabled = false
+    disabled = false,
+    className,
+    dropzoneClassName
 }: MultiFileUploadProps) {
     const [dragActive, setDragActive] = useState(false);
 
@@ -76,7 +80,7 @@ export function MultiFileUpload({
     };
 
     return (
-        <div className="w-full space-y-4">
+        <div className={cn("w-full space-y-4", className)}>
             {/* Drop Zone */}
             <label
                 htmlFor="multi-file-upload"
@@ -86,7 +90,8 @@ export function MultiFileUpload({
                     disabled && "opacity-50 cursor-not-allowed",
                     dragActive
                         ? "border-primary bg-primary/10 scale-[1.01]"
-                        : "border-white/10 hover:border-white/20 hover:bg-white/5"
+                        : "border-white/10 hover:border-white/20 hover:bg-white/5",
+                    dropzoneClassName
                 )}
                 onDragEnter={handleDrag}
                 onDragLeave={handleDrag}
