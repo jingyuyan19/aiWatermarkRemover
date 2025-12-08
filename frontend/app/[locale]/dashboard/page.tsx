@@ -342,19 +342,20 @@ export default function DashboardPage() {
                                 className="h-full"
                             >
                                 <Card className="bg-white/5 border-white/10 overflow-hidden h-full">
-                                    <CardContent className="p-8">
+                                    <CardContent className="p-8 h-full flex flex-col">
                                         <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
                                             <Upload className="w-6 h-6 text-primary" />
                                             {t('upload.title')}
                                         </h2>
 
-                                        <div className="space-y-6">
+                                        <div className="space-y-6 flex-1 flex flex-col">
                                             {/* File Upload Zone */}
                                             <MultiFileUpload
                                                 onFilesChange={handleFilesChange}
                                                 files={files}
                                                 maxFiles={10}
                                                 disabled={isProcessing}
+                                                className={files.length === 0 ? "flex-1" : ""}
                                             />
 
                                             {/* Upload Queue (shows during/after processing) */}
