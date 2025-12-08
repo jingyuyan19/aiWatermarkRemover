@@ -326,7 +326,7 @@ export default function Home() {
                                 >
                                     {/* Step indicator */}
                                     <div className="relative mb-8">
-                                        <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${color} p-[1px] group-hover:scale-105 transition-transform duration-300`}>
+                                        <div className={`tech-step-glow w-32 h-32 rounded-3xl bg-gradient-to-br ${color} p-[1px] group-hover:scale-105 transition-transform duration-300`}>
                                             <div className="w-full h-full rounded-3xl bg-black/90 flex items-center justify-center backdrop-blur-xl">
                                                 <Icon className="w-12 h-12 text-white" />
                                             </div>

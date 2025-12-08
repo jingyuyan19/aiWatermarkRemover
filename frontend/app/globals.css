@@ -206,3 +206,54 @@ body {
 .cl-socialButtonsBlockButtonText {
   color: white !important;
 }
+
+/* Border Light Sweep Animation */
+@keyframes border-sweep {
+  0% {
+    --angle: 0deg;
+  }
+
+  100% {
+    --angle: 360deg;
+  }
+}
+
+@property --angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.border-sweep {
+  position: relative;
+  background: linear-gradient(#000, #000) padding-box,
+    conic-gradient(from var(--angle), transparent 25%, hsl(var(--primary)) 50%, transparent 75%) border-box;
+  border: 2px solid transparent;
+  animation: border-sweep 3s linear infinite;
+}
+
+.border-sweep-slow {
+  position: relative;
+  background: linear-gradient(#000, #000) padding-box,
+    conic-gradient(from var(--angle), transparent 20%, hsl(var(--primary)) 35%, hsl(262 83% 58%) 50%, hsl(var(--primary)) 65%, transparent 80%) border-box;
+  border: 2px solid transparent;
+  animation: border-sweep 4s linear infinite;
+}
+
+/* Tech pipeline step with sweep effect */
+.tech-step-glow {
+  position: relative;
+  overflow: visible;
+}
+
+.tech-step-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  border-radius: 1.5rem;
+  padding: 2px;
+  background: conic-gradient(from var(--angle), transparent 20%, hsl(var(--primary)) 35%, hsl(262 83% 58%) 50%, hsl(var(--primary)) 65%, transparent 80%);
+  mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  animation: border-sweep 3s linear infinite;
+}
