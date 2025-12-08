@@ -453,24 +453,25 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Right Column: Stats */}
-                        <div className="space-y-6">
+                        <div className="grid grid-cols-2 lg:grid-cols-1 gap-4 lg:gap-6 lg:space-y-0">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.2 }}
+                                className="col-span-1"
                             >
-                                <Card className="bg-white/5 border-white/10">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-primary/20 flex items-center justify-center">
-                                                <Zap className="w-6 h-6 text-primary" />
+                                <Card className="bg-white/5 border-white/10 h-full">
+                                    <CardContent className="p-4 lg:p-6">
+                                        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 lg:gap-4">
+                                            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
+                                                <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-gray-400">{t('stats.credits')}</p>
+                                                <p className="text-xs lg:text-sm text-gray-400">{t('stats.credits')}</p>
                                                 {credits === null ? (
-                                                    <Skeleton className="h-9 w-16" />
+                                                    <Skeleton className="h-7 w-12 lg:h-9 lg:w-16 mt-1" />
                                                 ) : (
-                                                    <p className="text-3xl font-bold">{credits}</p>
+                                                    <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0">{credits}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -482,16 +483,17 @@ export default function DashboardPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.3 }}
+                                className="col-span-1"
                             >
-                                <Card className="bg-white/5 border-white/10">
-                                    <CardContent className="p-6">
-                                        <div className="flex items-center gap-4">
-                                            <div className="w-12 h-12 rounded-xl bg-green-500/20 flex items-center justify-center">
-                                                <Film className="w-6 h-6 text-green-500" />
+                                <Card className="bg-white/5 border-white/10 h-full">
+                                    <CardContent className="p-4 lg:p-6">
+                                        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 lg:gap-4">
+                                            <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-500/20 flex items-center justify-center shrink-0">
+                                                <Film className="w-5 h-5 lg:w-6 lg:h-6 text-green-500" />
                                             </div>
                                             <div>
-                                                <p className="text-sm text-gray-400">{t('stats.processed')}</p>
-                                                <p className="text-3xl font-bold">{jobs.filter(j => j.status === 'completed').length}</p>
+                                                <p className="text-xs lg:text-sm text-gray-400">{t('stats.processed')}</p>
+                                                <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0">{jobs.filter(j => j.status === 'completed').length}</p>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -502,17 +504,18 @@ export default function DashboardPage() {
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.4 }}
+                                className="col-span-2 lg:col-span-1"
                             >
                                 <Link href={`/${locale}/pricing`}>
-                                    <Card className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-colors">
-                                        <CardContent className="p-6">
-                                            <div className="flex items-center gap-4">
-                                                <div className="w-12 h-12 rounded-xl bg-accent/20 flex items-center justify-center">
-                                                    <Plus className="w-6 h-6 text-accent" />
+                                    <Card className="bg-white/5 border-white/10 cursor-pointer hover:bg-white/10 transition-colors h-full">
+                                        <CardContent className="p-4 lg:p-6">
+                                            <div className="flex items-center gap-3 lg:gap-4">
+                                                <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
+                                                    <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
                                                 </div>
                                                 <div>
-                                                    <p className="text-sm text-gray-400">{t('stats.buyCredits')}</p>
-                                                    <p className="text-lg font-semibold text-accent">{t('stats.topUp')}</p>
+                                                    <p className="text-xs lg:text-sm text-gray-400">{t('stats.buyCredits')}</p>
+                                                    <p className="text-base lg:text-lg font-semibold text-accent mt-0.5 lg:mt-0">{t('stats.topUp')}</p>
                                                 </div>
                                             </div>
                                         </CardContent>
@@ -544,8 +547,19 @@ export default function DashboardPage() {
                         <Card className="bg-white/5 border-white/10">
                             <CardContent className="p-0">
                                 {loading ? (
-                                    <div className="flex items-center justify-center py-12">
-                                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                    <div className="divide-y divide-white/5">
+                                        {[...Array(3)].map((_, i) => (
+                                            <div key={i} className="flex items-center justify-between p-4">
+                                                <div className="flex items-center gap-3 flex-1">
+                                                    <Skeleton className="w-5 h-5 rounded-full" />
+                                                    <div className="flex-1 max-w-md space-y-2">
+                                                        <Skeleton className="h-4 w-24" />
+                                                        <Skeleton className="h-3 w-16" />
+                                                    </div>
+                                                </div>
+                                                <Skeleton className="h-6 w-12 rounded-full" />
+                                            </div>
+                                        ))}
                                     </div>
                                 ) : recentJobs.length === 0 ? (
                                     <div className="text-center py-12">
