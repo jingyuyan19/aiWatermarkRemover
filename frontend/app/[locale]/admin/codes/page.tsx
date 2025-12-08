@@ -6,6 +6,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Ticket, Copy, Check, Download, Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 
 interface Code {
@@ -335,7 +336,7 @@ export default function CodesPage() {
                     {loading ? (
                         <div className="space-y-3">
                             {[...Array(5)].map((_, i) => (
-                                <div key={i} className="h-14 bg-gray-800 rounded-lg animate-pulse" />
+                                <Skeleton key={i} className="h-14 w-full" />
                             ))}
                         </div>
                     ) : codes.length === 0 ? (
@@ -363,8 +364,8 @@ export default function CodesPage() {
                                                 {code.credits} credits
                                             </span>
                                             <span className={`text-sm px-2 py-0.5 rounded-full ${code.redeemed_by
-                                                    ? 'bg-green-500/20 text-green-400'
-                                                    : 'bg-yellow-500/20 text-yellow-400'
+                                                ? 'bg-green-500/20 text-green-400'
+                                                : 'bg-yellow-500/20 text-yellow-400'
                                                 }`}>
                                                 {code.redeemed_by ? 'Redeemed' : 'Pending'}
                                             </span>

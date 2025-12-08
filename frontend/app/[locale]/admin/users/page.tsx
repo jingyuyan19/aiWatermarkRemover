@@ -7,6 +7,7 @@ import { Users, Plus, Minus, Search } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { toast } from 'sonner';
 import { Pagination, PaginationInfo } from '@/components/ui/Pagination';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface User {
     id: string;
@@ -159,7 +160,7 @@ export default function UsersPage() {
                     {loading ? (
                         <div className="space-y-3">
                             {[...Array(5)].map((_, i) => (
-                                <div key={i} className="h-14 bg-gray-800 rounded-lg animate-pulse" />
+                                <Skeleton key={i} className="h-20 w-full" />
                             ))}
                         </div>
                     ) : users.length === 0 ? (

@@ -12,6 +12,7 @@ import { Card, CardContent } from '@/components/ui/card';
 import { MultiFileUpload } from '@/components/ui/MultiFileUpload';
 import { UploadQueue, QueueItem } from '@/components/ui/UploadQueue';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
+import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
 import { useAuth } from '@clerk/nextjs';
 import { useTranslations, useLocale } from 'next-intl';
@@ -467,7 +468,7 @@ export default function DashboardPage() {
                                             <div>
                                                 <p className="text-sm text-gray-400">{t('stats.credits')}</p>
                                                 {credits === null ? (
-                                                    <div className="h-9 w-16 bg-white/10 rounded animate-pulse" />
+                                                    <Skeleton className="h-9 w-16" />
                                                 ) : (
                                                     <p className="text-3xl font-bold">{credits}</p>
                                                 )}

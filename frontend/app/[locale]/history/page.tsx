@@ -6,6 +6,7 @@ import {
     Film, Clock, CheckCircle, XCircle, Loader2,
     Download, History as HistoryIcon, ArrowLeft
 } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
@@ -161,8 +162,10 @@ export default function HistoryPage() {
                         <Card className="bg-white/5 border-white/10 overflow-hidden">
                             <CardContent className="p-0">
                                 {loading ? (
-                                    <div className="flex items-center justify-center py-20">
-                                        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                                    <div className="p-4 space-y-4">
+                                        {[...Array(5)].map((_, i) => (
+                                            <Skeleton key={i} className="h-16 w-full rounded-xl" />
+                                        ))}
                                     </div>
                                 ) : jobs.length === 0 ? (
                                     <div className="text-center py-20">

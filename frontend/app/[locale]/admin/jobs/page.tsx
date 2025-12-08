@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileVideo, Clock, CheckCircle, XCircle, Loader, Search } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@clerk/nextjs';
 import { Pagination, PaginationInfo } from '@/components/ui/Pagination';
 import { toast } from 'sonner';
@@ -113,7 +114,7 @@ export default function JobsPage() {
                     {loading ? (
                         <div className="space-y-3">
                             {[...Array(5)].map((_, i) => (
-                                <div key={i} className="h-14 bg-gray-800 rounded-lg animate-pulse" />
+                                <Skeleton key={i} className="h-14 w-full" />
                             ))}
                         </div>
                     ) : jobs.length === 0 ? (
