@@ -142,6 +142,16 @@ echo "✅ Update complete! RunPod will pull new image on next cold start."
 2. Open your endpoint
 3. Click **Restart Workers** or wait for auto-scale to 0 + new job
 
+### Switching to a Specific Version (e.g., v1.1)
+
+1.  Go to **RunPod Console > Serverless**.
+2.  Click on your Endpoint.
+3.  Click **Edit Template** (or the Settings icon).
+4.  Locate the **Container Image** field.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.1`.
+6.  Click **Save**.
+7.  The next cold start will pull `v1.1`. This effectively "locks" your worker to that version.
+
 ---
 
 ## Detailed Step-by-Step Guide
