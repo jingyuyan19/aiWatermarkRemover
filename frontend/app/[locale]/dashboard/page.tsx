@@ -462,16 +462,16 @@ export default function DashboardPage() {
                             >
                                 <Card className="bg-white/5 border-white/10 h-full">
                                     <CardContent className="p-4 lg:p-6">
-                                        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 lg:gap-4">
+                                        <div className="flex items-center gap-3 lg:gap-4">
                                             <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-primary/20 flex items-center justify-center shrink-0">
                                                 <Zap className="w-5 h-5 lg:w-6 lg:h-6 text-primary" />
                                             </div>
-                                            <div>
-                                                <p className="text-xs lg:text-sm text-gray-400">{t('stats.credits')}</p>
+                                            <div className="min-w-0">
+                                                <p className="text-xs lg:text-sm text-gray-400 truncate">{t('stats.credits')}</p>
                                                 {credits === null ? (
-                                                    <Skeleton className="h-7 w-12 lg:h-9 lg:w-16 mt-1" />
+                                                    <Skeleton className="h-6 w-12 lg:h-9 lg:w-16 mt-1" />
                                                 ) : (
-                                                    <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0">{credits}</p>
+                                                    <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0 leading-none">{credits}</p>
                                                 )}
                                             </div>
                                         </div>
@@ -487,13 +487,13 @@ export default function DashboardPage() {
                             >
                                 <Card className="bg-white/5 border-white/10 h-full">
                                     <CardContent className="p-4 lg:p-6">
-                                        <div className="flex flex-col lg:flex-row items-start lg:items-center gap-3 lg:gap-4">
+                                        <div className="flex items-center gap-3 lg:gap-4">
                                             <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-green-500/20 flex items-center justify-center shrink-0">
                                                 <Film className="w-5 h-5 lg:w-6 lg:h-6 text-green-500" />
                                             </div>
-                                            <div>
-                                                <p className="text-xs lg:text-sm text-gray-400">{t('stats.processed')}</p>
-                                                <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0">{jobs.filter(j => j.status === 'completed').length}</p>
+                                            <div className="min-w-0">
+                                                <p className="text-xs lg:text-sm text-gray-400 truncate">{t('stats.processed')}</p>
+                                                <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0 leading-none">{jobs.filter(j => j.status === 'completed').length}</p>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -513,9 +513,9 @@ export default function DashboardPage() {
                                                 <div className="w-10 h-10 lg:w-12 lg:h-12 rounded-xl bg-accent/20 flex items-center justify-center shrink-0">
                                                     <Plus className="w-5 h-5 lg:w-6 lg:h-6 text-accent" />
                                                 </div>
-                                                <div>
-                                                    <p className="text-xs lg:text-sm text-gray-400">{t('stats.buyCredits')}</p>
-                                                    <p className="text-base lg:text-lg font-semibold text-accent mt-0.5 lg:mt-0">{t('stats.topUp')}</p>
+                                                <div className="min-w-0">
+                                                    <p className="text-xs lg:text-sm text-gray-400 truncate">{t('stats.buyCredits')}</p>
+                                                    <p className="text-base lg:text-lg font-semibold text-accent mt-0.5 lg:mt-0 leading-none truncate">{t('stats.topUp')}</p>
                                                 </div>
                                             </div>
                                         </CardContent>
