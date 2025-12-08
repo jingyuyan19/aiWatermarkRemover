@@ -29,24 +29,7 @@ export default function JobPage() {
 
     // Activity Log Simulation
     const [activityStep, setActivityStep] = useState(0);
-    const activitySteps = [
-        'Initializing secure environment...',
-        'Allocating dedicated GPU vRAM...',
-        'Loading LaMa-Inpaint v2 model...',
-        'Analysing video structure...',
-        'Detecting static overlays...',
-        'Mapping temporal coordinates...',
-        'Generating occlusion masks...',
-        'Synthesizing texture patches...',
-        'Applying flow-guided propagation...',
-        'Refinement pass 1/3 (Coarse)...',
-        'Refinement pass 2/3 (Detail)...',
-        'Refinement pass 3/3 (Temporal)...',
-        'Color matching frames...',
-        'Re-encoding video stream...',
-        'Verifying output quality...',
-        'Finalizing render...'
-    ];
+    const activitySteps = t.raw('activity') as string[];
 
     useEffect(() => {
         if (!job || job.status === 'completed') return;
@@ -56,7 +39,7 @@ export default function JobPage() {
         }, 2500); // Change step every 2.5 seconds
 
         return () => clearInterval(interval);
-    }, [job?.status]);
+    }, [job?.status, activitySteps.length]);
 
     // Fetch Job Data
     useEffect(() => {

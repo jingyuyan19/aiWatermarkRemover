@@ -3,10 +3,12 @@
 import { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileVideo, Upload, CheckCircle2, Download, Loader2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 type DemoPhase = 'idle' | 'dragging' | 'uploading' | 'processing' | 'complete';
 
 export function HowItWorksDemo() {
+    const t = useTranslations('Demo');
     const [phase, setPhase] = useState<DemoPhase>('idle');
     const [progress, setProgress] = useState(0);
 
@@ -61,7 +63,7 @@ export function HowItWorksDemo() {
 
                 {/* Mobile header */}
                 <div className="sm:hidden flex items-center justify-center py-2 bg-white/5 border-b border-white/5">
-                    <span className="text-xs text-gray-400 font-medium">Live Demo</span>
+                    <span className="text-xs text-gray-400 font-medium">{t('liveDemo')}</span>
                 </div>
 
                 {/* App Content - responsive padding and height */}
@@ -86,8 +88,8 @@ export function HowItWorksDemo() {
                                     className="space-y-2 sm:space-y-4"
                                 >
                                     <Upload className="w-8 h-8 sm:w-12 sm:h-12 mx-auto text-gray-500" />
-                                    <p className="text-sm sm:text-base text-gray-400">Drop your video here</p>
-                                    <p className="text-xs text-gray-600">MP4, MOV, AVI up to 100MB</p>
+                                    <p className="text-sm sm:text-base text-gray-400">{t('dropVideo')}</p>
+                                    <p className="text-xs text-gray-600">{t('formats')}</p>
                                 </motion.div>
                             )}
 
@@ -107,11 +109,11 @@ export function HowItWorksDemo() {
                                     >
                                         <FileVideo className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
                                         <div className="text-left">
-                                            <p className="text-sm sm:text-base text-white font-medium">sample_video.mp4</p>
-                                            <p className="text-xs text-gray-400">2.8 MB</p>
+                                            <p className="text-sm sm:text-base text-white font-medium">{t('sampleFile')}</p>
+                                            <p className="text-xs text-gray-400">{t('fileSize')}</p>
                                         </div>
                                     </motion.div>
-                                    <p className="text-sm sm:text-base text-primary font-medium">Drop to upload</p>
+                                    <p className="text-sm sm:text-base text-primary font-medium">{t('dropToUpload')}</p>
                                 </motion.div>
                             )}
 
@@ -132,19 +134,19 @@ export function HowItWorksDemo() {
                                                     <FileVideo className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
                                                 </div>
                                                 <div className="flex-1 min-w-0">
-                                                    <p className="text-sm sm:text-base text-white font-medium truncate">sample_video.mp4</p>
+                                                    <p className="text-sm sm:text-base text-white font-medium truncate">{t('sampleFile')}</p>
                                                     {/* Status on mobile - inline with filename */}
                                                     <div className="flex items-center gap-2 mt-1">
                                                         {phase === 'uploading' && (
                                                             <>
                                                                 <Loader2 className="w-3 h-3 text-gray-400 animate-spin" />
-                                                                <span className="text-xs text-gray-400">Uploading...</span>
+                                                                <span className="text-xs text-gray-400">{t('uploading')}</span>
                                                             </>
                                                         )}
                                                         {phase === 'complete' && (
                                                             <>
                                                                 <CheckCircle2 className="w-4 h-4 text-green-500" />
-                                                                <span className="text-xs text-green-500">Complete!</span>
+                                                                <span className="text-xs text-green-500">{t('complete')}</span>
                                                             </>
                                                         )}
                                                     </div>
@@ -174,7 +176,7 @@ export function HowItWorksDemo() {
                                                         className="w-full sm:w-auto px-4 py-2 rounded-lg bg-primary text-white text-sm font-medium flex items-center justify-center gap-2 hover:bg-primary/90 transition-colors"
                                                     >
                                                         <Download className="w-4 h-4" />
-                                                        Download
+                                                        {t('download')}
                                                     </motion.button>
                                                 )}
                                             </AnimatePresence>
@@ -191,7 +193,7 @@ export function HowItWorksDemo() {
                                                 exit={{ opacity: 0 }}
                                                 className="text-xs sm:text-sm text-gray-400 text-center"
                                             >
-                                                🪄 AI is removing watermarks...
+                                                {t('processing')}
                                             </motion.p>
                                         )}
                                         {phase === 'complete' && (
@@ -201,7 +203,7 @@ export function HowItWorksDemo() {
                                                 animate={{ opacity: 1, y: 0 }}
                                                 className="text-xs sm:text-sm text-green-400 text-center"
                                             >
-                                                ✨ Watermark removed successfully!
+                                                {t('success')}
                                             </motion.p>
                                         )}
                                     </AnimatePresence>
@@ -213,11 +215,11 @@ export function HowItWorksDemo() {
                     {/* Step Indicators - simplified on mobile */}
                     <div className="flex justify-center gap-3 sm:gap-8 mt-4 sm:mt-8">
                         {[
-                            { label: 'Upload', active: phase === 'dragging' || phase === 'uploading' },
-                            { label: 'Process', active: phase === 'processing' },
-                            { label: 'Download', active: phase === 'complete' },
+                            { key: 'upload', active: phase === 'dragging' || phase === 'uploading' },
+                            { key: 'process', active: phase === 'processing' },
+                            { key: 'download', active: phase === 'complete' },
                         ].map((step, i) => (
-                            <div key={step.label} className="flex items-center gap-1.5 sm:gap-2">
+                            <div key={step.key} className="flex items-center gap-1.5 sm:gap-2">
                                 <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-bold transition-colors ${step.active
                                         ? 'bg-primary text-white'
                                         : 'bg-white/10 text-gray-500'
@@ -226,7 +228,7 @@ export function HowItWorksDemo() {
                                 </div>
                                 <span className={`text-xs sm:text-sm transition-colors ${step.active ? 'text-white' : 'text-gray-500'
                                     }`}>
-                                    {step.label}
+                                    {t(`steps.${step.key}`)}
                                 </span>
                             </div>
                         ))}

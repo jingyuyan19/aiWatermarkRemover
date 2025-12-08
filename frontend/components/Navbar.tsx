@@ -4,8 +4,10 @@ import { useState } from 'react';
 import NextImage from "next/image";
 import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
 import { Menu, X } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export function Navbar({ locale }: { locale: string }) {
+    const t = useTranslations('Navbar');
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
     return (
@@ -26,21 +28,21 @@ export function Navbar({ locale }: { locale: string }) {
 
                 {/* Desktop Navigation */}
                 <div className="hidden md:flex items-center gap-4">
-                <SignedOut>
-                    <a
-                        href={`/${locale}/pricing`}
-                        className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
-                    >
-                        {locale === 'zh-CN' ? '价格' : 'Pricing'}
-                    </a>
-                </SignedOut>
+                    <SignedOut>
+                        <a
+                            href={`/${locale}/pricing`}
+                            className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
+                        >
+                            {t('pricing')}
+                        </a>
+                    </SignedOut>
 
                     <LanguageSwitcher locale={locale} />
 
                     <SignedOut>
                         <SignInButton mode="modal">
                             <button className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-blue-600 transition-colors text-sm font-medium">
-                                {locale === 'zh-CN' ? '登录' : 'Sign In'}
+                                {t('signIn')}
                             </button>
                         </SignInButton>
                     </SignedOut>
@@ -49,19 +51,19 @@ export function Navbar({ locale }: { locale: string }) {
                             href={`/${locale}/dashboard`}
                             className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
                         >
-                            {locale === 'zh-CN' ? '控制台' : 'Dashboard'}
+                            {t('dashboard')}
                         </a>
                         <a
                             href={`/${locale}/history`}
                             className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors"
                         >
-                            {locale === 'zh-CN' ? '历史' : 'History'}
+                            {t('history')}
                         </a>
                         <a
                             href={`/${locale}/pricing`}
                             className="px-3 py-1.5 rounded-lg text-sm font-medium text-green-400 hover:text-green-300 hover:bg-green-500/10 transition-colors"
                         >
-                            {locale === 'zh-CN' ? '购买额度' : 'Buy Credits'}
+                            {t('buyCredits')}
                         </a>
 
                         <AdminLink locale={locale} />
@@ -103,7 +105,7 @@ export function Navbar({ locale }: { locale: string }) {
                                 className="block px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                {locale === 'zh-CN' ? '价格' : 'Pricing'}
+                                {t('pricing')}
                             </a>
                         </SignedOut>
 
@@ -113,7 +115,7 @@ export function Navbar({ locale }: { locale: string }) {
                                     className="w-full px-4 py-3 rounded-lg bg-primary text-white hover:bg-blue-600 transition-colors font-medium"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
-                                    {locale === 'zh-CN' ? '登录' : 'Sign In'}
+                                    {t('signIn')}
                                 </button>
                             </SignInButton>
                         </SignedOut>
@@ -124,14 +126,14 @@ export function Navbar({ locale }: { locale: string }) {
                                 className="block px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                {locale === 'zh-CN' ? '控制台' : 'Dashboard'}
+                                {t('dashboard')}
                             </a>
                             <a
                                 href={`/${locale}/history`}
                                 className="block px-4 py-3 rounded-lg text-white hover:bg-white/10 transition-colors"
                                 onClick={() => setMobileMenuOpen(false)}
                             >
-                                {locale === 'zh-CN' ? '历史' : 'History'}
+                                {t('history')}
                             </a>
                             <MobileAdminLink locale={locale} onClick={() => setMobileMenuOpen(false)} />
                             <div className="px-4 py-3 flex items-center gap-3">
@@ -147,7 +149,7 @@ export function Navbar({ locale }: { locale: string }) {
                                         }
                                     }}
                                 />
-                                <span className="text-gray-400 text-sm">{locale === 'zh-CN' ? '账户设置' : 'Account'}</span>
+                                <span className="text-gray-400 text-sm">{t('account')}</span>
                             </div>
                         </SignedIn>
                     </div>
@@ -193,8 +195,8 @@ function LanguageSwitcher({ locale, compact }: { locale: string; compact?: boole
                                 key={lang.code}
                                 href={`/${lang.code}`}
                                 className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${lang.code === locale
-                                        ? 'bg-primary/20 text-primary'
-                                        : 'text-gray-300 hover:bg-white/5 hover:text-white'
+                                    ? 'bg-primary/20 text-primary'
+                                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
                                     }`}
                                 onClick={() => setIsOpen(false)}
                             >

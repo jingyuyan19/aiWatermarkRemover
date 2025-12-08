@@ -6,9 +6,13 @@
     "Navbar": {
         "brand": "Vanishly",
         "signIn": "登录",
-        "features": "功能特点",
-        "pricing": "价格方案",
-        "faq": "常见问题"
+        "features": "功能",
+        "pricing": "价格",
+        "faq": "常见问题",
+        "dashboard": "控制台",
+        "history": "历史",
+        "buyCredits": "购买额度",
+        "account": "账户设置"
     },
     "HomePage": {
         "badge": "新功能：AI 视频去水印",
@@ -104,6 +108,82 @@
             "download": {
                 "title": "下载成品",
                 "description": "获取您的干净视频，随时可用。无水印，无质量损失。"
+            }
+        }
+    },
+    "Demo": {
+        "liveDemo": "实时演示",
+        "dropVideo": "将视频拖放到这里",
+        "formats": "MP4, MOV, AVI 最大100MB",
+        "sampleFile": "示例视频.mp4",
+        "fileSize": "2.8 MB",
+        "dropToUpload": "拖放上传",
+        "uploading": "上传中...",
+        "complete": "完成！",
+        "download": "下载",
+        "processing": "🪄 AI正在去除水印...",
+        "success": "✨ 水印去除成功！",
+        "steps": {
+            "upload": "上传",
+            "process": "处理",
+            "download": "下载"
+        }
+    },
+    "Platforms": {
+        "badge": "✨ AI视频支持",
+        "title": "支持所有主流AI视频平台",
+        "description": "去除各大AI平台生成视频的水印",
+        "items": {
+            "sora": {
+                "name": "Sora",
+                "subtitle": "OpenAI"
+            },
+            "veo": {
+                "name": "Google Veo",
+                "subtitle": "谷歌"
+            },
+            "runway": {
+                "name": "Runway",
+                "subtitle": "Gen-3"
+            },
+            "pika": {
+                "name": "Pika",
+                "subtitle": "Labs"
+            },
+            "kling": {
+                "name": "可灵",
+                "subtitle": "快手"
+            },
+            "hailuo": {
+                "name": "海螺",
+                "subtitle": "MiniMax"
+            },
+            "luma": {
+                "name": "Luma",
+                "subtitle": "Dream Machine"
+            }
+        }
+    },
+    "Technology": {
+        "badge": "我们的AI技术",
+        "title": "先进AI驱动",
+        "subtitle": "为创作者打造的企业级技术",
+        "items": {
+            "parallel": {
+                "title": "并行GPU处理",
+                "description": "同时上传多个视频。我们的云基础设施在专用GPU上同时处理它们。"
+            },
+            "detection": {
+                "title": "智能水印检测",
+                "description": "基于YOLO的神经网络自动检测和定位水印，准确率99%——无需手动选择。"
+            },
+            "inpainting": {
+                "title": "智能修复",
+                "description": "最先进的LaMa修复技术无缝填充去除区域，匹配周围的纹理和颜色。"
+            },
+            "temporal": {
+                "title": "逐帧完美",
+                "description": "专业的视频处理确保水印去除在所有帧中保持一致——没有闪烁或伪影。"
             }
         }
     },
@@ -215,6 +295,24 @@
             "jobId": "任务 ID",
             "created": "创建时间"
         },
+        "activity": [
+            "正在初始化安全环境...",
+            "正在分配专用GPU显存...",
+            "正在加载 LaMa-Inpaint v2 模型...",
+            "正在分析视频结构...",
+            "正在检测静态水印...",
+            "正在映射时间坐标...",
+            "正在生成遮罩...",
+            "正在合成纹理补丁...",
+            "正在应用流引导传播...",
+            "优化阶段 1/3 (粗糙)...",
+            "优化阶段 2/3 (细节)...",
+            "优化阶段 3/3 (时序)...",
+            "正在匹配色彩...",
+            "正在重新编码视频...",
+            "正在验证输出质量...",
+            "正在完成渲染..."
+        ],
         "error": "获取任务状态失败"
     },
     "Dashboard": {
