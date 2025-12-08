@@ -320,21 +320,20 @@ async def get_job_status(
                         # Log FULL raw response for debugging
                         logger.info(f"[DEBUG-POLL] RunPod FULL Response: {data}")
                         
-                        # Check both 'messages' and 'stream' fields
-                        messages = data.get("messages") or data.get("stream") or []
-                        logger.info(f"[DEBUG-POLL] Messages/Stream: {messages}")
+                        # With return_aggregate_stream=True, progress appears in 'output' field
+                        output_val = data.get("output")
+                        logger.info(f"[DEBUG-POLL] Output value: {output_val}")
                         
-                        if messages and len(messages) > 0:
-                            latest = messages[-1] if isinstance(messages, list) else str(messages)
-                            if isinstance(latest, str) and "%" in latest:
-                                try:
-                                    pct = int(latest.strip().replace("%", ""))
-                                    # Only update if progress has increased
-                                    if pct > (job.progress or 0):
-                                        job.progress = pct
-                                        await db.commit() # Commit progress updates
-                                except:
-                                    pass
+                        if output_val and isinstance(output_val, str) and "%" in output_val:
+                            try:
+                                pct = int(output_val.strip().replace("%", ""))
+                                # Only update if progress has increased
+                                if pct > (job.progress or 0):
+                                    job.progress = pct
+                                    await db.commit() # Commit progress updates
+                                    logger.info(f"[DEBUG-POLL] Updated job progress to {pct}%")
+                            except:
+                                pass
 
             except Exception as e:
                 print(f"[Job {job_id}] Error polling RunPod progress: {e}")
