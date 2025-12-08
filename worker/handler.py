@@ -62,8 +62,9 @@ def handler(job):
             # Note: RunPod expects progress updates as messages
             try:
                 runpod.serverless.progress_update(job, f"{progress}%")
+                print(f"[DEBUG-WORKER] Progress sent: {progress}%")
             except Exception as e:
-                print(f"Failed to update progress: {e}")
+                print(f"[DEBUG-WORKER] Failed to update progress: {e}")
 
         demarker.run(local_input, local_output, progress_callback=progress_callback)
         print(f"[{job_id}] Processing complete. Output size: {local_output.stat().st_size / 1024 / 1024:.2f} MB")
