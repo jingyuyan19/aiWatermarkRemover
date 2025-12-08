@@ -1,317 +1,424 @@
 # Updating the Worker (DeMark-World)
 
-Guide for updating the AI watermark removal worker and rebuilding the Docker image.
+Complete guide for updating the AI watermark removal worker when the upstream DeMark-World repository receives updates.
+
+---
+
+## Table of Contents
+
+1. [Architecture Overview](#architecture-overview)
+2. [Prerequisites & VPS Access](#prerequisites--vps-access)
+3. [Complete Update Workflow (Copy-Paste)](#complete-update-workflow-copy-paste)
+4. [Detailed Step-by-Step Guide](#detailed-step-by-step-guide)
+5. [Handling Merge Conflicts](#handling-merge-conflicts)
+6. [Your Custom Modifications](#your-custom-modifications)
+7. [Troubleshooting](#troubleshooting)
+8. [Version History](#version-history)
+
+---
 
 ## Architecture Overview
 
 ```
-┌─────────────────────────────────────────────────────────────────┐
-│ linkedlist771/DeMark-World (Original Upstream)                  │
-│   ↓ fork                                                        │
-│ jingyuyan19/DeMark-World (Your Fork - with custom modifications)│
-│   ↓ copy                                                        │
-│ worker/demark_world/ (Embedded in your project)                 │
-│   ↓ docker build                                                │
-│ Docker Hub: <username>/watermark-worker:latest                  │
-│   ↓ pull                                                        │
-│ RunPod Serverless (GPU Worker)                                  │
-└─────────────────────────────────────────────────────────────────┘
+┌─────────────────────────────────────────────────────────────────────┐
+│                     THE UPDATE PIPELINE                              │
+├─────────────────────────────────────────────────────────────────────┤
+│                                                                      │
+│  1. linkedlist771/DeMark-World  (Original Upstream)                 │
+│        ↓ git fetch upstream                                         │
+│                                                                      │
+│  2. jingyuyan19/DeMark-World    (Your GitHub Fork)                  │
+│        ↓ git merge + fix imports + push                             │
+│                                                                      │
+│  3. DigitalOcean VPS            (Build Machine - bypasses GFW)      │
+│        ↓ git pull + docker build                                    │
+│                                                                      │
+│  4. Docker Hub                   (Image Registry)                   │
+│        ↓ docker push                                                │
+│                                                                      │
+│  5. RunPod Serverless           (GPU Worker pulls new image)        │
+│                                                                      │
+└─────────────────────────────────────────────────────────────────────┘
 ```
 
 ---
 
-## Prerequisites
+## Prerequisites & VPS Access
 
-- DigitalOcean VPS access (for Docker builds from China)
-- Docker Hub account with push access
-- GitHub fork of DeMark-World
-- RunPod Serverless endpoint configured
+### Your DigitalOcean VPS
+
+| Field | Value |
+|-------|-------|
+| **IP Address** | `YOUR_VPS_IP` (update this!) |
+| **SSH User** | `root` |
+| **SSH Key** | Located at `~/.ssh/id_rsa` |
+| **Project Path** | `/root/aiWatermarkRemover` |
+
+### Required Tools Installed on VPS
+
+- ✅ Docker (with buildx)
+- ✅ Git
+- ✅ Docker Hub login saved
+
+### First-Time VPS Setup
+
+```bash
+# 1. SSH into VPS
+ssh root@YOUR_VPS_IP
+
+# 2. Install Docker (if not already)
+curl -fsSL https://get.docker.com | sh
+
+# 3. Login to Docker Hub (one-time)
+docker login
+# Enter: your Docker Hub username and password/token
+
+# 4. Clone your project
+git clone https://github.com/jingyuyan19/aiWatermarkRemover.git
+cd aiWatermarkRemover
+
+# 5. Clone DeMark-World into worker directory
+cd worker
+git clone https://github.com/jingyuyan19/DeMark-World.git demark_world
+```
 
 ---
 
-## One-Time Setup: Create Your Fork
+## Complete Update Workflow (Copy-Paste)
 
-### Step 1: Fork DeMark-World
+**When upstream has updates, run these commands in order:**
 
-1. Go to https://github.com/linkedlist771/DeMark-World
-2. Click **Fork** → Create fork under your account
-3. Your fork: `https://github.com/<your-username>/DeMark-World`
-
-### Step 2: Add Upstream Remote (on your fork)
+### On Your Local Machine (Mac)
 
 ```bash
-git clone https://github.com/<your-username>/DeMark-World.git
-cd DeMark-World
-git remote add upstream https://github.com/linkedlist771/DeMark-World.git
-git remote -v
-# Should show:
-# origin    https://github.com/<your-username>/DeMark-World.git
-# upstream  https://github.com/linkedlist771/DeMark-World.git
-```
+# Step 1: Sync your DeMark-World fork with upstream
+cd ~/path/to/DeMark-World  # Your local clone of your fork
+git fetch upstream
+git checkout main
+git merge upstream/main
 
-### Step 3: Apply Your Custom Modifications
+# Step 2: Fix import paths (required after every merge!)
+find src -type f -name "*.py" -exec sed -i '' 's/from src\.demark_world/from demark_world/g' {} \;
+find src -type f -name "*.py" -exec sed -i '' 's/import src\.demark_world/import demark_world/g' {} \;
 
-Your project has custom modifications in these files:
-- `src/demark_world/iopaint/model/anytext/cldm/ddim_hacked.py`
-- `src/demark_world/iopaint/model/anytext/cldm/embedding_manager.py`
-- `src/demark_world/iopaint/model/anytext/cldm/hack.py`
-- `src/demark_world/iopaint/model/anytext/cldm/model.py`
-
-Copy these from your current `worker/demark_world/` to your fork and commit:
-
-```bash
-# Copy modified files to fork, then:
+# Step 3: Commit and push
 git add .
-git commit -m "feat: custom modifications for Vanishly"
+git commit -m "sync: merge upstream + fix import paths"
 git push origin main
 ```
 
----
-
-## Regular Update Process
-
-### When Upstream Has New Features
-
-#### Step 1: Sync Your Fork with Upstream
+### On DigitalOcean VPS
 
 ```bash
-cd /path/to/your/DeMark-World-fork
+# Step 4: SSH into VPS
+ssh root@YOUR_VPS_IP
+
+# Step 5: Update and rebuild
+cd /root/aiWatermarkRemover/worker
+
+# Backup current (just in case)
+cp -r demark_world demark_world_backup_$(date +%Y%m%d)
+
+# Pull latest from your fork
+cd demark_world
+git pull origin main
+cd ..
+
+# Build new Docker image
+docker build -t jingyuyan19/watermark-worker:latest .
+
+# Push to Docker Hub
+docker push jingyuyan19/watermark-worker:latest
+
+# Clean up old backups (keep last 3)
+ls -dt demark_world_backup_* | tail -n +4 | xargs rm -rf
+
+echo "✅ Update complete! RunPod will pull new image on next cold start."
+```
+
+### Force RunPod to Use New Image
+
+1. Go to [RunPod Console](https://www.runpod.io/console/serverless)
+2. Open your endpoint
+3. Click **Restart Workers** or wait for auto-scale to 0 + new job
+
+---
+
+## Detailed Step-by-Step Guide
+
+### Step 1: Check for Upstream Updates
+
+```bash
+# On your local machine
+cd ~/path/to/DeMark-World
 git fetch upstream
+git log upstream/main --oneline -5
+```
+
+Compare with your current version:
+```bash
+git log main --oneline -5
+```
+
+### Step 2: Merge Upstream Changes
+
+```bash
 git checkout main
 git merge upstream/main
 ```
 
-**If conflicts:**
-```bash
-# Resolve conflicts in modified files
-git add .
-git commit -m "merge: sync with upstream + preserve custom mods"
-```
+**Common outcomes:**
+- ✅ `Already up to date.` → No updates available
+- ✅ `Fast-forward` → Clean merge, no conflicts
+- ⚠️ `CONFLICT` → Manual resolution needed (see section below)
+
+### Step 3: Fix Import Paths (CRITICAL!)
+
+Your Docker setup uses `PYTHONPATH=/app/demark_world_code/src`, which means all imports must be:
+- ✅ `from demark_world.xxx`
+- ❌ ~~`from src.demark_world.xxx`~~
+
+Run this after every merge:
 
 ```bash
+# macOS
+find src -type f -name "*.py" -exec sed -i '' 's/from src\.demark_world/from demark_world/g' {} \;
+find src -type f -name "*.py" -exec sed -i '' 's/import src\.demark_world/import demark_world/g' {} \;
+
+# Linux (on VPS)
+find src -type f -name "*.py" -exec sed -i 's/from src\.demark_world/from demark_world/g' {} \;
+find src -type f -name "*.py" -exec sed -i 's/import src\.demark_world/import demark_world/g' {} \;
+```
+
+### Step 4: Test Locally (Optional)
+
+```bash
+# Quick import test
+cd src
+python -c "from demark_world import DeMarkWorld; print('✅ Imports OK')"
+```
+
+### Step 5: Push to Your Fork
+
+```bash
+git add .
+git commit -m "sync: merge upstream $(git log upstream/main --oneline -1 | cut -d' ' -f1)"
 git push origin main
 ```
 
-#### Step 2: Update Worker Directory (on DO VPS)
+### Step 6: Build on VPS
 
 ```bash
-ssh root@<your-do-ip>
-cd /root/aiWatermarkRemover/worker
-
-# Backup current
-cp -r demark_world demark_world_backup
-
-# Fresh copy from your fork
-rm -rf demark_world
-git clone --depth 1 https://github.com/<your-username>/DeMark-World.git demark_world
+ssh root@YOUR_VPS_IP
+cd /root/aiWatermarkRemover/worker/demark_world
+git pull origin main
+cd ..
+docker build -t jingyuyan19/watermark-worker:latest .
+# ⏱️ Takes: 10-15 minutes
 ```
 
-#### Step 3: Rebuild Docker Image
+### Step 7: Push to Docker Hub
 
 ```bash
-docker build -t <your-dockerhub-username>/watermark-worker:latest .
-```
-
-**⏱️ Takes: 10-15 minutes**
-
-#### Step 4: Push to Docker Hub
-
-```bash
-docker login  # If not already logged in
-docker push <your-dockerhub-username>/watermark-worker:latest
-```
-
-**⏱️ Takes: 5-10 minutes**
-
-#### Step 5: RunPod Updates Automatically
-
-RunPod Serverless pulls new image on next cold start.
-
-To force immediate update:
-1. RunPod → Serverless → Your Endpoint
-2. Click **Restart** or wait for scale-to-zero + new job
-
----
-
-## Quick Reference Commands
-
-```bash
-# === SYNC FORK ===
-cd DeMark-World-fork
-git fetch upstream && git merge upstream/main && git push origin main
-
-# === UPDATE WORKER ===
-ssh root@<do-ip>
-cd /root/aiWatermarkRemover/worker
-rm -rf demark_world
-git clone --depth 1 https://github.com/<user>/DeMark-World.git demark_world
-docker build -t <user>/watermark-worker:latest .
-docker push <user>/watermark-worker:latest
+docker push jingyuyan19/watermark-worker:latest
+# ⏱️ Takes: 5-10 minutes
 ```
 
 ---
 
-## What Gets Updated
+## Handling Merge Conflicts
 
-| Component | Source | Description |
-|-----------|--------|-------------|
-| AI Models | `demark_world/src/` | Core removal algorithms |
-| Video Processing | `demark_world/src/` | Frame extraction, merging |
-| Memory Optimization | `demark_world/src/` | GPU memory handling |
+### Most Common Conflicts
 
-**Recent Upstream Updates (Dec 2025):**
-- ✅ Memory-aware chunksize (better large video handling)
-- ✅ Cached PhyNet (faster processing)
+| File | Reason | Resolution |
+|------|--------|------------|
+| `*.py` with imports | Your import path fixes | Keep YOUR version (with `from demark_world`) |
+| `requirements.txt` | Dependency updates | Merge both (upstream deps + yours) |
+| New files | Upstream added new features | Accept ALL upstream changes, then run sed fix |
+
+### Step-by-Step Conflict Resolution
+
+```bash
+# 1. See what's conflicted
+git status
+
+# 2. Open conflicted file
+# Look for conflict markers:
+# <<<<<<< HEAD
+# (your changes)
+# =======
+# (upstream changes)
+# >>>>>>> upstream/main
+
+# 3. For import-related conflicts, keep your version:
+# Keep: from demark_world.xxx
+# Remove: from src.demark_world.xxx
+
+# 4. Mark as resolved
+git add <conflicted-file>
+
+# 5. After all conflicts resolved
+git commit -m "merge: resolve conflicts with upstream"
+```
+
+### Using VS Code for Conflicts
+
+```bash
+code .  # Opens in VS Code
+# Click "Accept Current Change" for import-related conflicts
+# Click "Accept Incoming Change" for new features/fixes
+# Click "Accept Both Changes" when both are needed
+```
 
 ---
 
-## Version Tracking
+## Your Custom Modifications
 
-After updating, record the commit hash:
+### What You Changed (And Why)
+
+**All ~101 modified files have the SAME change:**
+
+```python
+# Original (upstream):
+from src.demark_world.xxx import yyy
+
+# Your version:
+from demark_world.xxx import yyy
+```
+
+This is required because your Dockerfile sets:
+```dockerfile
+ENV PYTHONPATH=/app/demark_world_code/src
+```
+
+### Files Most Likely to Conflict
+
+```
+src/demark_world/
+├── watermark_cleaner.py     # Core - many imports
+├── watermark_detector.py    # Core - many imports
+├── cleaner/lama_cleaner.py  # Model loader
+├── cleaner/e2fgvi_hq_cleaner.py  # Model loader
+└── iopaint/**/             # Many submodules
+```
+
+### Automation Script (Save This!)
+
+Create `~/scripts/fix-demark-imports.sh`:
 
 ```bash
-cd demark_world
-git log -1 --oneline
-# Example: e923cdc Feature: add memory-aware chunksize
+#!/bin/bash
+# Fixes DeMark-World imports after upstream merge
+# Usage: ./fix-demark-imports.sh /path/to/DeMark-World
+
+if [ -z "$1" ]; then
+    echo "Usage: $0 /path/to/DeMark-World"
+    exit 1
+fi
+
+cd "$1" || exit 1
+
+echo "Fixing import paths..."
+find src -type f -name "*.py" -exec sed -i '' 's/from src\.demark_world/from demark_world/g' {} \;
+find src -type f -name "*.py" -exec sed -i '' 's/import src\.demark_world/import demark_world/g' {} \;
+
+echo "Checking for remaining bad imports..."
+grep -r "from src.demark_world" src --include="*.py" | wc -l
+grep -r "import src.demark_world" src --include="*.py" | wc -l
+
+echo "✅ Done! Check counts above should be 0."
 ```
 
-Add to deployment notes or `.env`:
-```
-DEMARK_VERSION=e923cdc
+```bash
+chmod +x ~/scripts/fix-demark-imports.sh
 ```
 
 ---
 
 ## Troubleshooting
 
-### Merge Conflicts During Sync
-
-```bash
-# See conflicting files
-git status
-
-# For each conflict, manually edit to keep both upstream + your changes
-git add <resolved-file>
-git commit -m "merge: resolve conflicts"
-```
-
 ### Build Fails After Update
 
 ```bash
-# Clear Docker cache
-docker build --no-cache -t <user>/watermark-worker:latest .
+# Clear Docker cache and rebuild
+docker build --no-cache -t jingyuyan19/watermark-worker:latest .
+```
+
+### Import Errors in Logs
+
+```
+ModuleNotFoundError: No module named 'src.demark_world'
+```
+
+**Fix:** You missed running the sed command. Re-run import fixes:
+
+```bash
+cd demark_world
+find src -type f -name "*.py" -exec sed -i 's/from src\.demark_world/from demark_world/g' {} \;
+find src -type f -name "*.py" -exec sed -i 's/import src\.demark_world/import demark_world/g' {} \;
 ```
 
 ### Rollback to Previous Version
 
 ```bash
-# On DO VPS
+# On VPS
+cd /root/aiWatermarkRemover/worker
+ls demark_world_backup_*  # See available backups
+
 rm -rf demark_world
-mv demark_world_backup demark_world
-docker build -t <user>/watermark-worker:latest .
-docker push <user>/watermark-worker:latest
+cp -r demark_world_backup_YYYYMMDD demark_world
+
+docker build -t jingyuyan19/watermark-worker:latest .
+docker push jingyuyan19/watermark-worker:latest
 ```
 
----
-
-## When to Update
-
-| Scenario | Action |
-|----------|--------|
-| **Upstream has bug fix** | Update immediately |
-| **Upstream has new feature** | Evaluate, then update |
-| **Your worker is working fine** | No rush to update |
-| **Processing errors appear** | Check if upstream has fix |
-
----
-
-## Files You've Modified
-
-**Total: ~101 files changed** - but all for the same reason.
-
-### Why These Files Were Modified
-
-Your Dockerfile sets:
-```dockerfile
-ENV PYTHONPATH=/app/demark_world_code/src
-```
-
-This means Python's import root is `/app/demark_world_code/src/`, so imports must be:
-- ✅ `from demark_world.xxx` (your version)
-- ❌ `from src.demark_world.xxx` (original upstream)
-
-### The Fix Applied
-
-Every modified file has the same pattern:
-
-```python
-# Original (upstream)
-from src.demark_world.xxx import yyy
-import src.demark_world.xxx
-
-# Your version (fixed for PYTHONPATH)
-from demark_world.xxx import yyy
-import demark_world.xxx
-```
-
-### Files With Import Path Changes
-
-**Core modules:**
-```
-src/demark_world/
-├── watermark_cleaner.py
-├── watermark_detector.py
-├── schemas.py
-├── cleaner/lama_cleaner.py
-├── cleaner/e2fgvi_hq_cleaner.py
-├── models/model/e2fgvi.py
-├── models/model/e2fgvi_hq.py
-├── models/model/modules/feat_prop.py
-├── models/model/modules/flow_comp.py
-├── utils/download_utils.py
-├── utils/imputation_utils.py
-├── utils/watermark_utls.py
-└── ... (~90 more files with same import fix)
-```
-
-**IOPaint submodule:**
-```
-src/demark_world/iopaint/
-├── model/anytext/cldm/*.py
-├── tests/*.py
-├── schema.py
-├── web_config.py
-└── ... (many more)
-```
-
-### New Files in Upstream (Dec 2025)
-
-These files are **missing** from your local copy:
-```
-src/demark_world/constants.py          ← NEW
-src/demark_world/utils/mem_constants.py ← NEW (memory-aware feature)
-src/demark_world/utils/mem_utils.py     ← NEW (memory-aware feature)
-```
-
-⚠️ **These new files are needed for the memory-aware chunksize feature!**
-
-### How to Apply Changes After Merge
-
-After pulling upstream changes, run this find-replace:
+### VPS Disk Full
 
 ```bash
-# In your DeMark-World fork
-find src -type f -name "*.py" -exec sed -i '' 's/from src\.demark_world/from demark_world/g' {} \;
-find src -type f -name "*.py" -exec sed -i '' 's/import src\.demark_world/import demark_world/g' {} \;
+# Clean up Docker
+docker system prune -a -f
+
+# Remove old backups
+ls -dt demark_world_backup_* | tail -n +2 | xargs rm -rf
 ```
 
-This automatically fixes all import paths.
+### Docker Hub Push Fails
 
-### Summary
+```bash
+# Re-login
+docker logout
+docker login
 
-| Aspect | Status |
-|--------|--------|
-| **Functional changes** | ❌ None |
-| **Import path fixes** | ✅ ~101 files |
-| **Logic/algorithm changes** | ❌ None |
-| **Safe to auto-fix after merge** | ✅ Yes (sed command above) |
+# Or use token instead of password
+# Get token: https://hub.docker.com/settings/security
+```
+
+---
+
+## Version History
+
+Track your updates here after each sync:
+
+| Date | Upstream Commit | Notes |
+|------|-----------------|-------|
+| 2025-12-08 | `e923cdc` | Memory-aware chunksize, PhyNet cache |
+| _next_ | `_______` | _description_ |
+
+---
+
+## Quick Reference Card
+
+```
+╔══════════════════════════════════════════════════════════════╗
+║                    DEMARK-WORLD UPDATE                       ║
+╠══════════════════════════════════════════════════════════════╣
+║ 1. LOCAL:  cd DeMark-World && git fetch upstream            ║
+║ 2. LOCAL:  git merge upstream/main                           ║
+║ 3. LOCAL:  find src ... sed (fix imports)                    ║
+║ 4. LOCAL:  git push origin main                              ║
+║ 5. VPS:    ssh root@YOUR_VPS_IP                              ║
+║ 6. VPS:    cd /root/aiWatermarkRemover/worker/demark_world  ║
+║ 7. VPS:    git pull && cd .. && docker build && docker push ║
+║ 8. RUNPOD: Restart workers or wait for cold start           ║
+╚══════════════════════════════════════════════════════════════╝
+```
