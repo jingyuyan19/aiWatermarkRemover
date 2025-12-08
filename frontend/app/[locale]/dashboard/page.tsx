@@ -37,7 +37,7 @@ export default function DashboardPage() {
     const router = useRouter();
 
     const [jobs, setJobs] = useState<Job[]>([]);
-    const [credits, setCredits] = useState<number>(3);
+    const [credits, setCredits] = useState<number | null>(null);
     const [loading, setLoading] = useState(true);
 
     // Multi-file upload state
@@ -160,6 +160,12 @@ export default function DashboardPage() {
 
         // Check credits
         const totalCost = files.length * (quality === 'e2fgvi_hq' ? 2 : 1);
+        if (credits === null) {
+            toast.error('Loading credits...', {
+                description: 'Please wait while we fetch your credit balance.',
+            });
+            return;
+        }
         if (credits < totalCost) {
             toast.error(t('upload.insufficient_funds'), {
                 description: `Need ${totalCost} credits, you have ${credits}`,
@@ -460,7 +466,11 @@ export default function DashboardPage() {
                                             </div>
                                             <div>
                                                 <p className="text-sm text-gray-400">{t('stats.credits')}</p>
-                                                <p className="text-3xl font-bold">{credits}</p>
+                                                {credits === null ? (
+                                                    <div className="h-9 w-16 bg-white/10 rounded animate-pulse" />
+                                                ) : (
+                                                    <p className="text-3xl font-bold">{credits}</p>
+                                                )}
                                             </div>
                                         </div>
                                     </CardContent>
