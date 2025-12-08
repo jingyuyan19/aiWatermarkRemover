@@ -14,6 +14,7 @@ interface Job {
     input_url?: string;
     output_url?: string;
     created_at: string;
+    progress?: number;
 }
 
 export default function JobPage() {
@@ -229,7 +230,7 @@ export default function JobPage() {
                                             </div>
 
                                             <h3 className="text-3xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse">
-                                                {job.status === 'pending' ? 'Preparing' : 'Restoring'}
+                                                {job.status === 'pending' ? 'Preparing' : 'Processing'}
                                             </h3>
 
                                             {/* Dynamic Step Text */}
@@ -254,11 +255,19 @@ export default function JobPage() {
 
                         {/* Footer Note - Processing State only */}
                         {job.status !== 'completed' && job.status !== 'failed' && (
-                            <div className="text-center animate-in fade-in duration-1000 delay-500">
-                                <p className="text-white/40 text-sm font-light">
-                                    <span className="mr-2">⏳</span>
-                                    Hang tight! This usually takes about <span className="text-white/60 font-medium">45 seconds</span>.
-                                </p>
+                            <div className="text-center animate-in fade-in duration-1000 delay-500 max-w-md mx-auto w-full">
+                                <div className="flex items-center justify-between text-xs text-blue-200/50 mb-2 uppercase tracking-widest font-mono">
+                                    <span>Progress</span>
+                                    <span>{job.progress || 0}%</span>
+                                </div>
+                                <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden mb-4">
+                                    <div
+                                        className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 transition-all duration-300 ease-out relative"
+                                        style={{ width: `${Math.max(5, job.progress || 0)}%` }}
+                                    >
+                                        <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
+                                    </div>
+                                </div>
                                 <p className="text-white/20 text-xs mt-1">
                                     You can safely leave this page. Your video will be saved in your <Link href="/dashboard" className="hover:text-white/40 underline decoration-white/20 transition-colors">Dashboard</Link>.
                                 </p>
