@@ -12,6 +12,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
 import { HowItWorksDemo } from '@/components/HowItWorksDemo';
+import { PlatformIcon } from '@/components/PlatformIcons';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useTranslations, useLocale } from 'next-intl';
 
@@ -180,8 +181,11 @@ export default function Home() {
                                 whileInView={{ opacity: 1, y: 0 }}
                                 viewport={{ once: true }}
                                 transition={{ delay: idx * 0.05 }}
-                                className="group relative p-4 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[140px]"
+                                className="group relative p-4 rounded-xl bg-white/5 border border-white/10 hover:border-primary/50 hover:bg-primary/5 transition-all duration-300 w-[calc(50%-8px)] sm:w-[calc(33.333%-11px)] md:w-[140px] flex flex-col items-center"
                             >
+                                <div className="mb-3 transform group-hover:scale-110 transition-transform duration-300">
+                                    <PlatformIcon name={platform.name} className="w-10 h-10" />
+                                </div>
                                 <div className="text-lg font-bold text-white group-hover:text-primary transition-colors">
                                     {platform.name}
                                 </div>
