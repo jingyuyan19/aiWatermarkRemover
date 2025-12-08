@@ -112,19 +112,29 @@ export function MultiFileUpload({
                             )} />
                         )}
                     </div>
-                    <p className="text-sm text-gray-300 group-hover:text-white transition-colors text-center px-4">
+                    <div className="text-sm text-gray-300 group-hover:text-white transition-colors text-center px-4 flex flex-col items-center gap-1">
                         {files.length === 0 ? (
                             <>
-                                <span className="font-semibold text-primary">Click to upload</span> or drag and drop
-                                <br />
-                                <span className="text-gray-500 text-xs">MP4, MOV, AVI • Up to {maxFiles} files</span>
+                                <div className="mb-2">
+                                    <span className="font-semibold text-primary text-lg">Click to upload</span>
+                                    <span className="text-gray-400"> or drag and drop</span>
+                                </div>
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary shadow-sm shadow-primary/5">
+                                        Batch process up to {maxFiles} videos
+                                    </div>
+                                    <span className="text-gray-500 text-[10px] uppercase tracking-wider font-medium">MP4 • MOV • AVI</span>
+                                </div>
                             </>
                         ) : (
                             <>
-                                <span className="font-semibold text-primary">Add more files</span> ({files.length}/{maxFiles})
+                                <span className="font-semibold text-primary text-base">Add more files</span>
+                                <span className="text-xs text-gray-400">
+                                    {files.length} of {maxFiles} files selected
+                                </span>
                             </>
                         )}
-                    </p>
+                    </div>
                 </div>
                 <input
                     id="multi-file-upload"
