@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
+import { HowItWorksDemo } from '@/components/HowItWorksDemo';
 import { useAuth, SignInButton } from '@clerk/nextjs';
 import { useTranslations, useLocale } from 'next-intl';
 
@@ -242,7 +243,7 @@ export default function Home() {
             <section id="how-it-works" className="py-32 px-4 relative z-10">
                 <div className="container max-w-6xl mx-auto">
                     <motion.div
-                        className="text-center mb-20"
+                        className="text-center mb-16"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
@@ -251,33 +252,14 @@ export default function Home() {
                         <p className="text-xl text-gray-400">{t('HowItWorks.subtitle')}</p>
                     </motion.div>
 
-                    <div className="grid md:grid-cols-3 gap-12 relative">
-                        <div className="absolute top-12 left-0 w-full h-px bg-gradient-to-r from-transparent via-white/10 to-transparent hidden md:block" />
-
-                        {steps.map(({ key, icon: Icon, color }, index) => (
-                            <motion.div
-                                key={key}
-                                className="relative"
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.2 }}
-                            >
-                                <div className="text-center relative z-10">
-                                    <div className={`w-24 h-24 mx-auto rounded-2xl bg-black border border-white/10 flex items-center justify-center mb-8 shadow-2xl relative group`}>
-                                        <div className={`absolute inset-0 bg-gradient-to-br ${color} opacity-10 group-hover:opacity-20 transition-opacity rounded-2xl`} />
-                                        <Icon className="w-10 h-10 text-white group-hover:scale-110 transition-transform duration-300" />
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-white mb-3">
-                                        {t(`HowItWorks.steps.${key}.title`)}
-                                    </h3>
-                                    <p className="text-gray-400 leading-relaxed">
-                                        {t(`HowItWorks.steps.${key}.description`)}
-                                    </p>
-                                </div>
-                            </motion.div>
-                        ))}
-                    </div>
+                    <motion.div
+                        initial={{ opacity: 0, y: 40 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        transition={{ delay: 0.2 }}
+                    >
+                        <HowItWorksDemo />
+                    </motion.div>
                 </div>
             </section>
 
