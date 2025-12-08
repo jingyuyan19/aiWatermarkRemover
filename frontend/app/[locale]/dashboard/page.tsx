@@ -334,29 +334,27 @@ export default function DashboardPage() {
 
                     <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                         {/* Left Column: Upload */}
-                        <div className="lg:col-span-2 flex flex-col">
+                        <div className="lg:col-span-2">
                             <motion.div
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ delay: 0.1 }}
                                 className="h-full"
                             >
-                                <Card className="bg-white/5 border-white/10 overflow-hidden h-full flex flex-col">
-                                    <CardContent className="p-8 flex-1 flex flex-col">
+                                <Card className="bg-white/5 border-white/10 overflow-hidden h-full">
+                                    <CardContent className="p-8">
                                         <h2 className="text-2xl font-semibold mb-6 flex items-center gap-2">
                                             <Upload className="w-6 h-6 text-primary" />
                                             {t('upload.title')}
                                         </h2>
 
-                                        <div className="space-y-6 flex-1 flex flex-col">
+                                        <div className="space-y-6">
                                             {/* File Upload Zone */}
                                             <MultiFileUpload
                                                 onFilesChange={handleFilesChange}
                                                 files={files}
                                                 maxFiles={10}
                                                 disabled={isProcessing}
-                                                className="flex-1 flex flex-col"
-                                                dropzoneClassName="flex-1 min-h-[12rem]"
                                             />
 
                                             {/* Upload Queue (shows during/after processing) */}
