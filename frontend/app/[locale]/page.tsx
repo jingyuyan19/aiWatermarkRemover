@@ -281,55 +281,91 @@ export default function Home() {
                 </div>
             </section>
 
-            {/* ===== TECHNOLOGY SECTION ===== */}
-            <section className="py-32 px-4 relative z-10">
-                <div className="container max-w-6xl mx-auto">
+            {/* ===== TECHNOLOGY SECTION - PIPELINE DESIGN ===== */}
+            <section className="py-32 px-4 relative z-10 overflow-hidden">
+                {/* Gradient mesh background */}
+                <div className="absolute inset-0 opacity-30">
+                    <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/30 rounded-full blur-[128px]" />
+                    <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/20 rounded-full blur-[128px]" />
+                </div>
+
+                <div className="container max-w-6xl mx-auto relative">
                     <motion.div
-                        className="text-center mb-16"
+                        className="text-center mb-20"
                         initial={{ opacity: 0, y: 20 }}
                         whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                     >
-                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary mb-6">
-                            <Cpu className="w-3 h-3" />
-                            <span>Enterprise Technology</span>
+                        <span className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r from-primary/20 to-purple-500/20 border border-primary/30 text-sm font-medium text-primary mb-6 backdrop-blur-sm">
+                            <Cpu className="w-4 h-4" />
+                            <span>How Our AI Works</span>
                         </span>
-                        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">{t('Technology.title')}</h2>
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6">{t('Technology.title')}</h2>
                         <p className="text-xl text-gray-400 max-w-2xl mx-auto">{t('Technology.subtitle')}</p>
                     </motion.div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {[
-                            { key: 'parallel', icon: Layers, gradient: 'from-blue-500/20 to-cyan-500/20' },
-                            { key: 'detection', icon: Target, gradient: 'from-purple-500/20 to-pink-500/20' },
-                            { key: 'inpainting', icon: Sparkles, gradient: 'from-amber-500/20 to-orange-500/20' },
-                            { key: 'temporal', icon: Film, gradient: 'from-green-500/20 to-emerald-500/20' },
-                        ].map(({ key, icon: Icon, gradient }, index) => (
-                            <motion.div
-                                key={key}
-                                initial={{ opacity: 0, y: 20 }}
-                                whileInView={{ opacity: 1, y: 0 }}
-                                viewport={{ once: true }}
-                                transition={{ delay: index * 0.1 }}
-                                className="group"
-                            >
-                                <div className={`relative p-8 rounded-2xl bg-gradient-to-br ${gradient} border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden`}>
-                                    <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" />
-                                    <div className="relative z-10">
-                                        <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:border-primary/50">
-                                            <Icon className="w-7 h-7 text-primary" />
+                    {/* Horizontal Pipeline */}
+                    <div className="relative">
+                        {/* Connecting Line */}
+                        <div className="absolute top-16 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent hidden md:block" />
+
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
+                            {[
+                                { key: 'parallel', icon: Layers, num: '01', color: 'from-blue-500 to-cyan-400' },
+                                { key: 'detection', icon: Target, num: '02', color: 'from-purple-500 to-pink-400' },
+                                { key: 'inpainting', icon: Sparkles, num: '03', color: 'from-amber-500 to-orange-400' },
+                                { key: 'temporal', icon: Film, num: '04', color: 'from-green-500 to-emerald-400' },
+                            ].map(({ key, icon: Icon, num, color }, index) => (
+                                <motion.div
+                                    key={key}
+                                    initial={{ opacity: 0, y: 30 }}
+                                    whileInView={{ opacity: 1, y: 0 }}
+                                    viewport={{ once: true }}
+                                    transition={{ delay: index * 0.15 }}
+                                    className="flex flex-col items-center text-center group"
+                                >
+                                    {/* Step indicator */}
+                                    <div className="relative mb-8">
+                                        <div className={`w-32 h-32 rounded-3xl bg-gradient-to-br ${color} p-[1px] group-hover:scale-105 transition-transform duration-300`}>
+                                            <div className="w-full h-full rounded-3xl bg-black/90 flex items-center justify-center backdrop-blur-xl">
+                                                <Icon className="w-12 h-12 text-white" />
+                                            </div>
                                         </div>
-                                        <h3 className="text-xl font-semibold text-white mb-3">
-                                            {t(`Technology.items.${key}.title`)}
-                                        </h3>
-                                        <p className="text-gray-400 leading-relaxed">
-                                            {t(`Technology.items.${key}.description`)}
-                                        </p>
+                                        {/* Step number */}
+                                        <span className={`absolute -top-2 -right-2 w-8 h-8 rounded-full bg-gradient-to-br ${color} flex items-center justify-center text-sm font-bold text-white shadow-lg`}>
+                                            {num}
+                                        </span>
+                                        {/* Pulse effect */}
+                                        <div className={`absolute inset-0 rounded-3xl bg-gradient-to-br ${color} opacity-0 group-hover:opacity-20 blur-xl transition-opacity duration-500`} />
                                     </div>
-                                </div>
-                            </motion.div>
-                        ))}
+
+                                    <h3 className="text-lg font-semibold text-white mb-2">
+                                        {t(`Technology.items.${key}.title`)}
+                                    </h3>
+                                    <p className="text-sm text-gray-400 leading-relaxed max-w-[200px]">
+                                        {t(`Technology.items.${key}.description`)}
+                                    </p>
+                                </motion.div>
+                            ))}
+                        </div>
                     </div>
+
+                    {/* Tech Stack Badge Row */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                        className="mt-20 flex flex-wrap justify-center gap-4"
+                    >
+                        {['YOLO v8', 'LaMa', 'E2FGVI', 'CUDA', 'PyTorch'].map((tech) => (
+                            <span
+                                key={tech}
+                                className="px-4 py-2 rounded-lg bg-white/5 border border-white/10 text-sm font-mono text-gray-300 hover:border-primary/50 hover:text-primary transition-colors"
+                            >
+                                {tech}
+                            </span>
+                        ))}
+                    </motion.div>
                 </div>
             </section>
 
