@@ -244,7 +244,7 @@ export default function DashboardPage() {
                 successCount++;
 
                 // Update credits display
-                setCredits(prev => prev - (quality === 'e2fgvi_hq' ? 2 : 1));
+                setCredits(prev => prev !== null ? prev - (quality === 'e2fgvi_hq' ? 2 : 1) : 0);
 
             } catch (error) {
                 console.error('Error processing file:', item.file.name, error);
