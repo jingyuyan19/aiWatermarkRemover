@@ -5,6 +5,8 @@ Queue-based architecture for scale-to-zero deployment
 import runpod
 import os
 import boto3
+import torch
+import gc
 from pathlib import Path
 from demark_world.core import DeMarkWorld
 from demark_world.schemas import CleanerType
@@ -102,6 +104,16 @@ def handler(job):
             "job_id": job_id,
             "error": str(e)
         }
+    
+    finally:
+        # 5. Global Cleanup (Crucial for GPU persistence)
+        # Ensure model is unloaded if possible and cache is cleared
+        if 'demarker' in locals():
+            del demarker
+        
+        gc.collect()
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
 
 # Start the RunPod serverless handler
 runpod.serverless.start({
