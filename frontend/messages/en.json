@@ -107,6 +107,28 @@
             }
         }
     },
+    "Technology": {
+        "title": "Powered by Advanced AI",
+        "subtitle": "Enterprise-grade technology built for creators",
+        "items": {
+            "parallel": {
+                "title": "Parallel GPU Processing",
+                "description": "Upload multiple videos at once. Our cloud infrastructure processes them simultaneously on dedicated GPU workers."
+            },
+            "detection": {
+                "title": "Smart Watermark Detection",
+                "description": "YOLO-based neural networks automatically detect and locate watermarks with 99% accuracy—no manual selection needed."
+            },
+            "inpainting": {
+                "title": "Intelligent Restoration",
+                "description": "State-of-the-art LaMa inpainting technology fills removed areas seamlessly, matching surrounding textures and colors."
+            },
+            "temporal": {
+                "title": "Frame-Perfect Results",
+                "description": "Specialized video processing ensures watermark removal is consistent across all frames—no flickering or artifacts."
+            }
+        }
+    },
     "Comparison": {
         "title": "See the Difference",
         "before": "Before",

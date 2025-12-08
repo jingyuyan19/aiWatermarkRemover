@@ -6,7 +6,7 @@ import { motion } from 'framer-motion';
 import {
     Sparkles, Zap, Clock, Shield, Upload, Download,
     Cpu, Cloud, Check, ChevronDown, ChevronUp,
-    ArrowRight, Play, Layers, Wand2
+    ArrowRight, Play, Layers, Wand2, Target, Film
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
@@ -281,7 +281,57 @@ export default function Home() {
                 </div>
             </section>
 
+            {/* ===== TECHNOLOGY SECTION ===== */}
+            <section className="py-32 px-4 relative z-10">
+                <div className="container max-w-6xl mx-auto">
+                    <motion.div
+                        className="text-center mb-16"
+                        initial={{ opacity: 0, y: 20 }}
+                        whileInView={{ opacity: 1, y: 0 }}
+                        viewport={{ once: true }}
+                    >
+                        <span className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary mb-6">
+                            <Cpu className="w-3 h-3" />
+                            <span>Enterprise Technology</span>
+                        </span>
+                        <h2 className="text-4xl md:text-5xl font-bold mb-6 bg-clip-text text-transparent bg-gradient-to-b from-white to-white/60">{t('Technology.title')}</h2>
+                        <p className="text-xl text-gray-400 max-w-2xl mx-auto">{t('Technology.subtitle')}</p>
+                    </motion.div>
 
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        {[
+                            { key: 'parallel', icon: Layers, gradient: 'from-blue-500/20 to-cyan-500/20' },
+                            { key: 'detection', icon: Target, gradient: 'from-purple-500/20 to-pink-500/20' },
+                            { key: 'inpainting', icon: Sparkles, gradient: 'from-amber-500/20 to-orange-500/20' },
+                            { key: 'temporal', icon: Film, gradient: 'from-green-500/20 to-emerald-500/20' },
+                        ].map(({ key, icon: Icon, gradient }, index) => (
+                            <motion.div
+                                key={key}
+                                initial={{ opacity: 0, y: 20 }}
+                                whileInView={{ opacity: 1, y: 0 }}
+                                viewport={{ once: true }}
+                                transition={{ delay: index * 0.1 }}
+                                className="group"
+                            >
+                                <div className={`relative p-8 rounded-2xl bg-gradient-to-br ${gradient} border border-white/10 hover:border-white/20 transition-all duration-300 overflow-hidden`}>
+                                    <div className="absolute inset-0 bg-black/60 backdrop-blur-xl" />
+                                    <div className="relative z-10">
+                                        <div className="w-14 h-14 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 group-hover:border-primary/50">
+                                            <Icon className="w-7 h-7 text-primary" />
+                                        </div>
+                                        <h3 className="text-xl font-semibold text-white mb-3">
+                                            {t(`Technology.items.${key}.title`)}
+                                        </h3>
+                                        <p className="text-gray-400 leading-relaxed">
+                                            {t(`Technology.items.${key}.description`)}
+                                        </p>
+                                    </div>
+                                </div>
+                            </motion.div>
+                        ))}
+                    </div>
+                </div>
+            </section>
 
             {/* ===== FAQ SECTION ===== */}
             <section id="faq" className="py-32 px-4 relative z-10 bg-white/[0.02]">
