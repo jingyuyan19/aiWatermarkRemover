@@ -306,8 +306,20 @@ export default function Home() {
 
                     {/* Horizontal Pipeline */}
                     <div className="relative">
-                        {/* Connecting Line */}
-                        <div className="absolute top-16 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/50 to-transparent hidden md:block" />
+                        {/* Connecting Line with animated pulse */}
+                        <div className="absolute top-16 left-0 right-0 hidden md:block">
+                            {/* Base line */}
+                            <div className="h-px bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+                            {/* Animated light pulse */}
+                            <div className="absolute inset-0 overflow-hidden">
+                                <div className="pipeline-pulse h-px w-1/4 bg-gradient-to-r from-transparent via-primary to-transparent absolute animate-pulse-sweep" />
+                            </div>
+                            {/* Glowing orb that travels */}
+                            <div className="absolute inset-0 overflow-hidden">
+                                <div className="pipeline-orb absolute top-1/2 -translate-y-1/2 w-4 h-4 rounded-full bg-primary blur-sm animate-orb-sweep" />
+                                <div className="pipeline-orb-core absolute top-1/2 -translate-y-1/2 w-2 h-2 rounded-full bg-white animate-orb-sweep" />
+                            </div>
+                        </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-8 md:gap-4 relative">
                             {[
