@@ -317,13 +317,15 @@ async def get_job_status(
                     )
                     if rp_resp.status_code == 200:
                         data = rp_resp.json()
-                        # Use logger to ensure output appears
-                        logger.info(f"[DEBUG-POLL] RunPod Status for {job.runpod_job_id}: {data.get('status')}")
-                        logger.info(f"[DEBUG-POLL] Messages: {data.get('messages')}")
+                        # Log FULL raw response for debugging
+                        logger.info(f"[DEBUG-POLL] RunPod FULL Response: {data}")
                         
-                        messages = data.get("messages", [])
+                        # Check both 'messages' and 'stream' fields
+                        messages = data.get("messages") or data.get("stream") or []
+                        logger.info(f"[DEBUG-POLL] Messages/Stream: {messages}")
+                        
                         if messages and len(messages) > 0:
-                            latest = messages[-1]
+                            latest = messages[-1] if isinstance(messages, list) else str(messages)
                             if isinstance(latest, str) and "%" in latest:
                                 try:
                                     pct = int(latest.strip().replace("%", ""))

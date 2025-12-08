@@ -104,4 +104,7 @@ def handler(job):
         }
 
 # Start the RunPod serverless handler
-runpod.serverless.start({"handler": handler})
+runpod.serverless.start({
+    "handler": handler,
+    "return_aggregate_stream": True
+})
