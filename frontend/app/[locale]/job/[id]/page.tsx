@@ -32,17 +32,18 @@ export default function JobPage() {
     const [activityStep, setActivityStep] = useState(0);
     const activitySteps = t.raw('activity') as string[];
 
+    // Activity Step Timer
     useEffect(() => {
         if (!job || job.status === 'completed') return;
 
         const interval = setInterval(() => {
             setActivityStep(prev => (prev + 1) % activitySteps.length);
-        }, 2500); // Change step every 2.5 seconds
+        }, 2500);
 
         return () => clearInterval(interval);
     }, [job?.status, activitySteps.length]);
 
-    // Fetch Job Data
+    // Data Fetching
     useEffect(() => {
         let isMounted = true;
 
@@ -61,8 +62,6 @@ export default function JobPage() {
                     if (res.status === 404) {
                         if (isMounted) setError('Job not found');
                     } else {
-                        // Don't set error immediately on transient failures, maybe retry?
-                        // For now, simple error setting if it persists or is critical
                         console.error('Failed to fetch job');
                     }
                     return;
@@ -71,9 +70,6 @@ export default function JobPage() {
                 const data = await res.json();
                 if (isMounted) {
                     setJob(data);
-                    // Stop polling if completed/failed? 
-                    // The interval will run regardless, but that's fine for now, 
-                    // or we could clear it if status is terminal.
                 }
 
             } catch (err) {
@@ -97,8 +93,6 @@ export default function JobPage() {
             clearInterval(interval);
         };
     }, [isLoaded, userId, jobId, getToken]);
-
-
 
     if (error) {
         return (
@@ -181,14 +175,12 @@ export default function JobPage() {
                             {/* 2. Fluid Light Effect (Only when processing/pending) */}
                             {(job.status === 'processing' || job.status === 'pending') && (
                                 <>
-                                    {/* Overlay controlled by opacity (50% default) */}
                                     <div
                                         className="absolute inset-0 z-10 bg-black transition-opacity duration-300"
                                         style={{ opacity: 0.5 }}
                                     ></div>
 
                                     <div className="absolute inset-0 z-10 pointer-events-none overflow-hidden" style={{ mixBlendMode: 'normal' }}>
-                                        {/* Blob 1 */}
                                         <div
                                             className="absolute w-[80%] h-[80%] rounded-full bg-blue-600/80 transition-all duration-500"
                                             style={{
@@ -196,7 +188,6 @@ export default function JobPage() {
                                                 animation: 'fluid1 4.5s infinite ease-in-out'
                                             }}
                                         ></div>
-                                        {/* Blob 2 */}
                                         <div
                                             className="absolute w-[80%] h-[80%] rounded-full bg-violet-600/80 transition-all duration-500"
                                             style={{
@@ -204,7 +195,6 @@ export default function JobPage() {
                                                 animation: 'fluid2 5.75s infinite ease-in-out'
                                             }}
                                         ></div>
-                                        {/* Blob 3 */}
                                         <div
                                             className="absolute w-[60%] h-[60%] rounded-full bg-cyan-500/80 transition-all duration-500"
                                             style={{
@@ -220,9 +210,7 @@ export default function JobPage() {
                             {job.status !== 'completed' && (
                                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
                                     <div className="space-y-6">
-                                        {/* Animated Activity Log */}
                                         <div className="flex flex-col items-center gap-4">
-                                            {/* Pulse Indicator */}
                                             <div className="flex gap-2 items-center mb-2">
                                                 <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
                                                 <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
@@ -233,7 +221,6 @@ export default function JobPage() {
                                                 {job.status === 'pending' ? 'Preparing' : 'Processing'}
                                             </h3>
 
-                                            {/* Dynamic Step Text */}
                                             <div className="h-8 overflow-hidden relative w-full flex justify-center">
                                                 <p key={activityStep} className="text-blue-200/80 text-sm font-mono tracking-widest uppercase animate-[slideUp_0.5s_ease-out]">
                                                     {activitySteps[activityStep]}
@@ -260,7 +247,7 @@ export default function JobPage() {
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between items-end px-1">
                                         <span className="text-[10px] uppercase tracking-[0.2em] text-blue-300/60 font-semibold">
-                                            Processing
+                                            PROCESSING
                                         </span>
                                         <span className="text-sm font-mono font-medium text-blue-300">
                                             {job.progress || 0}%
@@ -268,16 +255,16 @@ export default function JobPage() {
                                     </div>
 
                                     <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/10 ring-1 ring-black/20">
-                                        {/* Gradient Fill */}
+                                        {/* Gradient Fill - Growing Bar */}
                                         <div
                                             className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-[0_0_15px_rgba(99,102,241,0.4)]"
                                             style={{ width: `${Math.max(2, job.progress || 0)}%` }}
                                         >
-                                            {/* Shimmer overlay */}
-                                            <div className="absolute inset-0 w-full h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)] animate-[shimmer-slide_1.5s_infinite]"></div>
+                                            {/* Subtle internal shimmer - reduced opacity and speed */}
+                                            <div className="absolute inset-0 w-full h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] animate-[shimmer-slow_3s_infinite]"></div>
 
-                                            {/* Glow tip */}
-                                            <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white/40 blur-[2px] shadow-[0_0_8px_white]"></div>
+                                            {/* Leading Edge Glow */}
+                                            <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[3px] shadow-[0_0_12px_white]"></div>
                                         </div>
                                     </div>
                                 </div>
@@ -329,13 +316,9 @@ export default function JobPage() {
                     70% { transform: translate(5%, -20%) scale(0.85); }
                     100% { transform: translate(0, 0) scale(0.9); }
                 }
-                @keyframes scan {
-                    0% { top: -50%; }
-                    100% { top: 150%; }
-                }
-                @keyframes shimmer-slide {
-                    0% { transform: translateX(-100%); }
-                    100% { transform: translateX(100%); }
+                @keyframes shimmer-slow {
+                    0% { transform: translateX(-150%); }
+                    100% { transform: translateX(150%); }
                 }
                 @keyframes slideUp {
                     0% { transform: translateY(100%); opacity: 0; }
