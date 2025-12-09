@@ -12,9 +12,16 @@
         "dashboard": "Dashboard",
         "history": "History",
         "buyCredits": "Buy Credits",
-        "account": "Account"
+        "account": "Account",
+        "freeCredits": "Get 3 Free Credits"
     },
     "HomePage": {
+        "ctaSection": {
+            "title": "Ready to remove watermarks?",
+            "subtitle": "Join thousands of creators using Vanishly to clean up their videos in seconds.",
+            "button": "Start Removing Now",
+            "noCard": "No credit card required"
+        },
         "title": "Remove Watermarks",
         "titleHighlight": "in Seconds",
         "subtitle": "Professional-grade watermark removal powered by advanced AI. Upload your video and let our neural networks do the magic.",

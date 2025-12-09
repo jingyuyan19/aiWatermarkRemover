@@ -41,8 +41,9 @@ export function Navbar({ locale }: { locale: string }) {
 
                     <SignedOut>
                         <SignInButton mode="modal">
-                            <button className="px-4 py-2 rounded-lg bg-primary text-white hover:bg-blue-600 transition-colors text-sm font-medium">
-                                {t('signIn')}
+                            <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg shadow-amber-500/20 transition-all text-sm font-bold flex items-center gap-2">
+                                <span className="mr-1">🎁</span>
+                                {t('freeCredits')}
                             </button>
                         </SignInButton>
                     </SignedOut>
@@ -112,10 +113,11 @@ export function Navbar({ locale }: { locale: string }) {
                         <SignedOut>
                             <SignInButton mode="modal">
                                 <button
-                                    className="w-full px-4 py-3 rounded-lg bg-primary text-white hover:bg-blue-600 transition-colors font-medium"
+                                    className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg shadow-amber-500/20 transition-all font-bold flex items-center justify-center gap-2"
                                     onClick={() => setMobileMenuOpen(false)}
                                 >
-                                    {t('signIn')}
+                                    <span className="mr-1">🎁</span>
+                                    {t('freeCredits')}
                                 </button>
                             </SignInButton>
                         </SignedOut>

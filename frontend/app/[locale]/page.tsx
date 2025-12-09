@@ -91,7 +91,7 @@ export default function Home() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
                             <SignInButton mode="modal">
-                                <Button size="lg" variant="glow" className="text-lg px-8 h-12 rounded-full">
+                                <Button size="lg" variant="gold" className="text-lg px-8 h-12 rounded-full shadow-lg shadow-amber-500/20">
                                     {t('HomePage.cta')}
                                     <ArrowRight className="ml-2 w-5 h-5" />
                                 </Button>
@@ -406,6 +406,44 @@ export default function Home() {
                     </div>
                 </div>
             </section>
+            {/* ===== FINAL CTA SECTION ===== */}
+            <section className="py-20 relative z-10 border-t border-white/5 bg-gradient-to-b from-black to-blue-900/10">
+                <div className="container max-w-4xl mx-auto text-center px-4">
+                    <motion.div
+                        initial={{ opacity: 0, scale: 0.95 }}
+                        whileInView={{ opacity: 1, scale: 1 }}
+                        viewport={{ once: true }}
+                        className="bg-white/5 border border-white/10 rounded-3xl p-12 md:p-16 relative overflow-hidden"
+                    >
+                        {/* Background Effects */}
+                        <div className="absolute top-0 right-0 w-64 h-64 bg-primary/20 rounded-full blur-[100px] -translate-y-1/2 translate-x-1/2" />
+                        <div className="absolute bottom-0 left-0 w-64 h-64 bg-purple-500/20 rounded-full blur-[100px] translate-y-1/2 -translate-x-1/2" />
+
+                        <div className="relative z-10">
+                            <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white tracking-tight">
+                                {t('HomePage.ctaSection.title')}
+                            </h2>
+                            <p className="text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
+                                {t('HomePage.ctaSection.subtitle')}
+                            </p>
+
+                            <div className="flex flex-col items-center gap-4">
+                                <SignInButton mode="modal">
+                                    <Button size="lg" variant="gold" className="text-lg px-10 h-14 rounded-full shadow-xl shadow-amber-500/20 hover:shadow-amber-500/40">
+                                        <Sparkles className="w-5 h-5 mr-2" />
+                                        {t('HomePage.ctaSection.button')}
+                                    </Button>
+                                </SignInButton>
+                                <p className="text-sm text-gray-500 flex items-center gap-2">
+                                    <Shield className="w-4 h-4" />
+                                    {t('HomePage.ctaSection.noCard')}
+                                </p>
+                            </div>
+                        </div>
+                    </motion.div>
+                </div>
+            </section>
+
         </main>
     );
 }

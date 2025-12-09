@@ -12,9 +12,16 @@
         "dashboard": "控制台",
         "history": "历史",
         "buyCredits": "购买额度",
-        "account": "账户设置"
+        "account": "账户设置",
+        "freeCredits": "免费领取 3 个积分"
     },
     "HomePage": {
+        "ctaSection": {
+            "title": "准备好开始了吗？",
+            "subtitle": "加入数千名创作者，使用 Vanishly 秒级清除视频水印。",
+            "button": "立即开始",
+            "noCard": "无需信用卡"
+        },
         "badge": "新功能：AI 视频去水印",
         "title": "一键去除水印",
         "titleHighlight": "秒级处理",
