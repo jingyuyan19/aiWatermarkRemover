@@ -17,7 +17,7 @@ export function Navbar({ locale }: { locale: string }) {
                 <a href={`/${locale}`} className="flex items-center gap-3 font-bold text-xl text-white hover:text-primary transition-colors">
                     <div className="relative w-10 h-10">
                         <NextImage
-                            src="/logo.png"
+                            src="/icon-black.png"
                             alt="Vanishly Logo"
                             fill
                             className="object-contain"

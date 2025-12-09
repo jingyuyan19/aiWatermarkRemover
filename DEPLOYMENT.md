@@ -141,7 +141,7 @@ https://your-app.vercel.app
 Go back to Railway → Backend → Variables and update:
 
 ```bash
-ALLOWED_ORIGINS=https://your-app.vercel.app,http://localhost:3000
+ALLOWED_ORIGINS=https://vanishly.io,https://www.vanishly.io,http://localhost:3000
 ```
 
 Then update `backend/main.py`:
@@ -244,8 +244,52 @@ Create multiple RunPod pods with the same Docker image and Redis URL. Celery wil
 ## Next Steps
 
 Consider adding:
-- Custom domain for Vercel frontend
+- Custom domain: `vanishly.io` (configured in Vercel)
 - Authentication (Clerk, Auth0)
+
+### Setting up Google OAuth (Production)
+
+1. Go to **[Google Cloud Console](https://console.cloud.google.com/)**.
+2. Create a new project (e.g., "Vanishly Prod").
+3. **OAuth Consent Screen (Project Configuration Wizard)**:
+   - **Step 1: App Information**:
+     - **App name**: "Vanishly" (or "Vanishly Prod").
+     - **User support email**: Select your email.
+     - Click **Next**.
+   - **Step 2: Audience**:
+     - Select **External**.
+     - Click **Next**.
+   - **Step 3: Contact Information**:
+     - **Email addresses**: Enter your email.
+     - Click **Next** / **Finish**.
+   - *Note: If you didn't see "Authorized domains", don't worry. It's handled in the next step.*
+4. **Credentials** (You are now on the Overview page):
+   - Click the button **Create OAuth client** (or go to **Clients** in the left sidebar).
+   - Application type: **Web application**.
+   - Name: "Clerk Prod".
+   - **Authorized JavaScript origins**: `https://vanishly.io` and `https://www.vanishly.io`.
+   - **Authorized redirect URIs**: Copy the URL from Clerk (e.g., `https://clerk.vanishly.io/v1/oauth_callback`).
+   - Click **Create**.
+5. Copy **Client ID** and **Client Secret** and paste them into Clerk.
+
+### Switching Between Dev and Prod
+
+The "switch" is controlled entirely by your **Environment Variables**:
+
+| Environment | Key Prefix | Where to set |
+|-------------|------------|--------------|
+| **Development** | `pk_test_...` | Local `.env.local` |
+| **Production** | `pk_live_...` | Vercel Project Settings (Production) |
+
+**Where to find them:**
+1. Go to **[Clerk Dashboard](https://dashboard.clerk.com)**.
+2. Select your application.
+3. Ensure the top toggle is set to **"Production"** (not Development).
+4. Click **API Keys** in the left sidebar.
+5. Copy the keys from the **"Standard Keys"** section.
+
+- **To run Prod locally**: Replace keys in `.env.local` with `pk_live_...` keys.
+- **To run Dev on Vercel**: Vercel "Preview" deployments automatically use the keys you set for the "Preview" environment (usually `pk_test_`).
 - Payment integration (Stripe)
 - Email notifications (Resend, SendGrid)
 - Analytics (PostHog, Mixpanel)

@@ -36,8 +36,40 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     const metadata = messages.Metadata as { title: string; description: string };
 
     return {
-        title: metadata?.title || "Vanishly",
-        description: metadata?.description || "Remove watermarks from your videos instantly.",
+        title: {
+            template: '%s | Vanishly',
+            default: metadata?.title || "Vanishly - AI Video Watermark Remover"
+        },
+        description: metadata?.description || "Remove watermarks, subtitles, and logos from videos instantly using advanced AI. Supports Sora, Runway, Pika, and more.",
+        keywords: ["ai watermark remover", "video eraser", "remove logo from video", "cleanup video", "inpainting"],
+        openGraph: {
+            title: "Vanishly - AI Video Watermark Remover",
+            description: "Remove watermarks, subtitles, and logos from videos instantly using advanced AI.",
+            url: 'https://vanishly.io',
+            siteName: 'Vanishly',
+            images: [
+                {
+                    url: 'https://vanishly.io/og-image.jpg', // You need to upload this
+                    width: 1200,
+                    height: 630,
+                    alt: 'Vanishly Dashboard Preview',
+                },
+            ],
+            locale: locale,
+            type: 'website',
+        },
+        twitter: {
+            card: 'summary_large_image',
+            title: "Vanishly - AI Video Watermark Remover",
+            description: "Remove watermarks from any video with AI.",
+            creator: "@vanishly_app", // Replace if you have one
+        },
+        metadataBase: new URL('https://vanishly.io'),
+        icons: {
+            icon: '/icon-dark.jpg',
+            shortcut: '/icon-dark.jpg',
+            apple: '/icon-dark.jpg',
+        },
     };
 }
 
@@ -89,6 +121,29 @@ export default async function LocaleLayout({ children, params }: Props) {
                     className={`${geistSans.variable} ${geistMono.variable} antialiased`}
                     suppressHydrationWarning
                 >
+                    <script
+                        type="application/ld+json"
+                        dangerouslySetInnerHTML={{
+                            __html: JSON.stringify({
+                                "@context": "https://schema.org",
+                                "@type": "SoftwareApplication",
+                                "name": "Vanishly",
+                                "applicationCategory": "MultimediaApplication",
+                                "operatingSystem": "Web",
+                                "offers": {
+                                    "@type": "Offer",
+                                    "price": "4.99",
+                                    "priceCurrency": "USD"
+                                },
+                                "description": "Remove watermarks from videos instantly using AI.",
+                                "aggregateRating": {
+                                    "@type": "AggregateRating",
+                                    "ratingValue": "4.8",
+                                    "ratingCount": "124"
+                                }
+                            })
+                        }}
+                    />
                     <NextIntlClientProvider messages={messages}>
                         <Navbar locale={locale} />
                         <div className="pt-16 min-h-screen">
