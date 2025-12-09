@@ -14,7 +14,7 @@ import { AuroraBackground } from '@/components/ui/AuroraBackground';
 import { BubblyButton } from '@/components/ui/BubblyButton';
 import { HowItWorksDemo } from '@/components/HowItWorksDemo';
 import { PlatformIcon } from '@/components/PlatformIcons';
-import { useAuth, SignInButton } from '@clerk/nextjs';
+import { useAuth, SignInButton, SignUpButton } from '@clerk/nextjs';
 import { useTranslations, useLocale } from 'next-intl';
 
 export default function Home() {
@@ -91,12 +91,12 @@ export default function Home() {
                             {t('HomePage.subtitle')}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
-                            <SignInButton mode="modal">
+                            <SignUpButton mode="modal">
                                 <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
                                     {t('HomePage.cta')}
                                     {/* Arrow icon might look weird in this specific design, keeping it simple as per CodePen reference */}
                                 </BubblyButton>
-                            </SignInButton>
+                            </SignUpButton>
                             <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
                                 <Play className="mr-2 w-5 h-5" />
                                 {t('HomePage.ctaSecondary')}
@@ -429,12 +429,12 @@ export default function Home() {
                             </p>
 
                             <div className="flex flex-col items-center gap-4">
-                                <SignInButton mode="modal">
+                                <SignUpButton mode="modal">
                                     <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
                                         <Sparkles className="w-5 h-5 mr-2 inline-block" />
                                         {t('HomePage.ctaSection.button')}
                                     </BubblyButton>
-                                </SignInButton>
+                                </SignUpButton>
                                 <p className="text-sm text-gray-500 flex items-center gap-2">
                                     <Shield className="w-4 h-4" />
                                     {t('HomePage.ctaSection.noCard')}

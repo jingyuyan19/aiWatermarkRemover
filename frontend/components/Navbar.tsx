@@ -4,7 +4,7 @@ import { useState } from 'react';
 import NextImage from "next/image";
 import { Button } from '@/components/ui/button';
 import { BubblyButton } from '@/components/ui/BubblyButton';
-import { useAuth, UserButton, SignInButton, SignedIn, SignedOut, useUser } from '@clerk/nextjs';
+import { useAuth, UserButton, SignInButton, SignUpButton, SignedIn, SignedOut, useUser } from '@clerk/nextjs';
 import { Menu, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -42,12 +42,12 @@ export function Navbar({ locale }: { locale: string }) {
                     <LanguageSwitcher locale={locale} />
 
                     <SignedOut>
-                        <SignInButton mode="modal">
+                        <SignUpButton mode="modal">
                             <BubblyButton rainbow className="text-sm !px-5 !py-2 font-bold contrast-fix">
                                 <span className="mr-2">🎁</span>
                                 {t('freeCredits')}
                             </BubblyButton>
-                        </SignInButton>
+                        </SignUpButton>
                     </SignedOut>
                     <SignedIn>
                         <a
@@ -113,12 +113,12 @@ export function Navbar({ locale }: { locale: string }) {
                         </SignedOut>
 
                         <SignedOut>
-                            <SignInButton mode="modal">
+                            <SignUpButton mode="modal">
                                 <BubblyButton rainbow className="w-full text-base py-4 font-bold contrast-fix justify-center">
                                     <span className="mr-2">🎁</span>
                                     {t('freeCredits')}
                                 </BubblyButton>
-                            </SignInButton>
+                            </SignUpButton>
                         </SignedOut>
 
                         <SignedIn>
