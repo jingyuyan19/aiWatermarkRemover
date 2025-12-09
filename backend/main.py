@@ -379,20 +379,37 @@ async def get_job_status(
                     await db.refresh(job)
                     print(f"[Job {job_id}] Marked as FAILED - stale job (age: {job_age})")
     
-    # If job failed and not yet refunded, refund credits
-    if job.status == JobStatus.FAILED and not job.refunded:
+    # If job failed and not yet refunded, refund credits atomically
+    if job.status == JobStatus.FAILED:
         try:
-            # Get user and refund credits
-            user_result = await db.execute(select(User).where(User.id == user_id))
-            user = user_result.scalar_one_or_none()
-            if user:
-                user.credits += job.cost
-                job.refunded = 1
-                await db.commit()
-                await db.refresh(job)
-                print(f"[Job {job_id}] Refunded {job.cost} credits to user {user_id}")
+            # Atomic update: Only set refunded=1 if it is currently 0
+            # This prevents double refunds even if multiple requests race here
+            stmt = (
+                text("UPDATE jobs SET refunded = 1 WHERE id = :job_id AND refunded = 0")
+                .bindparams(job_id=job.id)
+            )
+            update_result = await db.execute(stmt)
+            
+            if update_result.rowcount > 0:
+                # We successfully claimed the refund right. Now return credits.
+                # It's safe to do this in a separate statement because we own the 'lock' on refunded=1
+                user_result = await db.execute(select(User).where(User.id == user_id))
+                user_obj = user_result.scalar_one_or_none()
+                if user_obj:
+                    user_obj.credits += job.cost
+                    db.add(user_obj) # Explicitly mark user as modified
+                    await db.commit()
+                    await db.refresh(job)
+                    print(f"[Job {job_id}] Refunded {job.cost} credits to user {user_id} (ATOMIC)")
+            else:
+                # rowcount 0 means it was already refunded by another thread/request
+                # No action needed
+                pass
+                
         except Exception as e:
             print(f"[Job {job_id}] Error refunding credits: {e}")
+            # If DB error, we roll back to avoid partial state
+            await db.rollback()
         
     # Construct public URLs
     input_url = f"{PUBLIC_URL_BASE}/{job.input_key}" if job.input_key else None
