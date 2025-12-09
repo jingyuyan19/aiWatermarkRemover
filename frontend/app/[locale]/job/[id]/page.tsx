@@ -255,21 +255,35 @@ export default function JobPage() {
 
                         {/* Footer Note - Processing State only */}
                         {job.status !== 'completed' && job.status !== 'failed' && (
-                            <div className="text-center animate-in fade-in duration-1000 delay-500 max-w-md mx-auto w-full">
-                                <div className="flex items-center justify-between text-xs text-blue-200/50 mb-2 uppercase tracking-widest font-mono">
-                                    <span>Progress</span>
-                                    <span>{job.progress || 0}%</span>
-                                </div>
-                                <div className="h-1 w-full bg-white/10 rounded-full overflow-hidden mb-4">
-                                    <div
-                                        className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-cyan-500 transition-all duration-300 ease-out relative"
-                                        style={{ width: `${Math.max(5, job.progress || 0)}%` }}
-                                    >
-                                        <div className="absolute inset-0 bg-white/30 animate-[shimmer_2s_infinite]"></div>
+                            <div className="text-center animate-in fade-in duration-1000 delay-500 max-w-lg mx-auto w-full px-4">
+                                {/* Modern Progress Bar */}
+                                <div className="space-y-3 mb-6">
+                                    <div className="flex justify-between items-end px-1">
+                                        <span className="text-[10px] uppercase tracking-[0.2em] text-blue-300/60 font-semibold">
+                                            Processing
+                                        </span>
+                                        <span className="text-sm font-mono font-medium text-blue-300">
+                                            {job.progress || 0}%
+                                        </span>
+                                    </div>
+
+                                    <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/10 ring-1 ring-black/20">
+                                        {/* Gradient Fill */}
+                                        <div
+                                            className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                                            style={{ width: `${Math.max(2, job.progress || 0)}%` }}
+                                        >
+                                            {/* Shimmer overlay */}
+                                            <div className="absolute inset-0 w-full h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.2),transparent)] animate-[shimmer-slide_1.5s_infinite]"></div>
+
+                                            {/* Glow tip */}
+                                            <div className="absolute right-0 top-0 bottom-0 w-1.5 bg-white/40 blur-[2px] shadow-[0_0_8px_white]"></div>
+                                        </div>
                                     </div>
                                 </div>
-                                <p className="text-white/20 text-xs mt-1">
-                                    You can safely leave this page. Your video will be saved in your <Link href="/dashboard" className="hover:text-white/40 underline decoration-white/20 transition-colors">Dashboard</Link>.
+
+                                <p className="text-white/30 text-xs font-light tracking-wide">
+                                    You can safely leave this page. Your video will be saved in your <Link href="/dashboard" className="text-white/50 hover:text-white underline decoration-white/20 transition-colors">Dashboard</Link>.
                                 </p>
                             </div>
                         )}
@@ -319,7 +333,8 @@ export default function JobPage() {
                     0% { top: -50%; }
                     100% { top: 150%; }
                 }
-                @keyframes shimmer {
+                @keyframes shimmer-slide {
+                    0% { transform: translateX(-100%); }
                     100% { transform: translateX(100%); }
                 }
                 @keyframes slideUp {
