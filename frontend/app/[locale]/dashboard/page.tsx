@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -38,6 +38,12 @@ export default function DashboardPage() {
     const router = useRouter();
 
     const [jobs, setJobs] = useState<Job[]>([]);
+    const jobsRef = useRef<Job[]>([]);
+
+    // Keep ref in sync
+    useEffect(() => {
+        jobsRef.current = jobs;
+    }, [jobs]);
     const [credits, setCredits] = useState<number | null>(null);
     const [processedCount, setProcessedCount] = useState<number>(0);
     const [loading, setLoading] = useState(true);
@@ -117,40 +123,43 @@ export default function DashboardPage() {
 
         // Poll for active jobs
         const interval = setInterval(async () => {
-            // We use the functional update to get the latest jobs state without adding it to deps
-            setJobs(currentJobs => {
-                const activeJobs = currentJobs.filter(j =>
-                    j.status === 'processing' || j.status === 'pending'
-                );
+            const currentJobs = jobsRef.current;
+            const activeJobs = currentJobs.filter(j =>
+                j.status === 'processing' || j.status === 'pending'
+            );
 
-                if (activeJobs.length === 0) return currentJobs;
+            if (activeJobs.length === 0) return;
 
-                // Fire off updates for active jobs
-                // We don't await this inside the state updater, but we trigger the fetches
-                (async () => {
-                    const token = await getToken();
-                    if (!token) return;
+            const token = await getToken();
+            if (!token) return;
 
-                    await Promise.all(activeJobs.map(async (job) => {
-                        try {
-                            const res = await fetch(`${API_URL}/api/jobs/${job.id}`, {
-                                headers: { 'Authorization': `Bearer ${token}` }
-                            });
-                            if (res.ok) {
-                                const updatedJob = await res.json();
-                                setJobs(prev => prev.map(j =>
-                                    j.id === updatedJob.id ? updatedJob : j
-                                ));
+            await Promise.all(activeJobs.map(async (job) => {
+                try {
+                    const res = await fetch(`${API_URL}/api/jobs/${job.id}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    if (res.ok) {
+                        const updatedJob = await res.json();
+
+                        // Check if status or progress actually changed to avoid unnecessary renders
+                        setJobs(prev => {
+                            const match = prev.find(j => j.id === updatedJob.id);
+                            if (match && match.status === updatedJob.status && match.progress === updatedJob.progress && match.output_url === updatedJob.output_url) {
+                                return prev;
                             }
-                        } catch (err) {
-                            console.error(`Error polling job ${job.id}:`, err);
-                        }
-                    }));
-                })();
+                            return prev.map(j => j.id === updatedJob.id ? updatedJob : j);
+                        });
 
-                return currentJobs;
-            });
-        }, 4000); // Poll every 4 seconds
+                        // If a job just completed, refresh the "processed count" too
+                        if (updatedJob.status === 'completed' && job.status !== 'completed') {
+                            fetchData(); // Refresh the main list/stats once to be safe
+                        }
+                    }
+                } catch (err) {
+                    console.error(`Error polling job ${job.id}:`, err);
+                }
+            }));
+        }, 2000);
 
         return () => clearInterval(interval);
     }, [userId, getToken]);
