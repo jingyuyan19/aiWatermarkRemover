@@ -255,16 +255,26 @@ export default function JobPage() {
                                     </div>
 
                                     <div className="relative h-2 w-full bg-white/5 rounded-full overflow-hidden border border-white/10 ring-1 ring-black/20">
-                                        {/* Gradient Fill - Growing Bar */}
+                                        {/* Main Progress Logic Container */}
                                         <div
-                                            className="absolute top-0 bottom-0 left-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500 transition-all duration-700 ease-out rounded-full shadow-[0_0_15px_rgba(99,102,241,0.4)]"
+                                            className="absolute top-0 bottom-0 left-0 transition-all duration-700 ease-out rounded-full"
                                             style={{ width: `${Math.max(2, job.progress || 0)}%` }}
                                         >
-                                            {/* Subtle internal shimmer - reduced opacity and speed */}
-                                            <div className="absolute inset-0 w-full h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.1),transparent)] animate-[shimmer-slow_3s_infinite]"></div>
+                                            {/* 1. Inner Container: Content that MUST be clipped (Gradient + Shimmer) */}
+                                            <div className="absolute inset-0 rounded-full overflow-hidden">
+                                                {/* Gradient Background */}
+                                                <div className="absolute inset-0 bg-gradient-to-r from-blue-600 via-indigo-500 to-purple-500"></div>
 
-                                            {/* Leading Edge Glow */}
-                                            <div className="absolute right-0 top-0 bottom-0 w-2 bg-white/50 blur-[3px] shadow-[0_0_12px_white]"></div>
+                                                {/* Shimmer Overlay - Now strictly contained */}
+                                                <div className="absolute inset-0 w-full h-full bg-[linear-gradient(90deg,transparent,rgba(255,255,255,0.15),transparent)] animate-[shimmer-slow_2.5s_infinite]"></div>
+                                            </div>
+
+                                            {/* 2. Outer Effects: Allowed to bleed (Glows/Shadows) */}
+                                            {/* Main Bar Glow (Box Shadow equivalent) */}
+                                            <div className="absolute inset-0 rounded-full shadow-[0_0_15px_rgba(99,102,241,0.5)]"></div>
+
+                                            {/* Leading Edge Glow Tip */}
+                                            <div className="absolute right-0 top-1/2 -translate-y-1/2 w-4 h-4 bg-white/40 blur-[4px] rounded-full shadow-[0_0_10px_white] translate-x-1/2"></div>
                                         </div>
                                     </div>
                                 </div>
