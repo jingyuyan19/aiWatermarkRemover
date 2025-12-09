@@ -320,11 +320,29 @@ async def get_job_status(
                         # Log FULL raw response for debugging
                         logger.info(f"[DEBUG-POLL] RunPod FULL Response: {data}")
                         
+                        # Check for explicit failure
+                        rp_status = data.get("status")
+                        if rp_status == "FAILED":
+                             job.status = JobStatus.FAILED
+                             await db.commit()
+                             logger.info(f"[DEBUG-POLL] Job {job_id} marked as FAILED by RunPod status")
+                        
                         # With return_aggregate_stream=True, progress appears in 'output' field
                         output_val = data.get("output")
                         logger.info(f"[DEBUG-POLL] Output value: {output_val}")
                         
-                        if output_val and isinstance(output_val, str) and "%" in output_val:
+                        # Handle Dict output (Completed or Failed)
+                        if isinstance(output_val, dict):
+                            if output_val.get("status") == "failed":
+                                job.status = JobStatus.FAILED
+                                await db.commit()
+                                logger.info(f"[DEBUG-POLL] Job {job_id} marked as FAILED by worker output")
+                            elif output_val.get("status") == "completed":
+                                # We usually wait for R2 file check, but we can trust this too
+                                pass
+
+                        # Handle Progress String
+                        elif output_val and isinstance(output_val, str) and "%" in output_val:
                             try:
                                 pct = int(output_val.strip().replace("%", ""))
                                 # Only update if progress has increased
