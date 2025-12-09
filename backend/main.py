@@ -180,6 +180,9 @@ async def create_job(
     # 2. Check credits
     # Dynamically determine cost based on quality mode
     cost = models.CREDIT_COSTS.get(job_data.quality, 1)  # Default to 1 if unknown
+    
+    print(f"[DEBUG-COST] User {user_id} Job Quality: '{job_data.quality}' -> Cost: {cost}")
+    
     if user.credits < cost:
         raise HTTPException(
             status_code=402,

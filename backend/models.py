@@ -55,8 +55,8 @@ class Job(Base):
 
 # Credit cost by quality mode
 CREDIT_COSTS = {
-    "lama": 1,      # Fast mode
-    "e2fgvi": 2,    # HQ mode (costs more GPU time)
+    "lama": 1,          # Fast mode
+    "e2fgvi_hq": 2,     # HQ mode (costs more GPU time)
 }
 
 
