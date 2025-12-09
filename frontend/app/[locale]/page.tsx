@@ -90,7 +90,7 @@ export default function Home() {
                         <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
                             {t('HomePage.subtitle')}
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
                             <SignUpButton mode="modal">
                                 <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
                                     {t('HomePage.cta')}
@@ -102,6 +102,10 @@ export default function Home() {
                                 {t('HomePage.ctaSecondary')}
                             </Button>
                         </div>
+                        <p className="text-sm text-gray-500 flex items-center justify-center gap-2 mb-20 opacity-80">
+                            <Shield className="w-4 h-4" />
+                            {t('HomePage.ctaSection.noCard')}
+                        </p>
                     </motion.div>
 
                     {/* App Preview Mockup - Video Carousel */}
