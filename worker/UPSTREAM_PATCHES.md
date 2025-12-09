@@ -50,3 +50,19 @@ Pinned `diffusers` to version `0.29.2`.
 diffusers==0.29.2
 accelerate>=0.26.0
 ```
+
+## 3. Import Path Correction (Remove `src.`)
+
+**Issue:**
+The upstream repository structure uses a `src/` directory, so internal imports often look like `from src.demark_world...`. When used as a subdirectory in our worker, these absolute imports fail.
+
+**Files Modified:**
+- Multiple files in `worker/demark_world/src/demark_world/**`
+
+**The Fix:**
+Run the following command to strip the `src.` prefix from all imports:
+
+```bash
+# MacOS / Linux
+find worker/demark_world -name "*.py" -exec sed -i 's/from src.demark_world/from demark_world/g' {} +
+```
