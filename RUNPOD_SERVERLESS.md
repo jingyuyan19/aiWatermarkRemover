@@ -41,7 +41,7 @@ docker login
 
 ```bash
 cd worker
-docker build -t <your-dockerhub-username>/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t <your-dockerhub-username>/watermark-worker:latest .
 ```
 
 **⚠️ Note**: This takes 10-15 minutes. The image will be ~8GB (includes PyTorch + CUDA + AI models).

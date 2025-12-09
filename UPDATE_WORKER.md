@@ -114,24 +114,17 @@ git push origin main
 ssh root@YOUR_VPS_IP
 
 # Step 5: Update and rebuild
-cd /root/aiWatermarkRemover/worker
+# Pull latest code (demark_world is included in main repo)
+cd /root/aiWatermarkRemover
+git pull
+cd worker
 
-# Backup current (just in case)
-cp -r demark_world demark_world_backup_$(date +%Y%m%d)
-
-# Pull latest from your fork
-cd demark_world
-git pull origin main
-cd ..
-
-# Build the worker image
-docker build --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.3 -t jingyuyan19/watermark-worker:latest .
+# Build the worker image (Force rebuild with no-cache)
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.3 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
 docker push jingyuyan19/watermark-worker:v1.3
 docker push jingyuyan19/watermark-worker:latest
-# Clean up old backups (keep last 3)
-ls -dt demark_world_backup_* | tail -n +4 | xargs rm -rf
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
 ```
@@ -220,10 +213,10 @@ git push origin main
 
 ```bash
 ssh root@YOUR_VPS_IP
-cd /root/aiWatermarkRemover/worker/demark_world
-git pull origin main
-cd ..
-docker build -t jingyuyan19/watermark-worker:latest .
+cd /root/aiWatermarkRemover
+git pull
+cd worker
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:latest .
 # ⏱️ Takes: 10-15 minutes
 ```
 
@@ -355,8 +348,8 @@ chmod +x ~/scripts/fix-demark-imports.sh
 ### Build Fails After Update
 
 ```bash
-# Clear Docker cache and rebuild
-docker build --no-cache -t jingyuyan19/watermark-worker:latest .
+# Clear Docker cache and rebuild force platform
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:latest .
 ```
 
 ### Import Errors in Logs
@@ -383,7 +376,7 @@ ls demark_world_backup_*  # See available backups
 rm -rf demark_world
 cp -r demark_world_backup_YYYYMMDD demark_world
 
-docker build -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:latest .
 docker push jingyuyan19/watermark-worker:latest
 ```
 
@@ -432,8 +425,9 @@ Track your updates here after each sync:
 ║ 3. LOCAL:  find src ... sed (fix imports)                    ║
 ║ 4. LOCAL:  git push origin main                              ║
 ║ 5. VPS:    ssh root@YOUR_VPS_IP                              ║
-║ 6. VPS:    cd /root/aiWatermarkRemover/worker/demark_world  ║
-║ 7. VPS:    git pull && cd .. && docker build && docker push ║
+║ 6. VPS:    cd /root/aiWatermarkRemover && git pull          ║
+║ 7. VPS:    cd worker && docker build --no-cache ...         ║
+║ 8. VPS:    docker push ...                                  ║
 ║ 8. RUNPOD: Restart workers or wait for cold start           ║
 ╚══════════════════════════════════════════════════════════════╝
 ```
