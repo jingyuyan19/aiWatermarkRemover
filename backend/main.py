@@ -296,6 +296,7 @@ async def get_job_status(
     
     # If job is pending/processing, check for completion or failure
     if job.status in [JobStatus.PENDING, JobStatus.PROCESSING]:
+        rp_fail = False # Initialize to prevent UnboundLocalError if S3 check fails
         # 1. Check for progress from RunPod API if we have an ID
         if job.runpod_job_id and RUNPOD_ENDPOINT_ID:
             try:
