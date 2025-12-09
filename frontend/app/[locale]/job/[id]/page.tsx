@@ -5,6 +5,8 @@ import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
 import { useTranslations } from 'next-intl';
+import { toast } from 'sonner';
+import { ArrowLeft, Copy, Check } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
@@ -134,13 +136,19 @@ export default function JobPage() {
                     {/* Header */}
                     <div className="flex justify-between items-center mb-12">
                         <Link href="/" className="flex items-center text-gray-400 hover:text-white transition-colors group">
-                            <svg className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                            </svg>
+                            <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" />
                             {t('backToHome')}
                         </Link>
-                        <div className="px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-gray-400">
-                            ID: {job.id.slice(0, 8)}...
+
+                        <div
+                            onClick={() => {
+                                navigator.clipboard.writeText(job.id);
+                                toast.success('Job ID copied to clipboard');
+                            }}
+                            className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/5 border border-white/10 text-xs font-mono text-gray-400 hover:bg-white/10 hover:text-white cursor-pointer transition-colors group/copy"
+                        >
+                            <span>ID: {job.id.slice(0, 8)}...</span>
+                            <Copy className="w-3 h-3 opacity-50 group-hover/copy:opacity-100 transition-opacity" />
                         </div>
                     </div>
 
