@@ -90,14 +90,12 @@ export default function Home() {
                         <p className="text-xl text-gray-400 max-w-2xl mx-auto leading-relaxed mb-10">
                             {t('HomePage.subtitle')}
                         </p>
-                        <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
+                        <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-20">
                             <SignInButton mode="modal">
-                                <SignInButton mode="modal">
-                                    <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
-                                        {t('HomePage.cta')}
-                                        {/* Arrow icon might look weird in this specific design, keeping it simple as per CodePen reference */}
-                                    </BubblyButton>
-                                </SignInButton>
+                                <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
+                                    {t('HomePage.cta')}
+                                    {/* Arrow icon might look weird in this specific design, keeping it simple as per CodePen reference */}
+                                </BubblyButton>
                             </SignInButton>
                             <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
                                 <Play className="mr-2 w-5 h-5" />
