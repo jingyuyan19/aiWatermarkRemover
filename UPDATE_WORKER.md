@@ -312,6 +312,11 @@ src/demark_world/
 └── iopaint/**/             # Many submodules
 ```
 
+### Other Important Files
+
+- **[UPSTREAM_PATCHES.md](./worker/UPSTREAM_PATCHES.md)**: Critical bug fixes applied to the core library (read this before updating dependencies!).
+- **[worker/handler.py](./worker/handler.py)**: The RunPod serverless handler entry point.
+
 ### Automation Script (Save This!)
 
 Create `~/scripts/fix-demark-imports.sh`:
