@@ -1,117 +1,113 @@
-/* Grsmto Bubbly Button CSS Port */
-/* https://codepen.io/Grsmto/pen/mooaNd (Reference for CSS-only version logic which is cleaner for React) */
-/* Porting the SCSS provided by user to CSS */
+/* Grsmto Bubbly Button CSS Port (GSAP Compatible) */
 
-.bubbly-button {
-    font-family: 'Helvetica', 'Arial', sans-serif;
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    appearance: none;
+.button--bubble__container {
+    display: inline-block;
+    position: relative;
+    z-index: 10;
+}
+
+.button {
+    -webkit-font-smoothing: antialiased;
     background-color: #222;
     /* $dark-blue */
-    color: #fff;
-    border-radius: 4px;
     border: none;
+    color: #fff;
+    display: inline-block;
+    font-family: 'Montserrat', sans-serif;
+    font-size: 14px;
+    font-weight: 100;
+    text-decoration: none;
+    user-select: none;
+    letter-spacing: 1px;
+    color: white;
+    padding: 20px 40px;
+    text-transform: uppercase;
+    transition: all 0.1s ease-out;
     cursor: pointer;
+}
+
+.button:hover {
+    background-color: #90feb5;
+    /* $action-color */
+    color: #fff;
+}
+
+.button:active {
+    transform: scale(0.95);
+}
+
+.button--bubble {
     position: relative;
-    transition: transform ease-in 0.1s, box-shadow ease-in 0.25s;
-    box-shadow: 0 2px 25px rgba(144, 254, 181, 0.5);
-    /* Green glow */
-    padding: 16px 32px;
-    font-size: 18px;
-    font-weight: bold;
+    z-index: 2;
+    color: white;
+    background: none;
 }
 
-.bubbly-button:focus {
-    outline: 0;
+.button--bubble:hover {
+    background: none;
 }
 
-.bubbly-button:before,
-.bubbly-button:after {
+/* Hover over main button affects effect container children */
+.button--bubble:hover+.button--bubble__effect-container .circle {
+    background: #44fd7d;
+    /* darken($action-color, 15%) approx */
+}
+
+.button--bubble:hover+.button--bubble__effect-container .button {
+    background: #44fd7d;
+    /* darken($action-color, 15%) approx */
+}
+
+.button--bubble:active+.button--bubble__effect-container {
+    transform: scale(0.95);
+}
+
+.button--bubble__effect-container {
     position: absolute;
-    content: '';
     display: block;
-    width: 140%;
-    height: 100%;
-    left: -20%;
-    z-index: -1000;
-    transition: all ease-in-out 0.5s;
-    background-repeat: no-repeat;
+    width: 200%;
+    height: 400%;
+    top: -150%;
+    left: -50%;
+    -webkit-filter: url("#goo");
+    filter: url("#goo");
+    transition: all 0.1s ease-out;
+    pointer-events: none;
+    z-index: 1;
+    /* Ensure effect is behind or layered correctly */
 }
 
-.bubbly-button:before {
-    display: none;
-    top: -75%;
-    background-image:
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, transparent 20%, #90feb5 20%, transparent 30%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, transparent 10%, #90feb5 15%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%);
-    background-size: 10% 10%, 20% 20%, 15% 15%, 20% 20%, 18% 18%, 10% 10%, 15% 15%, 10% 10%, 18% 18%;
+.button--bubble__effect-container .circle {
+    position: absolute;
+    width: 25px;
+    height: 25px;
+    border-radius: 15px;
+    background: #222;
+    /* $dark-blue */
+    transition: background 0.1s ease-out;
 }
 
-.bubbly-button:after {
-    display: none;
-    bottom: -75%;
-    background-image:
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, transparent 10%, #90feb5 15%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%),
-        radial-gradient(circle, #90feb5 20%, transparent 20%);
-    background-size: 15% 15%, 20% 20%, 18% 18%, 20% 20%, 15% 15%, 10% 10%, 20% 20%;
+.button--bubble__effect-container .circle.top-left {
+    top: 40%;
+    left: 27%;
 }
 
-.bubbly-button:active {
-    transform: scale(0.9);
-    background-color: #1a1a1a;
-    box-shadow: 0 2px 25px rgba(255, 0, 130, 0.2);
+.button--bubble__effect-container .circle.bottom-right {
+    bottom: 40%;
+    right: 27%;
 }
 
-.bubbly-button.animate:before {
-    display: block;
-    animation: topBubbles ease-in-out 0.75s forwards;
-}
-
-.bubbly-button.animate:after {
-    display: block;
-    animation: bottomBubbles ease-in-out 0.75s forwards;
-}
-
-@keyframes topBubbles {
-    0% {
-        background-position: 5% 90%, 10% 90%, 10% 90%, 15% 90%, 25% 90%, 25% 90%, 40% 90%, 55% 90%, 70% 90%;
-    }
-
-    50% {
-        background-position: 0% 80%, 0% 20%, 10% 40%, 20% 0%, 30% 30%, 22% 50%, 50% 50%, 65% 20%, 90% 30%;
-    }
-
-    100% {
-        background-position: 0% 70%, 0% 10%, 10% 30%, 20% -10%, 30% 20%, 22% 40%, 50% 40%, 65% 10%, 90% 20%;
-        background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
-    }
-}
-
-@keyframes bottomBubbles {
-    0% {
-        background-position: 10% -10%, 30% 10%, 55% -10%, 70% -10%, 85% -10%, 70% -10%, 70% 0%;
-    }
-
-    50% {
-        background-position: 0% 80%, 20% 80%, 45% 60%, 60% 100%, 75% 70%, 95% 60%, 105% 0%;
-    }
-
-    100% {
-        background-position: 0% 90%, 20% 90%, 45% 70%, 60% 110%, 75% 80%, 95% 70%, 110% 10%;
-        background-size: 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%, 0% 0%;
-    }
+.effect-button {
+    position: absolute;
+    width: 50%;
+    height: 25%;
+    top: 50%;
+    left: 25%;
+    z-index: 1;
+    transform: translateY(-50%);
+    background: #222;
+    /* $dark-blue */
+    transition: background 0.1s ease-out;
+    border-radius: 4px;
+    /* Slight rounded corners for the effect filling */
 }
