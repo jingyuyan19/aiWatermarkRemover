@@ -375,7 +375,8 @@
             "pending": "Pending",
             "processing": "Processing",
             "completed": "Completed",
-            "failed": "Failed"
+            "failed": "Failed",
+            "expired": "Expired"
         },
         "filter": {
             "all": "All"

@@ -20,16 +20,10 @@ import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
-interface Job {
-    id: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    input_url: string | null;
-    output_url: string | null;
-    quality: string;
-    cost: number;
-    progress: number;
-    created_at: string;
-}
+import { Job } from '@/types/job';
+import { getEffectiveJobStatus } from '@/utils/jobExpiration';
+
+// Removed local Job interface
 
 export default function DashboardPage() {
     const t = useTranslations('Dashboard');
@@ -587,51 +581,42 @@ export default function DashboardPage() {
                                     </div>
                                 ) : (
                                     <div className="divide-y divide-white/5">
-                                        {recentJobs.map((job) => (
-                                            <Link
-                                                key={job.id}
-                                                href={`/${locale}/job/${job.id}`}
-                                                className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
-                                            >
-                                                <div className="flex items-center gap-3 flex-1">
-                                                    {getStatusIcon(job.status)}
-                                                    <div className="flex-1 max-w-md">
-                                                        <div className="flex items-center justify-between mb-1">
-                                                            <span className="text-sm font-medium">{getStatusText(job.status)}</span>
-                                                            {(job.status === 'processing' || job.status === 'pending') && (
-                                                                <span className="text-xs text-primary font-medium">{job.progress}%</span>
-                                                            )}
-                                                        </div>
-
-                                                        {(job.status === 'processing' || job.status === 'pending') ? (
-                                                            <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                                                <div
-                                                                    className="h-full bg-primary transition-all duration-500 ease-out"
-                                                                    style={{ width: `${Math.max(5, job.progress)}%` }}
-                                                                />
+                                        {recentJobs.map((job) => {
+                                            const status = getEffectiveJobStatus(job);
+                                            return (
+                                                <Link
+                                                    key={job.id}
+                                                    href={`/${locale}/job/${job.id}`}
+                                                    className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+                                                >
+                                                    <div className="flex items-center gap-3 flex-1">
+                                                        {status === 'completed' && <CheckCircle className="w-5 h-5 text-green-400" />}
+                                                        {status === 'processing' && <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />}
+                                                        {status === 'pending' && <Clock className="w-5 h-5 text-yellow-400" />}
+                                                        {status === 'failed' && <XCircle className="w-5 h-5 text-red-400" />}
+                                                        {status === 'expired' && <Clock className="w-5 h-5 text-gray-500" />}
+                                                        <div className="flex-1 max-w-md">
+                                                            <div className="flex items-center justify-between mb-1">
+                                                                <span className={`text-sm font-medium ${status === 'expired' ? 'text-gray-500' : ''}`}>
+                                                                    {status === 'expired' ? t('status.expired') : getStatusText(status)}
+                                                                </span>
+                                                                {(job.status === 'processing' || job.status === 'pending') && (
+                                                                    <span className="text-xs text-primary font-medium">{job.progress}%</span>
+                                                                )}
                                                             </div>
-                                                        ) : (
-                                                            <p className="text-xs text-gray-500">
-                                                                {new Date(job.created_at).toLocaleDateString()}
-                                                            </p>
-                                                        )}
-                                                    </div>
-                                                </div>
-                                                <span className={`px-2 py-1 rounded-full text-xs ${job.quality === 'e2fgvi_hq'
-                                                    ? 'bg-purple-500/20 text-purple-400'
-                                                    : 'bg-blue-500/20 text-blue-400'
-                                                    }`}>
-                                                    {job.quality === 'e2fgvi_hq' ? 'HQ' : 'Fast'}
-                                                </span>
+
+                                                            {(job.status === 'processing' || job.status === 'pending') ? (
+                                                                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
+                                                                </span>
                                             </Link>
                                         ))}
-                                    </div>
+                                                    </div>
                                 )}
-                            </CardContent>
+                                                </CardContent>
                         </Card>
                     </motion.div>
+                        </div>
                 </div>
-            </div>
         </main>
     );
 }

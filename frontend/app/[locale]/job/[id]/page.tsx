@@ -10,14 +10,10 @@ import { ArrowLeft, Copy, Check } from 'lucide-react';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
-interface Job {
-    id: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    input_url?: string;
-    output_url?: string;
-    created_at: string;
-    progress?: number;
-}
+import { Job } from '@/types/job';
+import { isJobExpired, getEffectiveJobStatus } from '@/utils/jobExpiration';
+
+// Removed local Job interface
 
 export default function JobPage() {
     const t = useTranslations('JobPage');
@@ -215,31 +211,49 @@ export default function JobPage() {
                             )}
 
                             {/* 3. Content status Layer */}
-                            {job.status !== 'completed' && (
+                            {getEffectiveJobStatus(job) !== 'completed' && (
                                 <div className="absolute inset-0 z-20 flex flex-col items-center justify-center p-6 text-center">
-                                    <div className="space-y-6">
-                                        <div className="flex flex-col items-center gap-4">
-                                            <div className="flex gap-2 items-center mb-2">
-                                                <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
-                                                <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
-                                                <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></span>
-                                            </div>
-
-                                            <h3 className="text-3xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse">
-                                                {job.status === 'pending' ? 'Preparing' : 'Processing'}
-                                            </h3>
-
-                                            <div className="h-8 overflow-hidden relative w-full flex justify-center">
-                                                <p key={activityStep} className="text-blue-200/80 text-sm font-mono tracking-widest uppercase animate-[slideUp_0.5s_ease-out]">
-                                                    {activitySteps[activityStep]}
+                                    {isJobExpired(job) ? (
+                                        <div className="space-y-6">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="p-4 rounded-full bg-white/5 border border-white/10">
+                                                    <svg className="w-8 h-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                                    </svg>
+                                                </div>
+                                                <h3 className="text-2xl font-light text-white tracking-widest uppercase opacity-90">
+                                                    {t('status.expired', { defaultMessage: 'Link Expired' })}
+                                                </h3>
+                                                <p className="text-gray-400 max-w-sm">
+                                                    This video has been automatically removed after 24 hours for security and storage optimization.
                                                 </p>
                                             </div>
                                         </div>
-                                    </div>
+                                    ) : (
+                                        <div className="space-y-6">
+                                            <div className="flex flex-col items-center gap-4">
+                                                <div className="flex gap-2 items-center mb-2">
+                                                    <span className="w-2 h-2 bg-blue-400 rounded-full animate-bounce [animation-delay:-0.3s]"></span>
+                                                    <span className="w-2 h-2 bg-purple-400 rounded-full animate-bounce [animation-delay:-0.15s]"></span>
+                                                    <span className="w-2 h-2 bg-cyan-400 rounded-full animate-bounce"></span>
+                                                </div>
+
+                                                <h3 className="text-3xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse">
+                                                    {job.status === 'pending' ? 'Preparing' : 'Processing'}
+                                                </h3>
+
+                                                <div className="h-8 overflow-hidden relative w-full flex justify-center">
+                                                    <p key={activityStep} className="text-blue-200/80 text-sm font-mono tracking-widest uppercase animate-[slideUp_0.5s_ease-out]">
+                                                        {activitySteps[activityStep]}
+                                                    </p>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
                             )}
 
-                            {job.status === 'completed' && job.output_url && (
+                            {getEffectiveJobStatus(job) === 'completed' && job.output_url && (
                                 <div className="absolute bottom-6 left-0 right-0 text-center z-20 pointer-events-none">
                                     <h3 className="inline-block px-4 py-2 bg-black/50 backdrop-blur-md rounded-full text-green-400 font-medium text-sm border border-green-500/30">
                                         {t('messages.completed')}
@@ -294,7 +308,7 @@ export default function JobPage() {
                         )}
 
                         {/* Actions Area */}
-                        {job.status === 'completed' && job.output_url && (
+                        {getEffectiveJobStatus(job) === 'completed' && job.output_url && (
                             <div className="flex justify-center animate-in fade-in slide-in-from-bottom-4 duration-700">
                                 <a
                                     href={job.output_url}

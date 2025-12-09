@@ -17,15 +17,10 @@ import Link from 'next/link';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
-interface Job {
-    id: string;
-    status: 'pending' | 'processing' | 'completed' | 'failed';
-    input_url: string | null;
-    output_url: string | null;
-    quality: string;
-    cost: number;
-    created_at: string;
-}
+import { Job } from '@/types/job';
+import { getEffectiveJobStatus, isJobExpired } from '@/utils/jobExpiration';
+
+// Removed local Job interface
 
 interface PaginatedResponse {
     jobs: Job[];
@@ -188,42 +183,56 @@ export default function HistoryPage() {
                                                     </tr>
                                                 </thead>
                                                 <tbody className="divide-y divide-white/5">
-                                                    {jobs.map((job) => (
-                                                        <tr key={job.id} className="hover:bg-white/5 transition-colors">
-                                                            <td className="px-4 md:px-6 py-4">
-                                                                <div className="flex items-center gap-2">
-                                                                    {getStatusIcon(job.status)}
-                                                                    <span className="capitalize text-sm">{getStatusText(job.status)}</span>
-                                                                </div>
-                                                            </td>
-                                                            <td className="px-4 md:px-6 py-4">
-                                                                <span className={`px-2 py-1 rounded-full text-xs ${job.quality === 'e2fgvi_hq'
-                                                                    ? 'bg-purple-500/20 text-purple-400'
-                                                                    : 'bg-blue-500/20 text-blue-400'
-                                                                    }`}>
-                                                                    {job.quality === 'e2fgvi_hq' ? 'HQ' : 'Fast'}
-                                                                </span>
-                                                            </td>
-                                                            <td className="px-4 md:px-6 py-4 text-gray-400 text-sm">
-                                                                {new Date(job.created_at).toLocaleString()}
-                                                            </td>
-                                                            <td className="px-4 md:px-6 py-4">
-                                                                <div className="flex gap-2">
-                                                                    <Link href={`/${locale}/job/${job.id}`}>
-                                                                        <Button size="sm" variant="ghost">{t('table.view')}</Button>
-                                                                    </Link>
-                                                                    {job.status === 'completed' && job.output_url && (
-                                                                        <a href={job.output_url} download>
-                                                                            <Button size="sm" variant="outline">
-                                                                                <Download className="w-4 h-4 mr-1" />
-                                                                                {t('table.download')}
-                                                                            </Button>
-                                                                        </a>
-                                                                    )}
-                                                                </div>
-                                                            </td>
-                                                        </tr>
-                                                    ))}
+                                                    {jobs.map((job) => {
+                                                        const status = getEffectiveJobStatus(job);
+                                                        return (
+                                                            <tr key={job.id} className="hover:bg-white/5 transition-colors">
+                                                                <td className="px-4 md:px-6 py-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {status === 'completed' && <CheckCircle className="w-5 h-5 text-green-400" />}
+                                                                        {status === 'processing' && <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />}
+                                                                        {status === 'pending' && <Clock className="w-5 h-5 text-yellow-400" />}
+                                                                        {status === 'failed' && <XCircle className="w-5 h-5 text-red-400" />}
+                                                                        {status === 'expired' && <Clock className="w-5 h-5 text-gray-500" />}
+                                                                        <span className={`capitalize text-sm ${status === 'completed' ? 'text-green-400' :
+                                                                                status === 'processing' ? 'text-blue-400' :
+                                                                                    status === 'failed' ? 'text-red-400' :
+                                                                                        status === 'expired' ? 'text-gray-500' :
+                                                                                            'text-yellow-400'
+                                                                            }`}>
+                                                                            {status === 'expired' ? t('status.expired') : job.status}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="px-4 md:px-6 py-4">
+                                                                    <span className={`px-2 py-1 rounded-full text-xs ${job.quality === 'e2fgvi_hq'
+                                                                        ? 'bg-purple-500/20 text-purple-400'
+                                                                        : 'bg-blue-500/20 text-blue-400'
+                                                                        }`}>
+                                                                        {job.quality === 'e2fgvi_hq' ? 'HQ' : 'Fast'}
+                                                                    </span>
+                                                                </td>
+                                                                <td className="px-4 md:px-6 py-4 text-gray-400 text-sm">
+                                                                    {new Date(job.created_at).toLocaleString()}
+                                                                </td>
+                                                                <td className="px-4 md:px-6 py-4">
+                                                                    <div className="flex gap-2">
+                                                                        <Link href={`/${locale}/job/${job.id}`}>
+                                                                            <Button size="sm" variant="ghost">{t('table.view')}</Button>
+                                                                        </Link>
+                                                                        {status === 'completed' && job.output_url && (
+                                                                            <a href={job.output_url} download target="_blank" rel="noopener noreferrer">
+                                                                                <Button size="sm" variant="outline">
+                                                                                    <Download className="w-4 h-4 mr-1" />
+                                                                                    {t('table.download')}
+                                                                                </Button>
+                                                                            </a>
+                                                                        )}
+                                                                    </div>
+                                                                </td>
+                                                            </tr>
+                                                        );
+                                                    })}
                                                 </tbody>
                                             </table>
                                         </div>
