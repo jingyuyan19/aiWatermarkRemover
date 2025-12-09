@@ -48,6 +48,11 @@ export function Navbar({ locale }: { locale: string }) {
                                 {t('freeCredits')}
                             </BubblyButton>
                         </SignUpButton>
+                        <SignInButton mode="modal">
+                            <button className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
+                                {t('signIn')}
+                            </button>
+                        </SignInButton>
                     </SignedOut>
                     <SignedIn>
                         <a
@@ -119,6 +124,17 @@ export function Navbar({ locale }: { locale: string }) {
                                     {t('freeCredits')}
                                 </BubblyButton>
                             </SignUpButton>
+                        </SignedOut>
+
+                        <SignedOut>
+                            <SignInButton mode="modal">
+                                <button
+                                    className="w-full px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all font-medium border border-white/10"
+                                    onClick={() => setMobileMenuOpen(false)}
+                                >
+                                    {t('signIn')}
+                                </button>
+                            </SignInButton>
                         </SignedOut>
 
                         <SignedIn>

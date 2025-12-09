@@ -5,7 +5,6 @@
     },
     "Navbar": {
         "brand": "Vanishly",
-        "signIn": "登录",
         "features": "功能",
         "pricing": "价格",
         "faq": "常见问题",
@@ -13,7 +12,8 @@
         "history": "历史",
         "buyCredits": "购买额度",
         "account": "账户设置",
-        "freeCredits": "免费领取 3 个积分"
+        "freeCredits": "领取3个免费点数",
+        "signIn": "登录"
     },
     "HomePage": {
         "ctaSection": {
