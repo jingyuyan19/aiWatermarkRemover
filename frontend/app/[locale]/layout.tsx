@@ -65,11 +65,6 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             creator: "@vanishly_app", // Replace if you have one
         },
         metadataBase: new URL('https://vanishly.io'),
-        icons: {
-            icon: '/icon-dark.jpg',
-            shortcut: '/icon-dark.jpg',
-            apple: '/icon-dark.jpg',
-        },
     };
 }
 

@@ -15,9 +15,9 @@ export function Navbar({ locale }: { locale: string }) {
             <div className="container mx-auto px-4 h-16 flex items-center justify-between">
                 {/* Logo */}
                 <a href={`/${locale}`} className="flex items-center gap-3 font-bold text-xl text-white hover:text-primary transition-colors">
-                    <div className="relative w-10 h-10">
+                    <div className="relative w-12 h-12">
                         <NextImage
-                            src="/icon-black.png"
+                            src="/logo.png"
                             alt="Vanishly Logo"
                             fill
                             className="object-contain"
