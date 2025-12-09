@@ -310,3 +310,18 @@ body {
 .animate-orb-sweep {
   animation: orb-sweep 3s ease-in-out infinite;
 }
+
+/* Gold Shimmer Sweep Animation */
+@keyframes shimmer-slide {
+  0% {
+    transform: translateX(-100%) skewX(-15deg);
+  }
+
+  100% {
+    transform: translateX(200%) skewX(-15deg);
+  }
+}
+
+.animate-shimmer-slide {
+  animation: shimmer-slide 3s infinite;
+}
