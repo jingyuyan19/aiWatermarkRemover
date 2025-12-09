@@ -309,6 +309,8 @@ class DeMarkWorld:
 
         process_out.stdin.close()
         process_out.wait()
+        if not quiet:
+            logger.debug("Core processing loop finished. Merging audio...")
 
         # 95% - 99%
         if progress_callback:

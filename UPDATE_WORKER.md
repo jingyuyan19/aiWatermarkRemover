@@ -124,12 +124,12 @@ cd demark_world
 git pull origin main
 cd ..
 
-# Build new Docker image
-docker build -t jingyuyan19/watermark-worker:latest .
+# Build the worker image
+docker build --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.3 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
+docker push jingyuyan19/watermark-worker:v1.3
 docker push jingyuyan19/watermark-worker:latest
-
 # Clean up old backups (keep last 3)
 ls -dt demark_world_backup_* | tail -n +4 | xargs rm -rf
 

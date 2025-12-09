@@ -36,7 +36,10 @@ def merge_frames_with_overlap(
         result_idx = start_idx + i
         if result_frames[result_idx] is not None and chunk_frames[i] is not None:
             # Alpha blending: gradually transition from old to new
-            alpha = i / overlap_end if overlap_end > 0 else 1.0
+            if overlap_end > 0:
+                alpha = i / overlap_end
+            else:
+                alpha = 1.0
             result_frames[result_idx] = (
                 result_frames[result_idx].astype(np.float32) * (1 - alpha)
                 + chunk_frames[i].astype(np.float32) * alpha

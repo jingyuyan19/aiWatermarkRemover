@@ -176,9 +176,17 @@ class E2FGVIHDCleaner:
 
     def clean(self, frames: np.ndarray, masks: np.ndarray) -> List[np.ndarray]:
         video_length = len(frames)
-        chunk_size = int(self.config.chunk_size_ratio * video_length)
+        chunk_size = max(1, int(self.config.chunk_size_ratio * video_length))
         overlap_size = int(self.config.overlap_ratio * video_length)
-        num_chunks = int(np.ceil(video_length / (chunk_size - overlap_size)))
+        # Validate and adjust overlap if needed
+        if chunk_size <= overlap_size:
+            logger.warning(f"Chunk size ({chunk_size}) <= Overlap size ({overlap_size}). Adjusting overlap.")
+            overlap_size = max(1, int(chunk_size * 0.5))
+            if overlap_size >= chunk_size:
+                overlap_size = 0  # Fallback
+        
+        step_size = max(1, chunk_size - overlap_size)
+        num_chunks = int(np.ceil(video_length / step_size))
         h, w = frames[0].shape[:2]
         # Convert to tensors
         imgs_all, masks_all = numpy_to_tensor(frames, masks)
