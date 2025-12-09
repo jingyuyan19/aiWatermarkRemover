@@ -39,6 +39,7 @@ export default function DashboardPage() {
 
     const [jobs, setJobs] = useState<Job[]>([]);
     const [credits, setCredits] = useState<number | null>(null);
+    const [processedCount, setProcessedCount] = useState<number>(0);
     const [loading, setLoading] = useState(true);
 
     // Multi-file upload state
@@ -82,6 +83,13 @@ export default function DashboardPage() {
                 // Handle both array (old) and object (new paginated) formats
                 const jobsList = Array.isArray(jobsData) ? jobsData : (jobsData.jobs || []);
                 setJobs(jobsList);
+
+                // Use backend stats if available, otherwise fallback to current list count
+                if (!Array.isArray(jobsData) && typeof jobsData.processed_count === 'number') {
+                    setProcessedCount(jobsData.processed_count);
+                } else {
+                    setProcessedCount(jobsList.filter((j: Job) => j.status === 'completed').length);
+                }
             }
         } catch (error) {
             console.error('Error fetching jobs:', error);
@@ -495,7 +503,7 @@ export default function DashboardPage() {
                                             </div>
                                             <div className="min-w-0">
                                                 <p className="text-xs lg:text-sm text-gray-400 truncate">{t('stats.processed')}</p>
-                                                <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0 leading-none">{jobs.filter(j => j.status === 'completed').length}</p>
+                                                <p className="text-xl lg:text-3xl font-bold mt-0.5 lg:mt-0 leading-none">{processedCount}</p>
                                             </div>
                                         </div>
                                     </CardContent>

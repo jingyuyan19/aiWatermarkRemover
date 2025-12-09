@@ -485,6 +485,14 @@ async def list_user_jobs(
         jobs = result.scalars().all()
         print(f"[DEBUG] Found {len(jobs)} jobs (page {page}/{total_pages})")
         
+        # Get count of COMPLETED jobs for stats
+        completed_query = select(func.count()).select_from(Job).where(
+            Job.user_id == user_id, 
+            Job.status == JobStatus.COMPLETED
+        )
+        completed_result = await db.execute(completed_query)
+        completed_count = completed_result.scalar() or 0
+
         response_data = [
             {
                 "id": job.id,
@@ -498,9 +506,11 @@ async def list_user_jobs(
             }
             for job in jobs
         ]
+
         return {
             "jobs": response_data,
             "total": total,
+            "processed_count": completed_count,
             "page": page,
             "page_size": page_size,
             "total_pages": total_pages
