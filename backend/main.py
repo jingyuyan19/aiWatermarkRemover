@@ -314,81 +314,91 @@ async def get_job_status(
                 # Since SDK documentation is scarce, let's implement the HTTP request manually as user suggested
                 # to be safe and precise.
                 import httpx
-                async with httpx.AsyncClient() as client:
-                    rp_resp = await client.get(
-                        f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job.runpod_job_id}",
-                        headers={"Authorization": f"Bearer {RUNPOD_API_KEY}"}
-                    )
-                    if rp_resp.status_code == 200:
-                        data = rp_resp.json()
-                        # Log FULL raw response for debugging
-                        logger.info(f"[DEBUG-POLL] RunPod FULL Response: {data}")
-                        
-                        # Check for explicit failure
-                        rp_status = data.get("status")
-                        if rp_status == "FAILED":
-                             job.status = JobStatus.FAILED
-                             await db.commit()
-                             logger.info(f"[DEBUG-POLL] Job {job_id} marked as FAILED by RunPod status")
-                        
-                        # With return_aggregate_stream=True, progress appears in 'output' field
-                        output_val = data.get("output")
-                        logger.info(f"[DEBUG-POLL] Output value: {output_val}")
-                        
-                        # Handle Dict output (Completed or Failed)
-                        if isinstance(output_val, dict):
-                            if output_val.get("status") == "failed":
-                                job.status = JobStatus.FAILED
-                                await db.commit()
-                                logger.info(f"[DEBUG-POLL] Job {job_id} marked as FAILED by worker output")
-                            elif output_val.get("status") == "completed":
-                                # We usually wait for R2 file check, but we can trust this too
-                                pass
+                import requests # For the provided snippet, assuming requests is available or httpx is used consistently
+                from starlette.concurrency import run_in_threadpool # For s3_client.head_object
+                
+                # RunPod Polling
+                rp_resp = await httpx.AsyncClient().get( # Using httpx for async
+                    f"https://api.runpod.ai/v2/{RUNPOD_ENDPOINT_ID}/status/{job.runpod_job_id}",
+                    headers={"Authorization": f"Bearer {RUNPOD_API_KEY}"},
+                    timeout=10
+                )
+                
+                if rp_resp.status_code == 200:
+                    data = rp_resp.json()
+                    # logger.info(f"[DEBUG-POLL] RunPod FULL Response: {data}")
 
-                        # Handle Progress String
-                        elif output_val and isinstance(output_val, str) and "%" in output_val:
-                            try:
-                                pct = int(output_val.strip().replace("%", ""))
-                                # Only update if progress has increased
-                                if pct > (job.progress or 0):
-                                    job.progress = pct
-                                    await db.commit() # Commit progress updates
-                                    logger.info(f"[DEBUG-POLL] Updated job progress to {pct}%")
-                            except:
-                                pass
+                    rp_status = data.get("status")
+                    output_val = data.get("output")
 
+                    # Update Progress
+                    if rp_status == "IN_PROGRESS" and isinstance(output_val, str) and "%" in output_val:
+                        try:
+                            pct = int(output_val.strip().replace("%", ""))
+                            if pct > (job.progress or 0):
+                                job.progress = pct
+                                await db.commit() # Commit progress updates
+                                logger.info(f"[DEBUG-POLL] Updated job progress to {pct}%")
+                        except:
+                            pass
+                    
+                    # Capture failure signal but DO NOT commit FAILED yet
+                    # We want to check S3 first.
+                    if rp_status == "FAILED":
+                        rp_fail = True
+                        print(f"[Job {job_id}] RunPod reported FAILED. Verifying S3 before refunding...")
+
+                    if isinstance(output_val, dict):
+                        if output_val.get("status") == "failed":
+                            rp_fail = True
+                            print(f"[Job {job_id}] Worker output reported failed. Verifying S3...")
+            
             except Exception as e:
-                print(f"[Job {job_id}] Error polling RunPod progress: {e}")
+                print(f"[Job {job_id}] Error polling RunPod: {e}")
 
-        # 2. Check for completion (Output file exists in R2)
-        if job.output_key:
+        # 2. Check S3 for output file
+        # ALWAYS check S3 if not completed, even if RunPod failed.
+        # The file might be there!
+        if job.output_key and job.status != JobStatus.COMPLETED:
             try:
-                # Check if output file exists in R2
-                s3_client.head_object(Bucket=BUCKET_NAME, Key=job.output_key)
+                await run_in_threadpool(s3_client.head_object, Bucket=BUCKET_NAME, Key=job.output_key)
                 # File exists! Job is complete
                 job.status = JobStatus.COMPLETED
                 job.progress = 100
                 await db.commit()
                 await db.refresh(job)
                 print(f"[Job {job_id}] Marked as COMPLETED - output file exists")
-            except Exception as e:
-                # File doesn't exist yet
-                # Check if job is too old (> 30 min) - likely failed
-                # File doesn't exist yet
-                # Check if job is too old (> 30 min) - likely failed
-                from datetime import datetime, timedelta, timezone
-                now_utc = datetime.now(timezone.utc)
-                created_at_utc = job.created_at.replace(tzinfo=timezone.utc) if job.created_at.tzinfo is None else job.created_at
-                job_age = now_utc - created_at_utc
                 
-                # print(f"[DEBUG-AGE] Job {job_id} Age: {job_age} (Now: {now_utc}, Created: {created_at_utc})")
+            except Exception:
+                # File NOT found on S3.
+                # NOW we can check for failures.
+                
+                should_fail = False
+                fail_reason = ""
 
-                if job_age > timedelta(minutes=30):
-                    # Job is stale, mark as failed
+                # Case A: RunPod reported failure
+                if rp_fail:
+                    should_fail = True
+                    fail_reason = "RunPod status is FAILED"
+
+                # Case B: Stale Job (> 30 mins)
+                if not should_fail:
+                    from datetime import datetime, timedelta, timezone
+                    now_utc = datetime.now(timezone.utc)
+                    created_at_utc = job.created_at.replace(tzinfo=timezone.utc) if job.created_at.tzinfo is None else job.created_at
+                    job_age = now_utc - created_at_utc
+                    
+                    # print(f"[DEBUG-AGE] Job {job_id} Age: {job_age} (Now: {now_utc}, Created: {created_at_utc})")
+
+                    if job_age > timedelta(minutes=30):
+                        should_fail = True
+                        fail_reason = f"Stale job (age: {job_age})"
+
+                if should_fail:
                     job.status = JobStatus.FAILED
                     await db.commit()
                     await db.refresh(job)
-                    print(f"[Job {job_id}] Marked as FAILED - stale job (age: {job_age})")
+                    print(f"[Job {job_id}] Marked as FAILED - {fail_reason}")
     
     # If job failed and not yet refunded, refund credits atomically
     if job.status == JobStatus.FAILED:
