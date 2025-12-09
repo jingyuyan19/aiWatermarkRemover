@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { AuroraBackground } from '@/components/ui/AuroraBackground';
+import { BubblyButton } from '@/components/ui/BubblyButton';
 import { HowItWorksDemo } from '@/components/HowItWorksDemo';
 import { PlatformIcon } from '@/components/PlatformIcons';
 import { useAuth, SignInButton } from '@clerk/nextjs';
@@ -91,10 +92,10 @@ export default function Home() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
                             <SignInButton mode="modal">
-                                <Button size="lg" variant="gold" className="text-lg px-8 h-12 rounded-full shadow-lg shadow-amber-500/20">
+                                <BubblyButton className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold">
                                     {t('HomePage.cta')}
-                                    <ArrowRight className="ml-2 w-5 h-5" />
-                                </Button>
+                                    {/* Arrow icon might look weird in this specific design, keeping it simple as per CodePen reference */}
+                                </BubblyButton>
                             </SignInButton>
                             <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
                                 <Play className="mr-2 w-5 h-5" />
