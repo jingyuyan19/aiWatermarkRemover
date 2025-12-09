@@ -374,8 +374,15 @@ async def get_job_status(
             except Exception as e:
                 # File doesn't exist yet
                 # Check if job is too old (> 30 min) - likely failed
+                # File doesn't exist yet
+                # Check if job is too old (> 30 min) - likely failed
                 from datetime import datetime, timedelta, timezone
-                job_age = datetime.now(timezone.utc) - job.created_at.replace(tzinfo=timezone.utc)
+                now_utc = datetime.now(timezone.utc)
+                created_at_utc = job.created_at.replace(tzinfo=timezone.utc) if job.created_at.tzinfo is None else job.created_at
+                job_age = now_utc - created_at_utc
+                
+                # print(f"[DEBUG-AGE] Job {job_id} Age: {job_age} (Now: {now_utc}, Created: {created_at_utc})")
+
                 if job_age > timedelta(minutes=30):
                     # Job is stale, mark as failed
                     job.status = JobStatus.FAILED
@@ -385,6 +392,7 @@ async def get_job_status(
     
     # If job failed and not yet refunded, refund credits atomically
     if job.status == JobStatus.FAILED:
+        print(f"[DEBUG-REFUND-CHECK] Job {job_id} is FAILED. Attempting refund...")
         try:
             # Atomic update: Only set refunded=1 if it is currently 0
             # This prevents double refunds even if multiple requests race here
@@ -407,7 +415,7 @@ async def get_job_status(
                     print(f"[Job {job_id}] Refunded {job.cost} credits to user {user_id} (ATOMIC)")
             else:
                 # rowcount 0 means it was already refunded by another thread/request
-                # No action needed
+                print(f"[DEBUG-REFUND] Job {job_id} already refunded by another thread.")
                 pass
                 
         except Exception as e:
