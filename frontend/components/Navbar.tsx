@@ -43,7 +43,7 @@ export function Navbar({ locale }: { locale: string }) {
 
                     <SignedOut>
                         <SignInButton mode="modal">
-                            <BubblyButton rainbow className="text-sm px-6 py-3 font-bold contrast-fix">
+                            <BubblyButton rainbow className="text-sm !px-5 !py-2 font-bold contrast-fix">
                                 <span className="mr-2">🎁</span>
                                 {t('freeCredits')}
                             </BubblyButton>
