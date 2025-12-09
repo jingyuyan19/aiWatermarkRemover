@@ -99,47 +99,18 @@ https://your-app.railway.app
 
 Save this for the frontend configuration.
 
-## Step 3: Worker Deployment (RunPod)
+## Step 3: Worker Deployment (RunPod Serverless)
 
-### 3.1 Build Docker Image
+**Critical:** We use RunPod Serverless for scale-to-zero capabilities. Do NOT deploy a standard GPU Pod (which costs money 24/7).
 
-```bash
-cd worker
-docker build -t <your-dockerhub-username>/watermark-worker:latest .
-docker push <your-dockerhub-username>/watermark-worker:latest
-```
+Please verify the detailed instructions in:
+👉 **[RUNPOD_SERVERLESS.md](./RUNPOD_SERVERLESS.md)**
 
-### 3.2 Deploy on RunPod
-
-1. Go to [RunPod](https://www.runpod.io/)
-2. Click **Deploy**
-3. Select **GPU Pod**
-4. Choose **RTX 4090** or **A100 40GB**
-5. Select **Custom Docker Image**
-6. Enter: `<your-dockerhub-username>/watermark-worker:latest`
-7. Set **Container Disk** to 50GB
-8. Add environment variables:
-
-```bash
-REDIS_URL=redis://<railway-redis-host>:6379/0
-S3_ENDPOINT_URL=https://<account-id>.r2.cloudflarestorage.com
-AWS_ACCESS_KEY_ID=<your-r2-access-key>
-AWS_SECRET_ACCESS_KEY=<your-r2-secret-key>
-BUCKET_NAME=ai-watermark-remover
-```
-
-9. Click **Deploy**
-
-> **Note**: Get the Railway Redis external hostname from Railway dashboard → Redis → Connect → External URL
-
-### 3.3 Verify Worker
-
-1. SSH into the RunPod instance
-2. Check logs:
-   ```bash
-   docker logs -f <container-id>
-   ```
-3. You should see: `celery@... ready`
+This standalone guide covers:
+1. Building the Docker image (with `no-cache` and platform flags)
+2. Creating the Serverless Endpoint
+3. Configuring scaling (0 to 3 workers)
+4. Setting up environment variables (R2, RunPod API keys)
 
 ## Step 4: Frontend Deployment (Vercel)
 
