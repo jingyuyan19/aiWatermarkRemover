@@ -29,7 +29,8 @@
 .button:hover {
     background-color: #90feb5;
     /* $action-color */
-    color: #fff;
+    color: #222;
+    /* Dark text for contrast on light green */
 }
 
 .button:active {
@@ -110,4 +111,27 @@
     transition: background 0.1s ease-out;
     border-radius: 4px;
     /* Slight rounded corners for the effect filling */
+}
+
+/* CodePen "Rainbow" Environment Simulation */
+@keyframes hue-rotate {
+    from {
+        -webkit-filter: hue-rotate(0);
+        -moz-filter: hue-rotate(0);
+        -ms-filter: hue-rotate(0);
+        filter: hue-rotate(0);
+    }
+
+    to {
+        -webkit-filter: hue-rotate(360deg);
+        -moz-filter: hue-rotate(360deg);
+        -ms-filter: hue-rotate(360deg);
+        filter: hue-rotate(360deg);
+    }
+}
+
+.demo-container {
+    /* Using filter instead of div animation to target the children more reliably in this context without breaking layout */
+    animation: hue-rotate 10s linear infinite;
+    display: inline-block;
 }
