@@ -20,7 +20,7 @@ const buttonVariants = cva(
           "hover:bg-accent hover:text-accent-foreground dark:hover:bg-accent/50",
         link: "text-primary underline-offset-4 hover:underline",
         glow: "bg-primary text-white hover:bg-blue-600 shadow-[0_0_20px_-5px_var(--primary-glow)] hover:shadow-[0_0_30px_-5px_var(--primary-glow)] border border-blue-400/20",
-        gold: "btn-fill-up border border-amber-500/50 text-white font-bold shadow-[0_0_20px_-5px_rgba(245,158,11,0.3)] hover:shadow-[0_0_30px_-5px_rgba(245,158,11,0.5)]",
+        gold: "btn-fill-up font-bold shadow-[0_0_20px_-5px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_-5px_rgba(6,182,212,0.5)]",
       },
       size: {
         default: "h-9 px-4 py-2 has-[>svg]:px-3",
