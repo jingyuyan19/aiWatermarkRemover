@@ -51,6 +51,7 @@ docker build --no-cache --platform linux/amd64 -t <your-dockerhub-username>/wate
 ### 1.3 Push to Docker Hub
 
 ```bash
+docker push <your-dockerhub-username>/watermark-worker:v1.3
 docker push <your-dockerhub-username>/watermark-worker:latest
 ```
 
