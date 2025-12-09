@@ -66,3 +66,24 @@ Run the following command to strip the `src.` prefix from all imports:
 # MacOS / Linux
 find worker/demark_world -name "*.py" -exec sed -i 's/from src.demark_world/from demark_world/g' {} +
 ```
+
+## 4. Python 3.10 Compatibility (`StrEnum`)
+
+**Issue:**
+The upstream repository uses `StrEnum` (introduced in Python 3.11) in `schemas.py`. Our RunPod environment runs Python 3.10 (to maintain compatibility with stable PyTorch 2.1 + MMCV builds), where `StrEnum` does not exist.
+
+**Files Modified:**
+- `worker/demark_world/src/demark_world/schemas.py`
+
+**The Fix:**
+Change the `CleanerType` class inheritance from `StrEnum` back to standard `str, Enum`.
+
+```python
+# Change this (Upstream/Py3.11+):
+from enum import StrEnum
+class CleanerType(StrEnum):
+
+# To this (Py3.10 Compatible):
+from enum import Enum
+class CleanerType(str, Enum):
+```
