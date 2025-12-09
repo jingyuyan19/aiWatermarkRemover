@@ -2,7 +2,9 @@
 
 import { useState } from 'react';
 import NextImage from "next/image";
-import { SignInButton, SignedIn, SignedOut, UserButton, useUser } from '@clerk/nextjs';
+import { Button } from '@/components/ui/button';
+import { BubblyButton } from '@/components/ui/BubblyButton';
+import { useAuth, UserButton, SignInButton, SignedIn, SignedOut, useUser } from '@clerk/nextjs';
 import { Menu, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
 
@@ -41,10 +43,10 @@ export function Navbar({ locale }: { locale: string }) {
 
                     <SignedOut>
                         <SignInButton mode="modal">
-                            <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg shadow-amber-500/20 transition-all text-sm font-bold flex items-center gap-2">
-                                <span className="mr-1">🎁</span>
+                            <BubblyButton rainbow className="text-sm px-6 py-3 font-bold contrast-fix">
+                                <span className="mr-2">🎁</span>
                                 {t('freeCredits')}
-                            </button>
+                            </BubblyButton>
                         </SignInButton>
                     </SignedOut>
                     <SignedIn>
@@ -112,13 +114,10 @@ export function Navbar({ locale }: { locale: string }) {
 
                         <SignedOut>
                             <SignInButton mode="modal">
-                                <button
-                                    className="w-full px-4 py-3 rounded-lg bg-gradient-to-r from-amber-400 to-amber-600 text-white hover:from-amber-500 hover:to-amber-700 shadow-lg shadow-amber-500/20 transition-all font-bold flex items-center justify-center gap-2"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    <span className="mr-1">🎁</span>
+                                <BubblyButton rainbow className="w-full text-base py-4 font-bold contrast-fix justify-center">
+                                    <span className="mr-2">🎁</span>
                                     {t('freeCredits')}
-                                </button>
+                                </BubblyButton>
                             </SignInButton>
                         </SignedOut>
 

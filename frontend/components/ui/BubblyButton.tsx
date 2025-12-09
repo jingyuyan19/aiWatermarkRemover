@@ -6,13 +6,15 @@ import './../../app/bubbly-button.css';
 
 interface BubblyButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
     children: React.ReactNode;
+    rainbow?: boolean;
 }
 
-export function BubblyButton({ children, className, onClick, ...props }: BubblyButtonProps) {
+export function BubblyButton({ children, className, onClick, rainbow = false, ...props }: BubblyButtonProps) {
     const containerRef = useRef<HTMLSpanElement>(null);
     const timelineRef = useRef<gsap.core.Timeline | null>(null);
 
     useEffect(() => {
+        // ... (GSAP logic remains unchanged) ...
         if (!containerRef.current) return;
 
         const mainButton = containerRef.current.querySelector('.button--bubble');
@@ -70,13 +72,15 @@ export function BubblyButton({ children, className, onClick, ...props }: BubblyB
 
         mainButton?.addEventListener('mouseenter', handleMouseEnter);
 
+        // Cleanup
         return () => {
             mainButton?.removeEventListener('mouseenter', handleMouseEnter);
             btTl.kill();
         };
+        // ...
     }, []);
 
-    return (
+    const buttonContent = (
         <span className="button--bubble__container relative inline-block" ref={containerRef}>
             <button
                 className={`button button--bubble ${className || ''}`}
@@ -98,4 +102,10 @@ export function BubblyButton({ children, className, onClick, ...props }: BubblyB
             </span>
         </span>
     );
+
+    if (rainbow) {
+        return <div className="demo-container">{buttonContent}</div>;
+    }
+
+    return buttonContent;
 }

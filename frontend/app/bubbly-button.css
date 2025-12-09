@@ -8,14 +8,14 @@
 
 .button {
     -webkit-font-smoothing: antialiased;
-    background-color: #222;
+    background-color: #4f46e5;
     /* $dark-blue */
     border: none;
     color: #fff;
     display: inline-block;
     font-family: 'Montserrat', sans-serif;
     font-size: 14px;
-    font-weight: 100;
+    font-weight: 700;
     text-decoration: none;
     user-select: none;
     letter-spacing: 1px;
@@ -29,8 +29,12 @@
 .button:hover {
     background-color: #90feb5;
     /* $action-color */
-    color: #222;
-    /* Dark text for contrast on light green */
+    color: #fff;
+}
+
+.button.contrast-fix:hover {
+    color: #222 !important;
+    /* Switch to dark text for better contrast on bright background */
 }
 
 .button:active {
@@ -83,7 +87,7 @@
     width: 25px;
     height: 25px;
     border-radius: 15px;
-    background: #222;
+    background: #4f46e5;
     /* $dark-blue */
     transition: background 0.1s ease-out;
 }
@@ -106,7 +110,7 @@
     left: 25%;
     z-index: 1;
     transform: translateY(-50%);
-    background: #222;
+    background: #4f46e5;
     /* $dark-blue */
     transition: background 0.1s ease-out;
     border-radius: 4px;
@@ -131,7 +135,10 @@
 }
 
 .demo-container {
-    /* Using filter instead of div animation to target the children more reliably in this context without breaking layout */
-    animation: hue-rotate 10s linear infinite;
     display: inline-block;
+}
+
+.demo-container:hover {
+    /* Only rainbow cycle when hovering */
+    animation: hue-rotate 4s linear infinite;
 }

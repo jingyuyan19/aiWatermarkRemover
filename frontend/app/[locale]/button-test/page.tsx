@@ -11,14 +11,14 @@ export default function ButtonTestPage() {
 
             {/* 1. The button inside a container that simulates the CodePen's hue-rotating div */}
             <div className="demo-container">
-                <BubblyButton className="text-lg font-bold">
+                <BubblyButton className="text-lg font-bold contrast-fix">
                     Hover Me (Rainbow)
                 </BubblyButton>
             </div>
 
             {/* 2. Control (No Rainbow) */}
             <div>
-                <BubblyButton className="text-lg font-bold">
+                <BubblyButton className="text-lg font-bold contrast-fix">
                     Hover Me (Static Green)
                 </BubblyButton>
             </div>

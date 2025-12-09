@@ -92,10 +92,12 @@ export default function Home() {
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center mb-20">
                             <SignInButton mode="modal">
-                                <BubblyButton className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold">
-                                    {t('HomePage.cta')}
-                                    {/* Arrow icon might look weird in this specific design, keeping it simple as per CodePen reference */}
-                                </BubblyButton>
+                                <SignInButton mode="modal">
+                                    <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
+                                        {t('HomePage.cta')}
+                                        {/* Arrow icon might look weird in this specific design, keeping it simple as per CodePen reference */}
+                                    </BubblyButton>
+                                </SignInButton>
                             </SignInButton>
                             <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
                                 <Play className="mr-2 w-5 h-5" />
@@ -430,10 +432,10 @@ export default function Home() {
 
                             <div className="flex flex-col items-center gap-4">
                                 <SignInButton mode="modal">
-                                    <Button size="lg" variant="gold" className="text-lg px-10 h-14 rounded-full shadow-xl shadow-amber-500/20 hover:shadow-amber-500/40">
-                                        <Sparkles className="w-5 h-5 mr-2" />
+                                    <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
+                                        <Sparkles className="w-5 h-5 mr-2 inline-block" />
                                         {t('HomePage.ctaSection.button')}
-                                    </Button>
+                                    </BubblyButton>
                                 </SignInButton>
                                 <p className="text-sm text-gray-500 flex items-center gap-2">
                                     <Shield className="w-4 h-4" />
