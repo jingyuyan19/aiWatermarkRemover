@@ -55,20 +55,20 @@ export default function Home() {
 
     // Redirect logic removed to allow logged-in users to view Landing Page (FAQ, Features)
 
-    const scrollToSection = (id: string) => {
+    const scrollToSection = (id: string, behavior: ScrollBehavior = 'smooth') => {
         const element = document.getElementById(id);
         if (element) {
-            element.scrollIntoView({ behavior: 'smooth' });
+            element.scrollIntoView({ behavior });
         }
     };
 
-    // Handle initial hash scroll after loading
+    // Handle initial hash scroll after loading (Instant Jump)
     useEffect(() => {
         if (isLoaded && window.location.hash) {
             const id = window.location.hash.replace('#', '');
             // Small timeout to ensure DOM is ready
             setTimeout(() => {
-                scrollToSection(id);
+                scrollToSection(id, 'auto');
             }, 100);
         }
     }, [isLoaded]);
@@ -135,7 +135,7 @@ export default function Home() {
                                     </BubblyButton>
                                 </SignUpButton>
                             )}
-                            <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
+                            <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works', 'smooth')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
                                 <Play className="mr-2 w-5 h-5" />
                                 {t('HomePage.ctaSecondary')}
                             </Button>
