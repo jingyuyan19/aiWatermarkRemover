@@ -169,7 +169,7 @@ export default function Home() {
                                         poster={videoSrc.replace('.mp4', '.png')}
                                         className={`w-full h-full object-contain transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
                                             } ${activeVideo === idx ? 'opacity-100' : 'opacity-0'}`}
-                                        preload={idx === 0 ? "auto" : "none"} // Defer loading others
+                                        preload={idx === 0 ? "auto" : "metadata"} // Metadata is safer than none for ensuring playback starts
                                         loop
                                         muted
                                         playsInline
