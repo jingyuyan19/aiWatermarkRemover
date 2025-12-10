@@ -166,10 +166,9 @@ export default function Home() {
                                             if (el) videoRefs.current[idx] = el;
                                         }}
                                         src={videoSrc}
-                                        poster={videoSrc.replace('.mp4', '.png')}
                                         className={`w-full h-full object-contain transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
                                             } ${activeVideo === idx ? 'opacity-100' : 'opacity-0'}`}
-                                        preload={idx === 0 ? "auto" : "metadata"} // Metadata is safer than none for ensuring playback starts
+                                        preload="auto" // prioritizing seamless playback over bandwidth
                                         loop
                                         muted
                                         playsInline
