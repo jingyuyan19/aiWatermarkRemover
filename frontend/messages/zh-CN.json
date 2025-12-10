@@ -27,6 +27,7 @@
         "titleHighlight": "秒级处理",
         "subtitle": "专业级水印去除，由先进的人工智能驱动。上传您的视频，让我们的神经网络为您施展魔法。",
         "cta": "开始去除水印",
+        "ctaDashboard": "进入控制台",
         "ctaSecondary": "查看演示",
         "slider": {
             "before": "原视频",

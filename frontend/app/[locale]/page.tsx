@@ -53,18 +53,13 @@ export default function Home() {
         });
     }, [activeVideo]);
 
-    // Redirect logged-in users to dashboard
-    useEffect(() => {
-        if (isLoaded && userId) {
-            router.push(`/${locale}/dashboard`);
-        }
-    }, [isLoaded, userId, locale, router]);
+    // Redirect logic removed to allow logged-in users to view Landing Page (FAQ, Features)
 
     const scrollToSection = (id: string) => {
         document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
     };
 
-    if (!isLoaded || userId) return null; // Hide while redirecting
+    if (!isLoaded) return null;
 
     const features = [
         { key: 'ai', icon: Wand2, colSpan: 'md:col-span-2' },
@@ -111,12 +106,21 @@ export default function Home() {
                             {t('HomePage.subtitle')}
                         </p>
                         <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-6">
-                            <SignUpButton mode="modal">
-                                <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
-                                    {t('HomePage.cta')}
-                                    {/* Arrow icon might look weird in this specific design, keeping it simple as per CodePen reference */}
-                                </BubblyButton>
-                            </SignUpButton>
+                            {userId ? (
+                                <Button
+                                    size="lg"
+                                    onClick={() => router.push(`/${locale}/dashboard`)}
+                                    className="text-lg px-10 py-4 h-14 rounded-md shadow-lg font-bold bg-primary hover:bg-blue-600 transition-all hover:scale-105"
+                                >
+                                    {t('HomePage.ctaDashboard')} <ArrowRight className="ml-2 w-5 h-5" />
+                                </Button>
+                            ) : (
+                                <SignUpButton mode="modal">
+                                    <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
+                                        {t('HomePage.cta')}
+                                    </BubblyButton>
+                                </SignUpButton>
+                            )}
                             <Button size="lg" variant="ghost" onClick={() => scrollToSection('how-it-works')} className="text-lg px-8 h-12 rounded-full hover:bg-white/5">
                                 <Play className="mr-2 w-5 h-5" />
                                 {t('HomePage.ctaSecondary')}
@@ -457,12 +461,23 @@ export default function Home() {
                             </p>
 
                             <div className="flex flex-col items-center gap-4">
-                                <SignUpButton mode="modal">
-                                    <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
+                                {userId ? (
+                                    <Button
+                                        size="lg"
+                                        onClick={() => router.push(`/${locale}/dashboard`)}
+                                        className="text-lg px-10 py-4 h-14 rounded-md shadow-lg font-bold bg-primary hover:bg-blue-600 transition-all hover:scale-105"
+                                    >
                                         <Sparkles className="w-5 h-5 mr-2 inline-block" />
-                                        {t('HomePage.ctaSection.button')}
-                                    </BubblyButton>
-                                </SignUpButton>
+                                        {t('HomePage.ctaDashboard')}
+                                    </Button>
+                                ) : (
+                                    <SignUpButton mode="modal">
+                                        <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
+                                            <Sparkles className="w-5 h-5 mr-2 inline-block" />
+                                            {t('HomePage.ctaSection.button')}
+                                        </BubblyButton>
+                                    </SignUpButton>
+                                )}
                                 <p className="text-sm text-gray-500 flex items-center gap-2">
                                     <Shield className="w-4 h-4" />
                                     {t('HomePage.ctaSection.noCard')}
