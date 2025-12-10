@@ -272,6 +272,19 @@ Consider adding:
    - Click **Create**.
 5. Copy **Client ID** and **Client Secret** and paste them into Clerk.
 
+### Step 7: Payment Setup (Creem)
+
+We use **Creem.io** for payments. The mode (Test vs Live) is determined automatically by your API Key.
+
+| Environment | Key Prefix | Base URL |
+|-------------|------------|----------|
+| **Test Mode** | `creem_test_...` | `https://test-api.creem.io` |
+| **Production** | `creem_live_...` | `https://api.creem.io` |
+
+1. Go to your Railway Backend Service → Variables.
+2. Set `CREEM_API_KEY` to your live key (starts with `creem_live_`) for production.
+3. Set `CREEM_WEBHOOK_SECRET` from your Creem dashboard (Webhooks section) to handle payment confirmations.
+
 ### Switching Between Dev and Prod
 
 The "switch" is controlled entirely by your **Environment Variables**:

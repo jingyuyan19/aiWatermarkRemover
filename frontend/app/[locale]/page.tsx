@@ -143,9 +143,11 @@ export default function Home() {
                                     <video
                                         key={videoSrc}
                                         src={videoSrc}
+                                        poster={videoSrc.replace('.mp4', '.png')}
                                         className={`w-full h-full object-contain transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
                                             } ${activeVideo === idx ? 'opacity-100' : 'opacity-0'}`}
-                                        autoPlay
+                                        autoPlay={activeVideo === idx} // Only autoplay valid for current
+                                        preload={idx === 0 ? "auto" : "none"} // Defer loading others
                                         loop
                                         muted
                                         playsInline
