@@ -18,12 +18,6 @@ export async function sendContactEmail(data: ContactFormData) {
     }
 
     try {
-        // NOTE: Temporarily mocking email sending to debug Vercel 500 bundling error.
-        console.log('Mock sending email:', { name, email, subject });
-        await new Promise(resolve => setTimeout(resolve, 500));
-        return { success: true };
-
-        /* 
         const transporter = nodemailer.createTransport({
             host: 'smtp.gmail.com',
             port: 587,
@@ -53,7 +47,6 @@ export async function sendContactEmail(data: ContactFormData) {
 
         await transporter.sendMail(mailOptions);
         return { success: true };
-        */
     } catch (error) {
         console.error('Email sending failed:', error);
         return { success: false, error: 'Failed to send email. Please try again later.' };
