@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useTranslations } from 'next-intl';
 import { toast } from 'sonner';
+import { sendContactEmail } from '@/app/actions/contact';
 
 export default function ContactPage() {
     const t = useTranslations('Contact');
@@ -23,15 +24,17 @@ export default function ContactPage() {
         e.preventDefault();
         setSending(true);
 
-        // Simulate sending (in production, this would call an API)
-        await new Promise(resolve => setTimeout(resolve, 1000));
+        const result = await sendContactEmail(formData);
 
         setSending(false);
-        setSent(true);
-        toast.success(t('successMessage'));
 
-        // Reset form
-        setFormData({ name: '', email: '', subject: '', message: '' });
+        if (result.success) {
+            setSent(true);
+            toast.success(t('successMessage'));
+            setFormData({ name: '', email: '', subject: '', message: '' });
+        } else {
+            toast.error(result.error || 'Failed to send message');
+        }
     };
 
     return (
