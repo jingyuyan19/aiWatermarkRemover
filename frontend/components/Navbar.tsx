@@ -42,13 +42,13 @@ export function Navbar({ locale }: { locale: string }) {
                     <LanguageSwitcher locale={locale} />
 
                     <SignedOut>
-                        <SignUpButton mode="modal">
+                        <SignUpButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
                             <BubblyButton rainbow className="text-sm !px-5 !py-2 font-bold contrast-fix">
                                 <span className="mr-2">🎁</span>
                                 {t('freeCredits')}
                             </BubblyButton>
                         </SignUpButton>
-                        <SignInButton mode="modal">
+                        <SignInButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
                             <button className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
                                 {t('signIn')}
                             </button>
@@ -118,7 +118,7 @@ export function Navbar({ locale }: { locale: string }) {
                         </SignedOut>
 
                         <SignedOut>
-                            <SignUpButton mode="modal">
+                            <SignUpButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
                                 <BubblyButton rainbow className="w-full text-base py-4 font-bold contrast-fix justify-center">
                                     <span className="mr-2">🎁</span>
                                     {t('freeCredits')}
@@ -127,7 +127,7 @@ export function Navbar({ locale }: { locale: string }) {
                         </SignedOut>
 
                         <SignedOut>
-                            <SignInButton mode="modal">
+                            <SignInButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
                                 <button
                                     className="w-full px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all font-medium border border-white/10"
                                     onClick={() => setMobileMenuOpen(false)}

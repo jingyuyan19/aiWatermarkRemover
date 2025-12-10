@@ -129,7 +129,7 @@ export default function Home() {
                                     {t('HomePage.ctaDashboard')} <ArrowRight className="ml-2 w-5 h-5" />
                                 </Button>
                             ) : (
-                                <SignUpButton mode="modal">
+                                <SignUpButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
                                     <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
                                         {t('HomePage.cta')}
                                     </BubblyButton>
