@@ -5,8 +5,12 @@ import { routing } from './i18n/routing';
 const intlMiddleware = createMiddleware(routing);
 
 export default clerkMiddleware(async (auth, req) => {
-    // Skip intl middleware for API routes
-    if (req.nextUrl.pathname.startsWith('/api')) {
+    // Skip intl middleware for API routes and Clerk internal routes
+    if (
+        req.nextUrl.pathname.startsWith('/api') ||
+        req.nextUrl.pathname.startsWith('/_next') ||
+        req.nextUrl.pathname.includes('/sso-callback')
+    ) {
         return;
     }
 
