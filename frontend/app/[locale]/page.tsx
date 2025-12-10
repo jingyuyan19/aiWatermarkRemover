@@ -56,8 +56,22 @@ export default function Home() {
     // Redirect logic removed to allow logged-in users to view Landing Page (FAQ, Features)
 
     const scrollToSection = (id: string) => {
-        document.getElementById(id)?.scrollIntoView({ behavior: 'smooth' });
+        const element = document.getElementById(id);
+        if (element) {
+            element.scrollIntoView({ behavior: 'smooth' });
+        }
     };
+
+    // Handle initial hash scroll after loading
+    useEffect(() => {
+        if (isLoaded && window.location.hash) {
+            const id = window.location.hash.replace('#', '');
+            // Small timeout to ensure DOM is ready
+            setTimeout(() => {
+                scrollToSection(id);
+            }, 100);
+        }
+    }, [isLoaded]);
 
     if (!isLoaded) return null;
 
