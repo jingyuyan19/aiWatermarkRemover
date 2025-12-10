@@ -5,6 +5,7 @@ const withNextIntl = createNextIntlPlugin('./i18n/request.ts');
 
 const nextConfig: NextConfig = {
   /* config options here */
+  serverExternalPackages: ['nodemailer'],
   async rewrites() {
     return [
       {
