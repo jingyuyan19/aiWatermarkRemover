@@ -606,17 +606,29 @@ export default function DashboardPage() {
                                                             </div>
 
                                                             {(job.status === 'processing' || job.status === 'pending') ? (
-                                                                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden">
-                                                                </span>
-                                            </Link>
-                                        ))}
+                                                                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-2">
+                                                                    <div
+                                                                        className="h-full bg-primary transition-all duration-500 rounded-full"
+                                                                        style={{ width: `${job.progress}%` }}
+                                                                    />
+                                                                </div>
+                                                            ) : (
+                                                                <p className="text-xs text-gray-500 truncate">
+                                                                    {new Date(job.created_at).toLocaleDateString()} • {job.quality === 'e2fgvi_hq' ? 'High Quality' : 'Fast'}
+                                                                </p>
+                                                            )}
+                                                        </div>
                                                     </div>
+                                                </Link>
+                                            );
+                                        })}
+                                    </div>
                                 )}
-                                                </CardContent>
+                            </CardContent>
                         </Card>
                     </motion.div>
-                        </div>
                 </div>
+            </div>
         </main>
     );
 }

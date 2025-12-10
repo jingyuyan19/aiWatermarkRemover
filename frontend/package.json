@@ -11,11 +11,13 @@
   "dependencies": {
     "@clerk/localizations": "^3.30.0",
     "@clerk/nextjs": "^6.35.6",
+    "@next/third-parties": "^16.0.8",
     "@radix-ui/react-label": "^2.1.8",
     "@radix-ui/react-slot": "^1.2.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "framer-motion": "^12.23.25",
+    "gsap": "^3.14.1",
     "lucide-react": "^0.555.0",
     "next": "^16.0.7",
     "next-intl": "^4.5.8",

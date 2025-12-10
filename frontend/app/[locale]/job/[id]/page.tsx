@@ -157,7 +157,7 @@ export default function JobPage() {
                             <div className="absolute inset-0 z-0 bg-black">
                                 {(job.input_url || job.output_url) && (
                                     <video
-                                        src={job.output_url || job.input_url}
+                                        src={job.output_url || job.input_url || undefined}
                                         controls={job.status === 'completed'}
                                         className={`w-full h-full transition-all duration-500 ${job.status === 'completed' ? 'object-contain' : 'object-cover contrast-125'}`}
                                         style={{

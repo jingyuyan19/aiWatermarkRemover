@@ -1,5 +1,6 @@
 
 import type { Metadata } from "next";
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Footer } from "@/components/ui/Footer";
@@ -159,6 +160,7 @@ export default async function LocaleLayout({ children, params }: Props) {
                         </defs>
                     </svg>
                 </body>
+                <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_ID || ""} />
             </html>
         </ClerkProvider>
     );
