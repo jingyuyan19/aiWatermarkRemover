@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
@@ -23,6 +23,7 @@ export default function Home() {
     const { isLoaded, userId } = useAuth();
     const [openFaq, setOpenFaq] = useState<string | null>(null);
     const [activeVideo, setActiveVideo] = useState(0);
+    const videoRefs = useRef<HTMLVideoElement[]>([]);
     const router = useRouter();
 
     // Auto-rotate videos every 8 seconds
@@ -32,6 +33,25 @@ export default function Home() {
         }, 8000);
         return () => clearInterval(timer);
     }, []);
+
+    // Handle video playback changes
+    useEffect(() => {
+        videoRefs.current.forEach((video, idx) => {
+            if (!video) return;
+            if (idx === activeVideo) {
+                video.currentTime = 0;
+                const playPromise = video.play();
+                if (playPromise !== undefined) {
+                    playPromise.catch(() => {
+                        // Auto-play was prevented
+                    });
+                }
+            } else {
+                video.pause();
+                // video.currentTime = 0; // Optional: reset time when hidden
+            }
+        });
+    }, [activeVideo]);
 
     // Redirect logged-in users to dashboard
     useEffect(() => {
@@ -142,11 +162,13 @@ export default function Home() {
                                 {['/sample_vid.mp4', '/sample_2.mp4', '/sample_3.mp4'].map((videoSrc, idx) => (
                                     <video
                                         key={videoSrc}
+                                        ref={(el) => {
+                                            if (el) videoRefs.current[idx] = el;
+                                        }}
                                         src={videoSrc}
                                         poster={videoSrc.replace('.mp4', '.png')}
                                         className={`w-full h-full object-contain transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
                                             } ${activeVideo === idx ? 'opacity-100' : 'opacity-0'}`}
-                                        autoPlay={activeVideo === idx} // Only autoplay valid for current
                                         preload={idx === 0 ? "auto" : "none"} // Defer loading others
                                         loop
                                         muted
