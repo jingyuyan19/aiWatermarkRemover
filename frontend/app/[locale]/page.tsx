@@ -123,13 +123,13 @@ export default function Home() {
                             {userId ? (
                                 <Button
                                     size="lg"
-                                    onClick={() => router.push(`/${locale}/dashboard`)}
+                                    onClick={() => router.push(`/dashboard`)}
                                     className="text-lg px-10 py-4 h-14 rounded-md shadow-lg font-bold bg-primary hover:bg-blue-600 transition-all hover:scale-105"
                                 >
                                     {t('HomePage.ctaDashboard')} <ArrowRight className="ml-2 w-5 h-5" />
                                 </Button>
                             ) : (
-                                <SignUpButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
+                                <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
                                     <BubblyButton rainbow className="text-lg px-10 py-4 h-auto rounded-md shadow-lg font-bold contrast-fix">
                                         {t('HomePage.cta')}
                                     </BubblyButton>

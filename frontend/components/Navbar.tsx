@@ -42,13 +42,13 @@ export function Navbar({ locale }: { locale: string }) {
                     <LanguageSwitcher locale={locale} />
 
                     <SignedOut>
-                        <SignUpButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
+                        <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
                             <BubblyButton rainbow className="text-sm !px-5 !py-2 font-bold contrast-fix">
                                 <span className="mr-2">🎁</span>
                                 {t('freeCredits')}
                             </BubblyButton>
                         </SignUpButton>
-                        <SignInButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
+                        <SignInButton mode="modal" forceRedirectUrl="/dashboard">
                             <button className="px-3 py-1.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-white/10 transition-colors">
                                 {t('signIn')}
                             </button>
