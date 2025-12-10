@@ -169,6 +169,7 @@ export default function Home() {
                                         className={`w-full h-full object-contain transition-opacity duration-1000 ${idx === 0 ? '' : 'absolute inset-0 pt-10'
                                             } ${activeVideo === idx ? 'opacity-100' : 'opacity-0'}`}
                                         preload="auto" // prioritizing seamless playback over bandwidth
+                                        autoPlay={activeVideo === idx}
                                         loop
                                         muted
                                         playsInline
