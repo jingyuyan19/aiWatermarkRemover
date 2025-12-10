@@ -8,8 +8,7 @@ export default clerkMiddleware(async (auth, req) => {
     // Skip intl middleware for API routes and Clerk internal routes
     if (
         req.nextUrl.pathname.startsWith('/api') ||
-        req.nextUrl.pathname.startsWith('/_next') ||
-        req.nextUrl.pathname.includes('/sso-callback')
+        req.nextUrl.pathname.startsWith('/_next')
     ) {
         return;
     }
