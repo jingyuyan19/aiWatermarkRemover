@@ -195,10 +195,10 @@ export default function HistoryPage() {
                                                                         {status === 'failed' && <XCircle className="w-5 h-5 text-red-400" />}
                                                                         {status === 'expired' && <Clock className="w-5 h-5 text-gray-500" />}
                                                                         <span className={`capitalize text-sm ${status === 'completed' ? 'text-green-400' :
-                                                                                status === 'processing' ? 'text-blue-400' :
-                                                                                    status === 'failed' ? 'text-red-400' :
-                                                                                        status === 'expired' ? 'text-gray-500' :
-                                                                                            'text-yellow-400'
+                                                                            status === 'processing' ? 'text-blue-400' :
+                                                                                status === 'failed' ? 'text-red-400' :
+                                                                                    status === 'expired' ? 'text-gray-500' :
+                                                                                        'text-yellow-400'
                                                                             }`}>
                                                                             {status === 'expired' ? t('status.expired') : job.status}
                                                                         </span>
@@ -217,9 +217,11 @@ export default function HistoryPage() {
                                                                 </td>
                                                                 <td className="px-4 md:px-6 py-4">
                                                                     <div className="flex gap-2">
-                                                                        <Link href={`/${locale}/job/${job.id}`}>
-                                                                            <Button size="sm" variant="ghost">{t('table.view')}</Button>
-                                                                        </Link>
+                                                                        {status !== 'expired' && (
+                                                                            <Link href={`/${locale}/job/${job.id}`}>
+                                                                                <Button size="sm" variant="ghost">{t('table.view')}</Button>
+                                                                            </Link>
+                                                                        )}
                                                                         {status === 'completed' && job.output_url && (
                                                                             <a href={job.output_url} download target="_blank" rel="noopener noreferrer">
                                                                                 <Button size="sm" variant="outline">
