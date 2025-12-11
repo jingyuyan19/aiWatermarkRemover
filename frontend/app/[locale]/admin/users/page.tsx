@@ -3,8 +3,9 @@
 import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, Plus, Minus, Search } from 'lucide-react';
+import { Users, Search } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
+import { CreditAdjustment } from './CreditAdjustment';
 import { toast } from 'sonner';
 import { Pagination, PaginationInfo } from '@/components/ui/Pagination';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -81,36 +82,12 @@ export default function UsersPage() {
         fetchUsers(page);
     };
 
-    const adjustCredits = async (userId: string, currentCredits: number, delta: number) => {
-        const newCredits = Math.max(0, currentCredits + delta);
-        setAdjustingUser(userId);
-
-        try {
-            const token = await getToken();
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users/${userId}/credits`, {
-                method: 'PATCH',
-                headers: {
-                    'Content-Type': 'application/json',
-                    Authorization: `Bearer ${token}`
-                },
-                body: JSON.stringify({ credits: newCredits })
+    const handleCreditUpdate = (userId: string, newCredits: number) => {
+        if (data) {
+            setData({
+                ...data,
+                users: data.users.map(u => u.id === userId ? { ...u, credits: newCredits } : u)
             });
-
-            if (res.ok) {
-                if (data) {
-                    setData({
-                        ...data,
-                        users: data.users.map(u => u.id === userId ? { ...u, credits: newCredits } : u)
-                    });
-                }
-                toast.success(t('toast.creditsUpdated', { credits: newCredits }));
-            } else {
-                toast.error(t('toast.updateFailed'));
-            }
-        } catch (error) {
-            toast.error(t('toast.updateFailed'));
-        } finally {
-            setAdjustingUser(null);
         }
     };
 
@@ -197,7 +174,11 @@ export default function UsersPage() {
                                                     <span className="text-white text-sm">{user.email || 'No email'}</span>
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <span className="text-primary font-semibold">{user.credits}</span>
+                                                    <CreditAdjustment
+                                                        userId={user.id}
+                                                        currentCredits={user.credits}
+                                                        onUpdate={(newCredits) => handleCreditUpdate(user.id, newCredits)}
+                                                    />
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     {user.is_admin ? (
@@ -214,22 +195,7 @@ export default function UsersPage() {
                                                     {new Date(user.created_at).toLocaleDateString()}
                                                 </td>
                                                 <td className="py-3 px-4">
-                                                    <div className="flex items-center justify-end gap-1">
-                                                        <button
-                                                            onClick={() => adjustCredits(user.id, user.credits, -10)}
-                                                            disabled={adjustingUser === user.id || user.credits < 10}
-                                                            className="p-2 hover:bg-red-500/20 rounded-lg transition-colors disabled:opacity-50"
-                                                        >
-                                                            <Minus className="w-4 h-4 text-red-400" />
-                                                        </button>
-                                                        <button
-                                                            onClick={() => adjustCredits(user.id, user.credits, 10)}
-                                                            disabled={adjustingUser === user.id}
-                                                            className="p-2 hover:bg-green-500/20 rounded-lg transition-colors disabled:opacity-50"
-                                                        >
-                                                            <Plus className="w-4 h-4 text-green-400" />
-                                                        </button>
-                                                    </div>
+                                                    {/* Future actions: Delete, Ban, etc. */}
                                                 </td>
                                             </motion.tr>
                                         ))}

@@ -601,6 +601,18 @@
                 "updateFailed": "Failed to update credits"
             }
         },
+        "Adjustment": {
+            "title": "Adjust Credits",
+            "current": "Current",
+            "add": "Add",
+            "remove": "Remove",
+            "set": "Set To",
+            "newBalance": "New Balance",
+            "cancel": "Cancel",
+            "confirm": "Confirm",
+            "success": "Updated successfully",
+            "error": "Update failed"
+        },
         "Codes": {
             "title": "Redemption Codes",
             "export": "Export Unredeemed",
