@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Ticket, Copy, Check, Download, Search, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Ticket, Copy, Check, Download, Search, ChevronLeft, ChevronRight, X, Trash2 } from 'lucide-react';
 import { useAuth } from '@clerk/nextjs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
@@ -33,6 +33,8 @@ export default function CodesPage() {
     const [loading, setLoading] = useState(true);
     const [generating, setGenerating] = useState(false);
     const [copiedCode, setCopiedCode] = useState<string | null>(null);
+    const [selectedCodes, setSelectedCodes] = useState<Set<string>>(new Set());
+    const [deleting, setDeleting] = useState(false);
 
     // Modal state for generated codes
     const [showModal, setShowModal] = useState(false);
@@ -166,6 +168,46 @@ export default function CodesPage() {
         toast.success(t('toast.copied'));
     };
 
+    const toggleSelection = (code: string) => {
+        const newSelected = new Set(selectedCodes);
+        if (newSelected.has(code)) {
+            newSelected.delete(code);
+        } else {
+            newSelected.add(code);
+        }
+        setSelectedCodes(newSelected);
+    };
+
+    const deleteSelectedCodes = async () => {
+        if (!confirm(`Are you sure you want to delete ${selectedCodes.size} codes?`)) return;
+
+        setDeleting(true);
+        try {
+            const token = await getToken();
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/codes`, {
+                method: 'DELETE',
+                headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${token}`
+                },
+                body: JSON.stringify({ codes: Array.from(selectedCodes) })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                toast.success(`Deleted ${data.deleted} codes`);
+                setSelectedCodes(new Set());
+                fetchCodes();
+            } else {
+                toast.error('Failed to delete codes');
+            }
+        } catch (error) {
+            toast.error('Failed to delete codes');
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     const exportCodes = async () => {
         // Fetch all pending codes for export
         try {
@@ -202,14 +244,34 @@ export default function CodesPage() {
         setPage(1);
     };
 
+    const toggleSelectAll = () => {
+        if (selectedCodes.size === codes.length) {
+            setSelectedCodes(new Set());
+        } else {
+            setSelectedCodes(new Set(codes.map(c => c.code)));
+        }
+    };
+
     return (
         <div>
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
-                <Button variant="outline" onClick={exportCodes}>
-                    <Download className="w-4 h-4 mr-2" />
-                    {t('export')}
-                </Button>
+                <div className="flex gap-2">
+                    {selectedCodes.size > 0 && (
+                        <Button
+                            variant="destructive"
+                            onClick={deleteSelectedCodes}
+                            disabled={deleting}
+                        >
+                            <Trash2 className="w-4 h-4 mr-2" />
+                            {deleting ? 'Deleting...' : `Delete (${selectedCodes.size})`}
+                        </Button>
+                    )}
+                    <Button variant="outline" onClick={exportCodes}>
+                        <Download className="w-4 h-4 mr-2" />
+                        {t('export')}
+                    </Button>
+                </div>
             </div>
 
             {/* Generator */}
@@ -333,9 +395,22 @@ export default function CodesPage() {
             <Card className="bg-gray-900 border-white/10">
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
-                        <h2 className="text-xl font-semibold text-white">
-                            {t('list.total')} <span className="text-gray-500 text-base">({total})</span>
-                        </h2>
+                        <div className="flex items-center gap-4">
+                            {!loading && codes.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedCodes.size === codes.length && codes.length > 0}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-primary"
+                                    />
+                                    <span className="text-sm text-gray-400">Select All</span>
+                                </div>
+                            )}
+                            <h2 className="text-xl font-semibold text-white">
+                                {t('list.total')} <span className="text-gray-500 text-base">({total})</span>
+                            </h2>
+                        </div>
                     </div>
 
                     {loading ? (
@@ -364,6 +439,12 @@ export default function CodesPage() {
                                             }`}
                                     >
                                         <div className="flex items-center gap-6">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedCodes.has(code.code)}
+                                                onChange={() => toggleSelection(code.code)}
+                                                className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-primary"
+                                            />
                                             <code className="font-mono text-lg text-white min-w-[140px]">{code.code}</code>
                                             <span className="text-sm text-primary font-medium min-w-[80px]">
                                                 {code.credits} credits

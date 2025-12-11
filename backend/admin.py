@@ -33,6 +33,10 @@ class CodeResponse(BaseModel):
     redeemed_at: Optional[datetime] = None
 
 
+class CodeDeleteRequest(BaseModel):
+    codes: list[str]
+
+
 class UserCreditUpdate(BaseModel):
     credits: int
 
@@ -103,6 +107,33 @@ async def generate_codes(
         )
         for c in codes
     ]
+
+
+@router.delete("/codes")
+async def delete_codes(
+    request: CodeDeleteRequest,
+    db: AsyncSession = Depends(get_db),
+    user_info: UserInfo = Depends(get_current_user_info)
+):
+    """Bulk delete redemption codes (admin only)."""
+    verify_admin_role(user_info)
+    
+    if not request.codes:
+        return {"deleted": 0}
+        
+    # Delete codes that match the list
+    result = await db.execute(
+        select(RedemptionCode).where(RedemptionCode.code.in_(request.codes))
+    )
+    codes_to_delete = result.scalars().all()
+    count = len(codes_to_delete)
+    
+    for code in codes_to_delete:
+        await db.delete(code)
+        
+    await db.commit()
+    
+    return {"deleted": count}
 
 
 class PaginatedCodesResponse(BaseModel):
