@@ -18,7 +18,7 @@ interface RedeemResult {
 
 export function RedeemCodeCard({ onSuccess }: { onSuccess?: (newBalance: number) => void }) {
     const { getToken } = useAuth();
-    const t = useTranslations('Redeem');
+    const t = useTranslations('Components.Redeem');
     const [code, setCode] = useState('');
     const [loading, setLoading] = useState(false);
     const [result, setResult] = useState<RedeemResult | null>(null);

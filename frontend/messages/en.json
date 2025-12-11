@@ -384,6 +384,11 @@
                     "failed": "Upload failed",
                     "uploading": "Uploading...",
                     "waiting": "Waiting..."
+                },
+                "fileUpload": {
+                    "click": "Click to upload",
+                    "drag": "or drag and drop",
+                    "formats": "MP4, MOV, AVI (max 100MB)"
                 }
             }
         },
@@ -571,5 +576,107 @@
         "successTitle": "Message Sent!",
         "successMessage": "Thank you for reaching out. We'll get back to you soon.",
         "sendAnother": "Send Another Message"
+    },
+    "Admin": {
+        "Users": {
+            "title": "User Management",
+            "allUsers": "All Users",
+            "noUsers": "No users found",
+            "searchPlaceholder": "Search by email...",
+            "roles": {
+                "all": "All Roles",
+                "admin": "Admins",
+                "user": "Users"
+            },
+            "table": {
+                "email": "Email",
+                "credits": "Credits",
+                "role": "Role",
+                "jobs": "Jobs",
+                "joined": "Joined",
+                "actions": "Actions"
+            },
+            "toast": {
+                "creditsUpdated": "Credits updated to {credits}",
+                "updateFailed": "Failed to update credits"
+            }
+        },
+        "Codes": {
+            "title": "Redemption Codes",
+            "export": "Export Unredeemed",
+            "generate": {
+                "title": "Generate Codes",
+                "creditsPerCode": "Credits per code",
+                "numberOfCodes": "Number of codes",
+                "prefix": "Prefix",
+                "button": "Generate",
+                "generating": "Generating..."
+            },
+            "filters": {
+                "searchPlaceholder": "Search codes...",
+                "allStatus": "All Status",
+                "pending": "Pending",
+                "redeemed": "Redeemed",
+                "allCredits": "All Credits",
+                "clear": "Clear filters"
+            },
+            "list": {
+                "total": "Codes",
+                "noCodes": "No codes found",
+                "page": "Page {current} of {total}",
+                "previous": "Previous",
+                "next": "Next"
+            },
+            "modal": {
+                "title": "Generated Codes",
+                "subtitle": "{count} code{s} • {credits} credits each",
+                "copyAll": "Copy All",
+                "downloadCsv": "Download CSV"
+            },
+            "toast": {
+                "generated": "Generated {count} code(s)!",
+                "generateFailed": "Failed to generate codes",
+                "csvDownloaded": "CSV downloaded!",
+                "allCopied": "All codes copied!",
+                "copied": "Code copied!",
+                "exported": "Exported {count} unredeemed codes",
+                "exportFailed": "Failed to export codes"
+            }
+        }
+    },
+    "Components": {
+        "Redeem": {
+            "title": "Redeem Code",
+            "subtitle": "Unlock premium features with a code",
+            "placeholder": "ENTER CODE",
+            "button": "Redeem",
+            "loading": "...",
+            "success": "Code redeemed successfully!",
+            "error": "Failed to redeem code",
+            "enterCode": "Please enter a code",
+            "newBalance": "New balance",
+            "credits": "credits",
+            "invalidCode": "Invalid code"
+        },
+        "Comparison": {
+            "before": "Original",
+            "after": "Removed",
+            "watermark": "WATERMARK"
+        }
+    },
+    "Pages": {
+        "NotFound": {
+            "title": "Page Not Found",
+            "description": "The page you're looking for doesn't exist or has been moved.",
+            "goHome": "Go Home"
+        },
+        "Error": {
+            "title": "Something went wrong",
+            "description": "An unexpected error occurred. Please try again.",
+            "retry": "Try Again"
+        },
+        "Loading": {
+            "text": "Loading..."
+        }
     }
 }

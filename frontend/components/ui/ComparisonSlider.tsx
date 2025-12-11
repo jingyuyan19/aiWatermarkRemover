@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import Image from 'next/image';
 import { GripVertical } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 interface ComparisonSliderProps {
     imageSrc?: string;
@@ -17,12 +18,14 @@ export function ComparisonSlider({
     imageSrc,
     videoSrcBefore,
     videoSrcAfter,
-    beforeLabel = 'Original',
-    afterLabel = 'Removed',
+    beforeLabel,
+    afterLabel,
     type = 'image',
 }: ComparisonSliderProps) {
+    const t = useTranslations('Components.Comparison');
     const [sliderPosition, setSliderPosition] = useState(50);
     const [isDragging, setIsDragging] = useState(false);
+    // ... (refs and hooks unchanged) ...
     const containerRef = useRef<HTMLDivElement>(null);
     const beforeVideoRef = useRef<HTMLVideoElement>(null);
     const afterVideoRef = useRef<HTMLVideoElement>(null);
@@ -57,6 +60,7 @@ export function ComparisonSlider({
 
     // Sync videos
     useEffect(() => {
+        // ... (video sync logic unchanged) ...
         if (type === 'video' && beforeVideoRef.current && afterVideoRef.current) {
             const before = beforeVideoRef.current;
             const after = afterVideoRef.current;
@@ -113,7 +117,7 @@ export function ComparisonSlider({
                     />
                 )}
                 <div className="absolute top-4 right-4 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded border border-white/10 z-10">
-                    {afterLabel}
+                    {afterLabel || t('after')}
                 </div>
             </div>
 
@@ -146,7 +150,7 @@ export function ComparisonSlider({
                         <div className="absolute inset-0 flex items-center justify-center bg-black/5">
                             <div className="transform -rotate-12 border-4 border-white/30 px-8 py-4 rounded-xl backdrop-blur-[2px]">
                                 <span className="text-5xl md:text-7xl font-black text-white/40 tracking-widest uppercase drop-shadow-lg">
-                                    WATERMARK
+                                    {t('watermark')}
                                 </span>
                             </div>
                             {/* Repeating pattern for realism */}
@@ -160,7 +164,7 @@ export function ComparisonSlider({
                 )}
 
                 <div className="absolute top-4 left-4 bg-black/50 backdrop-blur-md text-white text-xs font-bold px-2 py-1 rounded border border-white/10">
-                    {beforeLabel}
+                    {beforeLabel || t('before')}
                 </div>
             </div>
 

@@ -8,6 +8,7 @@ import { useAuth } from '@clerk/nextjs';
 import { toast } from 'sonner';
 import { Pagination, PaginationInfo } from '@/components/ui/Pagination';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useTranslations } from 'next-intl';
 
 interface User {
     id: string;
@@ -28,6 +29,7 @@ interface PaginatedResponse {
 }
 
 export default function UsersPage() {
+    const t = useTranslations('Admin.Users');
     const { getToken } = useAuth();
     const [data, setData] = useState<PaginatedResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -101,12 +103,12 @@ export default function UsersPage() {
                         users: data.users.map(u => u.id === userId ? { ...u, credits: newCredits } : u)
                     });
                 }
-                toast.success(`Credits updated to ${newCredits}`);
+                toast.success(t('toast.creditsUpdated', { credits: newCredits }));
             } else {
-                toast.error('Failed to update credits');
+                toast.error(t('toast.updateFailed'));
             }
         } catch (error) {
-            toast.error('Failed to update credits');
+            toast.error(t('toast.updateFailed'));
         } finally {
             setAdjustingUser(null);
         }
@@ -116,7 +118,7 @@ export default function UsersPage() {
 
     return (
         <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">User Management</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">{t('title')}</h1>
 
             <Card className="bg-gray-900 border-white/10">
                 <CardContent className="p-4 md:p-6">
@@ -126,7 +128,7 @@ export default function UsersPage() {
                             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                             <input
                                 type="text"
-                                placeholder="Search by email..."
+                                placeholder={t('searchPlaceholder')}
                                 value={searchQuery}
                                 onChange={(e) => setSearchQuery(e.target.value)}
                                 className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
@@ -137,16 +139,16 @@ export default function UsersPage() {
                             onChange={(e) => setRoleFilter(e.target.value)}
                             className="px-4 py-2.5 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
                         >
-                            <option value="">All Roles</option>
-                            <option value="admin">Admins</option>
-                            <option value="user">Users</option>
+                            <option value="">{t('roles.all')}</option>
+                            <option value="admin">{t('roles.admin')}</option>
+                            <option value="user">{t('roles.user')}</option>
                         </select>
                     </div>
 
                     {/* Header with count */}
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-white">
-                            All Users {data && <span className="text-gray-500">({data.total})</span>}
+                            {t('allUsers')} {data && <span className="text-gray-500">({data.total})</span>}
                         </h2>
                         {data && data.total > 0 && (
                             <PaginationInfo
@@ -166,7 +168,7 @@ export default function UsersPage() {
                     ) : users.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">
                             <Users className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>No users found</p>
+                            <p>{t('noUsers')}</p>
                         </div>
                     ) : (
                         <>
@@ -174,12 +176,12 @@ export default function UsersPage() {
                                 <table className="w-full min-w-[600px]">
                                     <thead>
                                         <tr className="border-b border-white/10">
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Email</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Credits</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Role</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Jobs</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Joined</th>
-                                            <th className="text-right py-3 px-4 text-sm text-gray-400 font-medium">Actions</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.email')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.credits')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.role')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.jobs')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.joined')}</th>
+                                            <th className="text-right py-3 px-4 text-sm text-gray-400 font-medium">{t('table.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -199,9 +201,9 @@ export default function UsersPage() {
                                                 </td>
                                                 <td className="py-3 px-4">
                                                     {user.is_admin ? (
-                                                        <span className="px-2 py-1 bg-primary/20 text-primary text-xs rounded-full">Admin</span>
+                                                        <span className="px-2 py-1 bg-primary/20 text-primary text-xs rounded-full">{t('roles.admin')}</span>
                                                     ) : (
-                                                        <span className="px-2 py-1 bg-gray-700 text-gray-400 text-xs rounded-full">User</span>
+                                                        <span className="px-2 py-1 bg-gray-700 text-gray-400 text-xs rounded-full">{t('roles.user')}</span>
                                                     )}
                                                 </td>
                                                 <td className="py-3 px-4">

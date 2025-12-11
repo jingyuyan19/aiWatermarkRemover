@@ -8,6 +8,7 @@ import { Ticket, Copy, Check, Download, Search, ChevronLeft, ChevronRight, X } f
 import { useAuth } from '@clerk/nextjs';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface Code {
     code: string;
@@ -26,6 +27,7 @@ interface PaginatedResponse {
 }
 
 export default function CodesPage() {
+    const t = useTranslations('Admin.Codes');
     const { getToken } = useAuth();
     const [codes, setCodes] = useState<Code[]>([]);
     const [loading, setLoading] = useState(true);
@@ -108,16 +110,18 @@ export default function CodesPage() {
                 const newCodes = await res.json();
                 setGeneratedCodes(newCodes);
                 setShowModal(true);
-                toast.success(`Generated ${newCodes.length} code(s)!`);
+                setGeneratedCodes(newCodes);
+                setShowModal(true);
+                toast.success(t('toast.generated', { count: newCodes.length }));
 
                 // Refresh the list
                 setPage(1);
                 fetchCodes();
             } else {
-                toast.error('Failed to generate codes');
+                toast.error(t('toast.generateFailed'));
             }
         } catch (error) {
-            toast.error('Failed to generate codes');
+            toast.error(t('toast.generateFailed'));
         } finally {
             setGenerating(false);
         }
@@ -143,22 +147,23 @@ export default function CodesPage() {
         a.href = url;
         a.download = filename;
         a.click();
+        a.click();
         URL.revokeObjectURL(url);
 
-        toast.success('CSV downloaded!');
+        toast.success(t('toast.csvDownloaded'));
     };
 
     const copyAllCodes = () => {
         const allCodes = generatedCodes.map(c => c.code).join('\n');
         navigator.clipboard.writeText(allCodes);
-        toast.success('All codes copied!');
+        toast.success(t('toast.allCopied'));
     };
 
     const copyCode = (code: string) => {
         navigator.clipboard.writeText(code);
         setCopiedCode(code);
         setTimeout(() => setCopiedCode(null), 2000);
-        toast.success('Code copied!');
+        toast.success(t('toast.copied'));
     };
 
     const exportCodes = async () => {
@@ -177,10 +182,10 @@ export default function CodesPage() {
                 a.href = url;
                 a.download = `vanishly-codes-${new Date().toISOString().split('T')[0]}.txt`;
                 a.click();
-                toast.success(`Exported ${data.codes.length} unredeemed codes`);
+                toast.success(t('toast.exported', { count: data.codes.length }));
             }
         } catch (error) {
-            toast.error('Failed to export codes');
+            toast.error(t('toast.exportFailed'));
         }
     };
 
@@ -200,21 +205,21 @@ export default function CodesPage() {
     return (
         <div>
             <div className="flex items-center justify-between mb-8">
-                <h1 className="text-3xl font-bold text-white">Redemption Codes</h1>
+                <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
                 <Button variant="outline" onClick={exportCodes}>
                     <Download className="w-4 h-4 mr-2" />
-                    Export Unredeemed
+                    {t('export')}
                 </Button>
             </div>
 
             {/* Generator */}
             <Card className="bg-gray-900 border-white/10 mb-8">
                 <CardContent className="p-6">
-                    <h2 className="text-xl font-semibold text-white mb-6">Generate Codes</h2>
+                    <h2 className="text-xl font-semibold text-white mb-6">{t('generate.title')}</h2>
 
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div>
-                            <label className="block text-sm text-gray-400 mb-2">Credits per code</label>
+                            <label className="block text-sm text-gray-400 mb-2">{t('generate.creditsPerCode')}</label>
                             <select
                                 value={credits}
                                 onChange={(e) => setCredits(Number(e.target.value))}
@@ -226,7 +231,7 @@ export default function CodesPage() {
                             </select>
                         </div>
                         <div>
-                            <label className="block text-sm text-gray-400 mb-2">Number of codes</label>
+                            <label className="block text-sm text-gray-400 mb-2">{t('generate.numberOfCodes')}</label>
                             <input
                                 type="number"
                                 min={1}
@@ -237,12 +242,12 @@ export default function CodesPage() {
                             />
                         </div>
                         <div>
-                            <label className="block text-sm text-gray-400 mb-2">Prefix</label>
+                            <label className="block text-sm text-gray-400 mb-2">{t('generate.prefix')}</label>
                             <input
                                 type="text"
                                 value={prefix}
                                 onChange={(e) => setPrefix(e.target.value)}
-                                placeholder="e.g., TB-"
+                                placeholder={t('generate.prefix')}
                                 className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
                             />
                         </div>
@@ -253,7 +258,7 @@ export default function CodesPage() {
                                 onClick={generateCodes}
                                 disabled={generating}
                             >
-                                {generating ? 'Generating...' : 'Generate'}
+                                {generating ? t('generate.generating') : t('generate.button')}
                             </Button>
                         </div>
                     </div>
@@ -272,7 +277,7 @@ export default function CodesPage() {
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                    placeholder="Search codes..."
+                                    placeholder={t('filters.searchPlaceholder')}
                                     className="flex-1 px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white placeholder:text-gray-500"
                                 />
                                 <Button variant="outline" onClick={handleSearch}>
@@ -291,9 +296,9 @@ export default function CodesPage() {
                                 }}
                                 className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
                             >
-                                <option value="all">All Status</option>
-                                <option value="pending">Pending</option>
-                                <option value="redeemed">Redeemed</option>
+                                <option value="all">{t('filters.allStatus')}</option>
+                                <option value="pending">{t('filters.pending')}</option>
+                                <option value="redeemed">{t('filters.redeemed')}</option>
                             </select>
                         </div>
 
@@ -307,7 +312,7 @@ export default function CodesPage() {
                                 }}
                                 className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
                             >
-                                <option value="">All Credits</option>
+                                <option value="">{t('filters.allCredits')}</option>
                                 <option value="10">10 Credits</option>
                                 <option value="50">50 Credits</option>
                                 <option value="200">200 Credits</option>
@@ -317,7 +322,7 @@ export default function CodesPage() {
                         {/* Clear Filters */}
                         {(statusFilter !== 'all' || creditsFilter || searchQuery) && (
                             <Button variant="ghost" onClick={clearFilters} className="text-gray-400">
-                                Clear filters
+                                {t('filters.clear')}
                             </Button>
                         )}
                     </div>
@@ -329,7 +334,7 @@ export default function CodesPage() {
                 <CardContent className="p-6">
                     <div className="flex items-center justify-between mb-6">
                         <h2 className="text-xl font-semibold text-white">
-                            Codes <span className="text-gray-500 text-base">({total} total)</span>
+                            {t('list.total')} <span className="text-gray-500 text-base">({total})</span>
                         </h2>
                     </div>
 
@@ -342,7 +347,7 @@ export default function CodesPage() {
                     ) : codes.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">
                             <Ticket className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>No codes found</p>
+                            <p>{t('list.noCodes')}</p>
                         </div>
                     ) : (
                         <>
@@ -367,7 +372,7 @@ export default function CodesPage() {
                                                 ? 'bg-green-500/20 text-green-400'
                                                 : 'bg-yellow-500/20 text-yellow-400'
                                                 }`}>
-                                                {code.redeemed_by ? 'Redeemed' : 'Pending'}
+                                                {code.redeemed_by ? t('filters.redeemed') : t('filters.pending')}
                                             </span>
                                             <span className="text-sm text-gray-500">
                                                 {new Date(code.created_at).toLocaleDateString('en-US', {
@@ -401,7 +406,7 @@ export default function CodesPage() {
                             {totalPages > 1 && (
                                 <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/10">
                                     <p className="text-sm text-gray-400">
-                                        Page {page} of {totalPages}
+                                        {t('list.page', { current: page, total: totalPages })}
                                     </p>
                                     <div className="flex items-center gap-2">
                                         <Button
@@ -411,7 +416,7 @@ export default function CodesPage() {
                                             disabled={page === 1}
                                         >
                                             <ChevronLeft className="w-4 h-4" />
-                                            Previous
+                                            {t('list.previous')}
                                         </Button>
                                         <Button
                                             variant="outline"
@@ -419,7 +424,7 @@ export default function CodesPage() {
                                             onClick={() => setPage(p => Math.min(totalPages, p + 1))}
                                             disabled={page === totalPages}
                                         >
-                                            Next
+                                            {t('list.next')}
                                             <ChevronRight className="w-4 h-4" />
                                         </Button>
                                     </div>
@@ -450,9 +455,9 @@ export default function CodesPage() {
                             {/* Header */}
                             <div className="flex items-center justify-between p-6 border-b border-white/10">
                                 <div>
-                                    <h2 className="text-xl font-bold text-white">Generated Codes</h2>
+                                    <h2 className="text-xl font-bold text-white">{t('modal.title')}</h2>
                                     <p className="text-sm text-gray-400 mt-1">
-                                        {generatedCodes.length} code{generatedCodes.length > 1 ? 's' : ''} • {generatedCodes[0]?.credits} credits each
+                                        {generatedCodes.length > 0 && t('modal.subtitle', { count: generatedCodes.length, credits: generatedCodes[0]?.credits })}
                                     </p>
                                 </div>
                                 <button
@@ -498,7 +503,7 @@ export default function CodesPage() {
                                     onClick={copyAllCodes}
                                 >
                                     <Copy className="w-4 h-4 mr-2" />
-                                    Copy All
+                                    {t('modal.copyAll')}
                                 </Button>
                                 <Button
                                     variant="glow"
@@ -506,7 +511,7 @@ export default function CodesPage() {
                                     onClick={downloadGeneratedCodes}
                                 >
                                     <Download className="w-4 h-4 mr-2" />
-                                    Download CSV
+                                    {t('modal.downloadCsv')}
                                 </Button>
                             </div>
                         </motion.div>
