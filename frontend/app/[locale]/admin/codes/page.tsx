@@ -281,10 +281,7 @@ export default function CodesPage() {
         <div>
             <div className="flex items-center justify-between mb-8">
                 <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
-                <Button variant="outline" onClick={exportCodes}>
-                    <Download className="w-4 h-4 mr-2" />
-                    {t('export')}
-                </Button>
+
             </div>
 
 
