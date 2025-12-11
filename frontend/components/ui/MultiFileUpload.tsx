@@ -5,6 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Upload, FileVideo, X, Plus } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
+import { useTranslations } from 'next-intl';
 
 function cn(...inputs: ClassValue[]) {
     return twMerge(clsx(inputs));
@@ -25,6 +26,7 @@ export function MultiFileUpload({
     disabled = false,
     className
 }: MultiFileUploadProps) {
+    const t = useTranslations('Dashboard.upload.dropzone');
     const [dragActive, setDragActive] = useState(false);
 
     const handleDrag = useCallback((e: React.DragEvent) => {
@@ -116,21 +118,21 @@ export function MultiFileUpload({
                         {files.length === 0 ? (
                             <>
                                 <div className="mb-2">
-                                    <span className="font-semibold text-primary text-lg">Click to upload</span>
-                                    <span className="text-gray-400"> or drag and drop</span>
+                                    <span className="font-semibold text-primary text-lg">{t('click')}</span>
+                                    <span className="text-gray-400"> {t('drag')}</span>
                                 </div>
                                 <div className="flex flex-col items-center gap-2">
                                     <div className="px-3 py-1 rounded-full bg-primary/10 border border-primary/20 text-xs font-medium text-primary shadow-sm shadow-primary/5">
-                                        Batch process up to {maxFiles} videos
+                                        {t('batch', { count: maxFiles })}
                                     </div>
-                                    <span className="text-gray-500 text-[10px] uppercase tracking-wider font-medium">MP4 • MOV • AVI</span>
+                                    <span className="text-gray-500 text-[10px] uppercase tracking-wider font-medium">{t('formats')}</span>
                                 </div>
                             </>
                         ) : (
                             <>
-                                <span className="font-semibold text-primary text-base">Add more files</span>
+                                <span className="font-semibold text-primary text-base">{t('addMore')}</span>
                                 <span className="text-xs text-gray-400">
-                                    {files.length} of {maxFiles} files selected
+                                    {t('selectedCount', { count: files.length, total: maxFiles })}
                                 </span>
                             </>
                         )}
@@ -160,7 +162,7 @@ export function MultiFileUpload({
                         {/* Header */}
                         <div className="flex items-center justify-between px-1">
                             <span className="text-sm text-gray-400">
-                                {files.length} {files.length === 1 ? 'file' : 'files'} selected
+                                {t(files.length === 1 ? 'fileSelected' : 'filesSelected', { count: files.length })}
                             </span>
                             <button
                                 type="button"
@@ -168,7 +170,7 @@ export function MultiFileUpload({
                                 disabled={disabled}
                                 className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-50"
                             >
-                                Clear all
+                                {t('clearAll')}
                             </button>
                         </div>
 

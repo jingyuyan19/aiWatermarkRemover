@@ -432,10 +432,15 @@ export default function DashboardPage() {
                                                     {/* Cost Preview */}
                                                     <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl text-sm">
                                                         <span className="text-gray-400">
-                                                            {files.length} video{files.length > 1 ? 's' : ''} × {quality === 'e2fgvi_hq' ? '2' : '1'} credit{quality === 'e2fgvi_hq' ? 's' : ''}
+                                                            {t('upload.cost.calculation', {
+                                                                count: files.length,
+                                                                s: files.length > 1 ? 's' : '',
+                                                                per: quality === 'e2fgvi_hq' ? '2' : '1',
+                                                                credits: quality === 'e2fgvi_hq' ? 's' : ''
+                                                            })}
                                                         </span>
                                                         <span className="font-semibold text-white">
-                                                            Total: {files.length * (quality === 'e2fgvi_hq' ? 2 : 1)} credits
+                                                            {t('upload.cost.total', { cost: files.length * (quality === 'e2fgvi_hq' ? 2 : 1) })}
                                                         </span>
                                                     </div>
 
@@ -454,7 +459,7 @@ export default function DashboardPage() {
                                                                 {t('upload.processing')}
                                                             </span>
                                                         ) : (
-                                                            `Process ${files.length} Video${files.length > 1 ? 's' : ''}`
+                                                            t(files.length > 1 ? 'upload.processButtonPlural' : 'upload.processButton', { count: files.length })
                                                         )}
                                                     </Button>
                                                 </>

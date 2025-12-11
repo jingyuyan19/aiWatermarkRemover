@@ -354,6 +354,36 @@
                     "title": "高质量",
                     "description": "E2FGVI • 5-10 分钟"
                 }
+            },
+            "dropzone": {
+                "click": "点击上传",
+                "drag": "或拖拽文件到此处",
+                "batch": "批量处理最多 {count} 个视频",
+                "formats": "MP4 • MOV • AVI",
+                "addMore": "添加更多文件",
+                "selectedCount": "已选择 {count}/{total} 个文件",
+                "clearAll": "清除全部",
+                "fileSelected": "已选择 {count} 个文件",
+                "filesSelected": "已选择 {count} 个文件"
+            },
+            "cost": {
+                "calculation": "{count} 个视频 × {per} 积分",
+                "total": "总计: {cost} 积分"
+            },
+            "processButton": "处理 {count} 个视频",
+            "processButtonPlural": "处理 {count} 个视频",
+            "queue": {
+                "processing": "正在处理 {current}/{total}",
+                "completedCount": "✓ {count} 个已完成",
+                "failedCount": "✗ {count} 个失败",
+                "pendingCount": "{count} 个等待中",
+                "clearCompleted": "清除已完成",
+                "status": {
+                    "queued": "已加入处理队列",
+                    "failed": "上传失败",
+                    "uploading": "上传中...",
+                    "waiting": "等待中..."
+                }
             }
         },
         "recentJobs": {

@@ -355,6 +355,36 @@
                     "title": "High Quality",
                     "description": "E2FGVI • 5-10 min"
                 }
+            },
+            "dropzone": {
+                "click": "Click to upload",
+                "drag": "or drag and drop",
+                "batch": "Batch process up to {count} videos",
+                "formats": "MP4 • MOV • AVI",
+                "addMore": "Add more files",
+                "selectedCount": "{count} of {total} files selected",
+                "clearAll": "Clear all",
+                "fileSelected": "{count} file selected",
+                "filesSelected": "{count} files selected"
+            },
+            "cost": {
+                "calculation": "{count} video{s} × {per} credit{s}",
+                "total": "Total: {cost} credits"
+            },
+            "processButton": "Process {count} Video",
+            "processButtonPlural": "Process {count} Videos",
+            "queue": {
+                "processing": "Processing {current}/{total}",
+                "completedCount": "✓ {count} completed",
+                "failedCount": "✗ {count} failed",
+                "pendingCount": "{count} pending",
+                "clearCompleted": "Clear completed",
+                "status": {
+                    "queued": "Queued for processing",
+                    "failed": "Upload failed",
+                    "uploading": "Uploading...",
+                    "waiting": "Waiting..."
+                }
             }
         },
         "recentJobs": {

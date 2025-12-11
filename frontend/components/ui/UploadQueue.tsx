@@ -2,6 +2,7 @@
 
 import { motion, AnimatePresence } from 'framer-motion';
 import { FileVideo, CheckCircle, XCircle, Loader2, Clock, Trash2 } from 'lucide-react';
+import { useTranslations } from 'next-intl';
 
 export interface QueueItem {
     id: string;
@@ -20,6 +21,7 @@ interface UploadQueueProps {
 }
 
 export function UploadQueue({ items, onRemove, onClearCompleted, isProcessing }: UploadQueueProps) {
+    const t = useTranslations('Dashboard.upload.queue');
     const completedCount = items.filter(i => i.status === 'done').length;
     const errorCount = items.filter(i => i.status === 'error').length;
     const pendingCount = items.filter(i => i.status === 'pending').length;
@@ -46,13 +48,13 @@ export function UploadQueue({ items, onRemove, onClearCompleted, isProcessing }:
     const getStatusText = (item: QueueItem) => {
         switch (item.status) {
             case 'done':
-                return 'Queued for processing';
+                return t('status.queued');
             case 'error':
-                return item.error || 'Upload failed';
+                return item.error || t('status.failed');
             case 'uploading':
-                return 'Uploading...';
+                return t('status.uploading');
             default:
-                return 'Waiting...';
+                return t('status.waiting');
         }
     };
 
@@ -66,22 +68,22 @@ export function UploadQueue({ items, onRemove, onClearCompleted, isProcessing }:
                     {isProcessing && (
                         <span className="flex items-center gap-1.5 text-primary">
                             <Loader2 className="w-4 h-4 animate-spin" />
-                            Processing {completedCount + 1}/{items.length}
+                            {t('processing', { current: completedCount + 1, total: items.length })}
                         </span>
                     )}
                     {!isProcessing && completedCount > 0 && (
                         <span className="text-green-400">
-                            ✓ {completedCount} completed
+                            {t('completedCount', { count: completedCount })}
                         </span>
                     )}
                     {errorCount > 0 && (
                         <span className="text-red-400">
-                            ✗ {errorCount} failed
+                            {t('failedCount', { count: errorCount })}
                         </span>
                     )}
                     {pendingCount > 0 && !isProcessing && (
                         <span className="text-gray-400">
-                            {pendingCount} pending
+                            {t('pendingCount', { count: pendingCount })}
                         </span>
                     )}
                 </div>
@@ -92,7 +94,7 @@ export function UploadQueue({ items, onRemove, onClearCompleted, isProcessing }:
                         className="text-xs text-gray-400 hover:text-white transition-colors flex items-center gap-1"
                     >
                         <Trash2 className="w-3 h-3" />
-                        Clear completed
+                        {t('clearCompleted')}
                     </button>
                 )}
             </div>
@@ -108,24 +110,24 @@ export function UploadQueue({ items, onRemove, onClearCompleted, isProcessing }:
                             exit={{ opacity: 0, height: 0 }}
                             transition={{ delay: index * 0.02 }}
                             className={`flex items-center gap-3 p-3 rounded-xl border transition-all ${item.status === 'uploading'
-                                    ? 'bg-primary/10 border-primary/30'
-                                    : item.status === 'done'
-                                        ? 'bg-green-500/5 border-green-500/20'
-                                        : item.status === 'error'
-                                            ? 'bg-red-500/5 border-red-500/20'
-                                            : 'bg-white/5 border-white/10'
+                                ? 'bg-primary/10 border-primary/30'
+                                : item.status === 'done'
+                                    ? 'bg-green-500/5 border-green-500/20'
+                                    : item.status === 'error'
+                                        ? 'bg-red-500/5 border-red-500/20'
+                                        : 'bg-white/5 border-white/10'
                                 }`}
                         >
                             {/* Icon */}
                             <div className={`p-2 rounded-lg ${item.status === 'uploading' ? 'bg-primary/20' :
-                                    item.status === 'done' ? 'bg-green-500/20' :
-                                        item.status === 'error' ? 'bg-red-500/20' :
-                                            'bg-white/10'
+                                item.status === 'done' ? 'bg-green-500/20' :
+                                    item.status === 'error' ? 'bg-red-500/20' :
+                                        'bg-white/10'
                                 }`}>
                                 <FileVideo className={`w-4 h-4 ${item.status === 'uploading' ? 'text-primary' :
-                                        item.status === 'done' ? 'text-green-500' :
-                                            item.status === 'error' ? 'text-red-500' :
-                                                'text-gray-400'
+                                    item.status === 'done' ? 'text-green-500' :
+                                        item.status === 'error' ? 'text-red-500' :
+                                            'text-gray-400'
                                     }`} />
                             </div>
 
