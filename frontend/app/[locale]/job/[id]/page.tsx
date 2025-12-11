@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useAuth } from '@clerk/nextjs';
-import { useTranslations } from 'next-intl';
+import { useTranslations, useLocale } from 'next-intl';
 import { toast } from 'sonner';
 import { ArrowLeft, Copy, Check } from 'lucide-react';
 
@@ -17,6 +17,7 @@ import { isJobExpired, getEffectiveJobStatus } from '@/utils/jobExpiration';
 
 export default function JobPage() {
     const t = useTranslations('JobPage');
+    const locale = useLocale();
     const params = useParams();
     const router = useRouter();
     const jobId = params.id as string;
@@ -102,7 +103,7 @@ export default function JobPage() {
                         </svg>
                     </div>
                     <p className="text-red-200 text-lg font-medium">{error}</p>
-                    <Link href="/" className="mt-6 inline-block text-white/50 hover:text-white transition-colors">
+                    <Link href={`/${locale}/dashboard`} className="mt-6 inline-block text-white/50 hover:text-white transition-colors">
                         {t('backToHome')}
                     </Link>
                 </div>
@@ -131,7 +132,7 @@ export default function JobPage() {
                 <div className="max-w-5xl mx-auto">
                     {/* Header */}
                     <div className="flex justify-between items-center mb-12">
-                        <Link href="/" className="flex items-center text-gray-400 hover:text-white transition-colors group">
+                        <Link href={`/${locale}/dashboard`} className="flex items-center text-gray-400 hover:text-white transition-colors group">
                             <ArrowLeft className="w-5 h-5 mr-2 transform group-hover:-translate-x-1 transition-transform" />
                             {t('backToHome')}
                         </Link>

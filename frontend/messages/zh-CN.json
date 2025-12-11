@@ -279,7 +279,7 @@
         "copyright": "© {year} Vanishly。保留所有权利。"
     },
     "JobPage": {
-        "backToHome": "← 返回首页",
+        "backToHome": "返回控制台",
         "title": "任务状态",
         "loading": "正在加载任务详情...",
         "status": "状态",

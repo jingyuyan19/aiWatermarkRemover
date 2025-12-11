@@ -280,7 +280,7 @@
         "copyright": "© {year} Vanishly. All rights reserved."
     },
     "JobPage": {
-        "backToHome": "Back to Home",
+        "backToHome": "Back to Dashboard",
         "title": "Job Status",
         "loading": "Loading job details...",
         "status": "Status",
