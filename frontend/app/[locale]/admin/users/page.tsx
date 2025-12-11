@@ -36,6 +36,7 @@ export default function UsersPage() {
     const [loading, setLoading] = useState(true);
     const [adjustingUser, setAdjustingUser] = useState<string | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [searchInput, setSearchInput] = useState('');
     const [roleFilter, setRoleFilter] = useState<string>('');
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 15;
@@ -48,7 +49,7 @@ export default function UsersPage() {
             params.set('page', page.toString());
             params.set('page_size', pageSize.toString());
             if (searchQuery) params.set('search', searchQuery);
-            if (roleFilter) params.set('role', roleFilter);
+            if (roleFilter && roleFilter !== 'all') params.set('role', roleFilter);
 
             const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/admin/users?${params}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -66,16 +67,19 @@ export default function UsersPage() {
     useEffect(() => {
         setCurrentPage(1);
         fetchUsers(1);
-    }, [getToken, roleFilter]);
+    }, [getToken, roleFilter, searchQuery]);
 
-    // Debounced search
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            setCurrentPage(1);
-            fetchUsers(1);
-        }, 300);
-        return () => clearTimeout(timer);
-    }, [searchQuery]);
+    const handleSearch = () => {
+        setSearchQuery(searchInput);
+        setCurrentPage(1);
+    };
+
+    const clearFilters = () => {
+        setSearchQuery('');
+        setSearchInput('');
+        setRoleFilter('all');
+        setCurrentPage(1);
+    };
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -100,26 +104,52 @@ export default function UsersPage() {
             <Card className="bg-gray-900 border-white/10">
                 <CardContent className="p-4 md:p-6">
                     {/* Search and Filters */}
-                    <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                            <input
-                                type="text"
-                                placeholder={t('searchPlaceholder')}
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2.5 bg-gray-800 border border-white/10 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
-                            />
+                    <div className="flex flex-wrap items-center gap-4 mb-6">
+                        {/* Search */}
+                        <div className="flex-1 min-w-[200px]">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    placeholder="Search Email or User ID..."
+                                    className="flex-1 px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                <button
+                                    onClick={handleSearch}
+                                    className="px-4 py-2 border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
+                                >
+                                    <Search className="w-4 h-4 text-gray-400" />
+                                </button>
+                            </div>
                         </div>
-                        <select
-                            value={roleFilter}
-                            onChange={(e) => setRoleFilter(e.target.value)}
-                            className="px-4 py-2.5 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                            <option value="">{t('roles.all')}</option>
-                            <option value="admin">{t('roles.admin')}</option>
-                            <option value="user">{t('roles.user')}</option>
-                        </select>
+
+                        {/* Role Filter */}
+                        <div className="min-w-[140px]">
+                            <select
+                                value={roleFilter}
+                                onChange={(e) => {
+                                    setRoleFilter(e.target.value);
+                                    setCurrentPage(1);
+                                }}
+                                className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="all">{t('roles.all')}</option>
+                                <option value="admin">{t('roles.admin')}</option>
+                                <option value="user">{t('roles.user')}</option>
+                            </select>
+                        </div>
+
+                        {/* Clear Filters */}
+                        {(roleFilter || searchQuery) && (
+                            <button
+                                onClick={clearFilters}
+                                className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                            >
+                                Clear filters
+                            </button>
+                        )}
                     </div>
 
                     {/* Header with count */}
@@ -153,6 +183,7 @@ export default function UsersPage() {
                                 <table className="w-full min-w-[600px]">
                                     <thead>
                                         <tr className="border-b border-white/10">
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">User ID</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.email')}</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.credits')}</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.role')}</th>
@@ -169,6 +200,18 @@ export default function UsersPage() {
                                                 transition={{ delay: index * 0.02 }}
                                                 className="border-b border-white/5 hover:bg-white/5"
                                             >
+                                                <td className="py-3 px-4">
+                                                    <code
+                                                        className="text-xs text-gray-400 font-mono cursor-pointer hover:text-white transition-colors"
+                                                        title="Click to copy ID"
+                                                        onClick={() => {
+                                                            navigator.clipboard.writeText(user.id);
+                                                            toast.success('User ID copied');
+                                                        }}
+                                                    >
+                                                        {user.id.substring(0, 12)}...
+                                                    </code>
+                                                </td>
                                                 <td className="py-3 px-4">
                                                     <span className="text-white text-sm">{user.email || 'No email'}</span>
                                                 </td>

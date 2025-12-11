@@ -12,6 +12,7 @@ import { toast } from 'sonner';
 interface Job {
     id: string;
     user_id: string;
+    user_email?: string;
     status: string;
     quality: string;
     cost: number;
@@ -37,7 +38,10 @@ export default function JobsPage() {
     const { getToken } = useAuth();
     const [data, setData] = useState<PaginatedResponse | null>(null);
     const [loading, setLoading] = useState(true);
-    const [statusFilter, setStatusFilter] = useState('');
+    const [statusFilter, setStatusFilter] = useState('all');
+    const [qualityFilter, setQualityFilter] = useState('all');
+    const [searchQuery, setSearchQuery] = useState('');
+    const [searchInput, setSearchInput] = useState('');
     const [currentPage, setCurrentPage] = useState(1);
     const pageSize = 20;
 
@@ -49,7 +53,10 @@ export default function JobsPage() {
             const params = new URLSearchParams();
             params.set('page', page.toString());
             params.set('page_size', pageSize.toString());
-            if (statusFilter) params.set('status', statusFilter);
+
+            if (statusFilter && statusFilter !== 'all') params.set('status', statusFilter);
+            if (qualityFilter && qualityFilter !== 'all') params.set('quality', qualityFilter);
+            if (searchQuery) params.set('search', searchQuery);
 
             const res = await fetch(`${API_URL}/api/admin/jobs?${params}`, {
                 headers: { Authorization: `Bearer ${token}` }
@@ -65,9 +72,26 @@ export default function JobsPage() {
     };
 
     useEffect(() => {
-        setCurrentPage(1);
+        // Debounce search input? Or just use explicit search button/enter
+        // For simplicity and to match Codes page pattern, we use explicit search query state
         fetchJobs(1);
-    }, [getToken, statusFilter]);
+    }, [getToken, statusFilter, qualityFilter, searchQuery]);
+
+    const handleSearch = () => {
+        setSearchQuery(searchInput);
+        setCurrentPage(1);
+    };
+
+    const clearFilters = () => {
+        setStatusFilter('all');
+        setQualityFilter('all');
+        setSearchQuery('');
+        setSearchInput('');
+        setCurrentPage(1);
+        // fetchJobs(1) will be triggered by useEffect dependencies
+    };
+
+
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -83,18 +107,70 @@ export default function JobsPage() {
             <Card className="bg-gray-900 border-white/10">
                 <CardContent className="p-4 md:p-6">
                     {/* Filters */}
-                    <div className="flex flex-col sm:flex-row gap-3 mb-6">
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => setStatusFilter(e.target.value)}
-                            className="px-4 py-2.5 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
-                        >
-                            <option value="">All Statuses</option>
-                            <option value="pending">Pending</option>
-                            <option value="processing">Processing</option>
-                            <option value="completed">Completed</option>
-                            <option value="failed">Failed</option>
-                        </select>
+                    <div className="flex flex-wrap items-center gap-4 mb-6">
+                        {/* Search */}
+                        <div className="flex-1 min-w-[200px]">
+                            <div className="flex gap-2">
+                                <input
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    placeholder="Search Job ID, User ID or Email..."
+                                    className="flex-1 px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
+                                />
+                                <button
+                                    onClick={handleSearch}
+                                    className="px-4 py-2 border border-white/10 rounded-lg hover:bg-white/5 transition-colors"
+                                >
+                                    <Search className="w-4 h-4 text-gray-400" />
+                                </button>
+                            </div>
+                        </div>
+
+                        {/* Status Filter */}
+                        <div className="min-w-[140px]">
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => {
+                                    setStatusFilter(e.target.value);
+                                    setCurrentPage(1);
+                                }}
+                                className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="all">All Statuses</option>
+                                <option value="pending">Pending</option>
+                                <option value="processing">Processing</option>
+                                <option value="completed">Completed</option>
+                                <option value="failed">Failed</option>
+                            </select>
+                        </div>
+
+                        {/* Quality Filter */}
+                        <div className="min-w-[140px]">
+                            <select
+                                value={qualityFilter}
+                                onChange={(e) => {
+                                    setQualityFilter(e.target.value);
+                                    setCurrentPage(1);
+                                }}
+                                className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
+                            >
+                                <option value="all">All Models</option>
+                                <option value="lama">LAMA</option>
+                                <option value="E2FGVI_HQ">E2FGVI HQ</option>
+                            </select>
+                        </div>
+
+                        {/* Clear Filters */}
+                        {(statusFilter !== 'all' || qualityFilter !== 'all' || searchQuery) && (
+                            <button
+                                onClick={clearFilters}
+                                className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
+                            >
+                                Clear filters
+                            </button>
+                        )}
                     </div>
 
                     {/* Header with count */}
@@ -129,7 +205,7 @@ export default function JobsPage() {
                                     <thead>
                                         <tr className="border-b border-white/10">
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Job ID</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">User ID</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">User</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Status</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Quality</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Cost</th>
@@ -162,9 +238,18 @@ export default function JobsPage() {
                                                         </code>
                                                     </td>
                                                     <td className="py-3 px-4">
-                                                        <code className="text-xs text-gray-400 font-mono">
-                                                            {job.user_id ? `${job.user_id.substring(0, 12)}...` : 'N/A'}
-                                                        </code>
+                                                        <div className="flex flex-col">
+                                                            {job.user_email ? (
+                                                                <span className="text-sm text-gray-300" title={job.user_email}>
+                                                                    {job.user_email}
+                                                                </span>
+                                                            ) : (
+                                                                <span className="text-sm text-gray-500 italic">No Email</span>
+                                                            )}
+                                                            <code className="text-xs text-gray-600 font-mono" title={job.user_id}>
+                                                                {job.user_id ? `${job.user_id.substring(0, 12)}...` : 'N/A'}
+                                                            </code>
+                                                        </div>
                                                     </td>
                                                     <td className="py-3 px-4">
                                                         <div className="flex items-center gap-2">

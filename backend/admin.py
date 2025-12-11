@@ -244,7 +244,14 @@ async def list_users(
     base_query = select(User)
     
     if search:
-        base_query = base_query.where(User.email.ilike(f"%{search}%"))
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        base_query = base_query.where(
+            or_(
+                User.email.ilike(search_term),
+                User.id.ilike(search_term)
+            )
+        )
     
     if role == "admin":
         base_query = base_query.where(User.is_admin == 1)
@@ -332,17 +339,33 @@ async def list_all_jobs(
     page: int = 1,
     page_size: int = 20,
     status: Optional[str] = None,
+    quality: Optional[str] = None,
+    search: Optional[str] = None,
     db: AsyncSession = Depends(get_db),
     user_info: UserInfo = Depends(get_current_user_info)
 ):
-    """List all jobs with pagination (admin only)."""
+    """List all jobs with pagination and filters (admin only)."""
     verify_admin_role(user_info)
     
-    # Build base query
-    base_query = select(Job)
+    # Build base query - join with User to get email
+    base_query = select(Job, User.email).outerjoin(User, Job.user_id == User.id)
     
-    if status:
+    if status and status != 'all':
         base_query = base_query.where(Job.status == status)
+        
+    if quality and quality != 'all':
+        base_query = base_query.where(Job.quality == quality)
+        
+    if search:
+        search_term = f"%{search}%"
+        from sqlalchemy import or_
+        base_query = base_query.where(
+            or_(
+                Job.id.ilike(search_term),
+                Job.user_id.ilike(search_term),
+                User.email.ilike(search_term)
+            )
+        )
     
     # Get total count
     count_query = select(func.count()).select_from(base_query.subquery())
@@ -359,19 +382,20 @@ async def list_all_jobs(
         .offset(offset)
         .limit(page_size)
     )
-    jobs = result.scalars().all()
+    rows = result.all()
     
     return {
         "jobs": [
             {
                 "id": j.id,
                 "user_id": j.user_id,
+                "user_email": email,
                 "status": j.status,
                 "quality": j.quality,
                 "cost": j.cost,
                 "created_at": j.created_at
             }
-            for j in jobs
+            for j, email in rows
         ],
         "total": total,
         "page": page,
