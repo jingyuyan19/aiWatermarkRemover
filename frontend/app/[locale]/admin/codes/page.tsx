@@ -229,284 +229,377 @@ export default function CodesPage() {
         } catch (error) {
             toast.error(t('toast.exportFailed'));
         }
-    }
-};
+    };
 
-const exportSelectedCodes = () => {
-    if (selectedCodes.size === 0) return;
+    const exportSelectedCodes = () => {
+        if (selectedCodes.size === 0) return;
 
-    // Same format as generated codes download
-    // Filter codes from the current list (or ideally fetch if we supported cross-page select, but current implementation is page-based mostly)
-    // Since selectedCodes is a Set of code strings, we can just use those.
+        // Same format as generated codes download
+        // Filter codes from the current list (or ideally fetch if we supported cross-page select, but current implementation is page-based mostly)
+        // Since selectedCodes is a Set of code strings, we can just use those.
 
-    const now = new Date();
-    const dateStr = now.toISOString().split('T')[0];
-    const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
-    const filename = `selected_codes_${selectedCodes.size}_${dateStr}_${timeStr}.csv`;
+        const now = new Date();
+        const dateStr = now.toISOString().split('T')[0];
+        const timeStr = now.toTimeString().split(' ')[0].replace(/:/g, '-');
+        const filename = `selected_codes_${selectedCodes.size}_${dateStr}_${timeStr}.csv`;
 
-    const csvContent = Array.from(selectedCodes).join('\n');
+        const csvContent = Array.from(selectedCodes).join('\n');
 
-    const blob = new Blob([csvContent], { type: 'text/csv' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = filename;
-    a.click();
-    URL.revokeObjectURL(url);
+        const blob = new Blob([csvContent], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = filename;
+        a.click();
+        URL.revokeObjectURL(url);
 
-    toast.success(t('toast.csvDownloaded'));
-};
+        toast.success(t('toast.csvDownloaded'));
+    };
 
-const handleSearch = () => {
-    setSearchQuery(searchInput);
-    setPage(1);
-};
+    const handleSearch = () => {
+        setSearchQuery(searchInput);
+        setPage(1);
+    };
 
-const clearFilters = () => {
-    setStatusFilter('all');
-    setCreditsFilter(null);
-    setSearchQuery('');
-    setSearchInput('');
-    setPage(1);
-};
+    const clearFilters = () => {
+        setStatusFilter('all');
+        setCreditsFilter(null);
+        setSearchQuery('');
+        setSearchInput('');
+        setPage(1);
+    };
 
-const toggleSelectAll = () => {
-    if (selectedCodes.size === codes.length) {
-        setSelectedCodes(new Set());
-    } else {
-        setSelectedCodes(new Set(codes.map(c => c.code)));
-    }
-};
+    const toggleSelectAll = () => {
+        if (selectedCodes.size === codes.length) {
+            setSelectedCodes(new Set());
+        } else {
+            setSelectedCodes(new Set(codes.map(c => c.code)));
+        }
+    };
 
-return (
-    <div>
-        <div className="flex items-center justify-between mb-8">
-            <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
-            <Button variant="outline" onClick={exportCodes}>
-                <Download className="w-4 h-4 mr-2" />
-                {t('export')}
-            </Button>
-        </div>
+    return (
+        <div>
+            <div className="flex items-center justify-between mb-8">
+                <h1 className="text-3xl font-bold text-white">{t('title')}</h1>
+                <Button variant="outline" onClick={exportCodes}>
+                    <Download className="w-4 h-4 mr-2" />
+                    {t('export')}
+                </Button>
+            </div>
 
 
-        {/* Generator */}
-        <Card className="bg-gray-900 border-white/10 mb-8">
-            <CardContent className="p-6">
-                <h2 className="text-xl font-semibold text-white mb-6">{t('generate.title')}</h2>
+            {/* Generator */}
+            <Card className="bg-gray-900 border-white/10 mb-8">
+                <CardContent className="p-6">
+                    <h2 className="text-xl font-semibold text-white mb-6">{t('generate.title')}</h2>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
-                    <div>
-                        <label className="block text-sm text-gray-400 mb-2">{t('generate.creditsPerCode')}</label>
-                        <select
-                            value={credits}
-                            onChange={(e) => setCredits(Number(e.target.value))}
-                            className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                        >
-                            <option value={10}>10 (Starter - $4.99)</option>
-                            <option value={50}>50 (Pro - $19.99)</option>
-                            <option value={200}>200 (Business - $59.99)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label className="block text-sm text-gray-400 mb-2">{t('generate.numberOfCodes')}</label>
-                        <input
-                            type="number"
-                            min={1}
-                            max={100}
-                            value={count}
-                            onChange={(e) => setCount(Number(e.target.value))}
-                            className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                        />
-                    </div>
-                    <div>
-                        <label className="block text-sm text-gray-400 mb-2">{t('generate.prefix')}</label>
-                        <input
-                            type="text"
-                            value={prefix}
-                            onChange={(e) => setPrefix(e.target.value)}
-                            placeholder={t('generate.prefix')}
-                            className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                        />
-                    </div>
-                    <div className="flex items-end">
-                        <Button
-                            variant="glow"
-                            className="w-full"
-                            onClick={generateCodes}
-                            disabled={generating}
-                        >
-                            {generating ? t('generate.generating') : t('generate.button')}
-                        </Button>
-                    </div>
-                </div>
-            </CardContent>
-        </Card>
-
-        {/* Filters */}
-        <Card className="bg-gray-900 border-white/10 mb-6">
-            <CardContent className="p-4">
-                <div className="flex flex-wrap items-center gap-4">
-                    {/* Search */}
-                    <div className="flex-1 min-w-[200px]">
-                        <div className="flex gap-2">
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-2">{t('generate.creditsPerCode')}</label>
+                            <select
+                                value={credits}
+                                onChange={(e) => setCredits(Number(e.target.value))}
+                                className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
+                            >
+                                <option value={10}>10 (Starter - $4.99)</option>
+                                <option value={50}>50 (Pro - $19.99)</option>
+                                <option value={200}>200 (Business - $59.99)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-2">{t('generate.numberOfCodes')}</label>
+                            <input
+                                type="number"
+                                min={1}
+                                max={100}
+                                value={count}
+                                onChange={(e) => setCount(Number(e.target.value))}
+                                className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm text-gray-400 mb-2">{t('generate.prefix')}</label>
                             <input
                                 type="text"
-                                value={searchInput}
-                                onChange={(e) => setSearchInput(e.target.value)}
-                                onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                placeholder={t('filters.searchPlaceholder')}
-                                className="flex-1 px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white placeholder:text-gray-500"
+                                value={prefix}
+                                onChange={(e) => setPrefix(e.target.value)}
+                                placeholder={t('generate.prefix')}
+                                className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
                             />
-                            <Button variant="outline" onClick={handleSearch}>
-                                <Search className="w-4 h-4" />
+                        </div>
+                        <div className="flex items-end">
+                            <Button
+                                variant="glow"
+                                className="w-full"
+                                onClick={generateCodes}
+                                disabled={generating}
+                            >
+                                {generating ? t('generate.generating') : t('generate.button')}
                             </Button>
                         </div>
                     </div>
+                </CardContent>
+            </Card>
 
-                    {/* Status Filter */}
-                    <div>
-                        <select
-                            value={statusFilter}
-                            onChange={(e) => {
-                                setStatusFilter(e.target.value as 'all' | 'pending' | 'redeemed');
-                                setPage(1);
-                            }}
-                            className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                        >
-                            <option value="all">{t('filters.allStatus')}</option>
-                            <option value="pending">{t('filters.pending')}</option>
-                            <option value="redeemed">{t('filters.redeemed')}</option>
-                        </select>
-                    </div>
-
-                    {/* Credits Filter */}
-                    <div>
-                        <select
-                            value={creditsFilter || ''}
-                            onChange={(e) => {
-                                setCreditsFilter(e.target.value ? Number(e.target.value) : null);
-                                setPage(1);
-                            }}
-                            className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                        >
-                            <option value="">{t('filters.allCredits')}</option>
-                            <option value="10">10 Credits</option>
-                            <option value="50">50 Credits</option>
-                            <option value="200">200 Credits</option>
-                        </select>
-                    </div>
-
-                    {/* Clear Filters */}
-                    {(statusFilter !== 'all' || creditsFilter || searchQuery) && (
-                        <Button variant="ghost" onClick={clearFilters} className="text-gray-400">
-                            {t('filters.clear')}
-                        </Button>
-                    )}
-                </div>
-            </CardContent>
-        </Card>
-
-        {/* Codes List */}
-        <Card className="bg-gray-900 border-white/10">
-            <CardContent className="p-6">
-                <div className="flex items-center justify-between mb-6">
-                    <div className="flex items-center gap-4">
-                        {!loading && codes.length > 0 && (
-                            <div className="flex items-center gap-2">
+            {/* Filters */}
+            <Card className="bg-gray-900 border-white/10 mb-6">
+                <CardContent className="p-4">
+                    <div className="flex flex-wrap items-center gap-4">
+                        {/* Search */}
+                        <div className="flex-1 min-w-[200px]">
+                            <div className="flex gap-2">
                                 <input
-                                    type="checkbox"
-                                    checked={selectedCodes.size === codes.length && codes.length > 0}
-                                    onChange={toggleSelectAll}
-                                    className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-primary"
+                                    type="text"
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
+                                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                                    placeholder={t('filters.searchPlaceholder')}
+                                    className="flex-1 px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white placeholder:text-gray-500"
                                 />
-                                <span className="text-sm text-gray-400">Select All</span>
+                                <Button variant="outline" onClick={handleSearch}>
+                                    <Search className="w-4 h-4" />
+                                </Button>
+                            </div>
+                        </div>
+
+                        {/* Status Filter */}
+                        <div>
+                            <select
+                                value={statusFilter}
+                                onChange={(e) => {
+                                    setStatusFilter(e.target.value as 'all' | 'pending' | 'redeemed');
+                                    setPage(1);
+                                }}
+                                className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
+                            >
+                                <option value="all">{t('filters.allStatus')}</option>
+                                <option value="pending">{t('filters.pending')}</option>
+                                <option value="redeemed">{t('filters.redeemed')}</option>
+                            </select>
+                        </div>
+
+                        {/* Credits Filter */}
+                        <div>
+                            <select
+                                value={creditsFilter || ''}
+                                onChange={(e) => {
+                                    setCreditsFilter(e.target.value ? Number(e.target.value) : null);
+                                    setPage(1);
+                                }}
+                                className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
+                            >
+                                <option value="">{t('filters.allCredits')}</option>
+                                <option value="10">10 Credits</option>
+                                <option value="50">50 Credits</option>
+                                <option value="200">200 Credits</option>
+                            </select>
+                        </div>
+
+                        {/* Clear Filters */}
+                        {(statusFilter !== 'all' || creditsFilter || searchQuery) && (
+                            <Button variant="ghost" onClick={clearFilters} className="text-gray-400">
+                                {t('filters.clear')}
+                            </Button>
+                        )}
+                    </div>
+                </CardContent>
+            </Card>
+
+            {/* Codes List */}
+            <Card className="bg-gray-900 border-white/10">
+                <CardContent className="p-6">
+                    <div className="flex items-center justify-between mb-6">
+                        <div className="flex items-center gap-4">
+                            {!loading && codes.length > 0 && (
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        checked={selectedCodes.size === codes.length && codes.length > 0}
+                                        onChange={toggleSelectAll}
+                                        className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-primary"
+                                    />
+                                    <span className="text-sm text-gray-400">Select All</span>
+                                </div>
+                            )}
+                            <h2 className="text-xl font-semibold text-white">
+                                {t('list.total')} <span className="text-gray-500 text-base">({total})</span>
+                            </h2>
+                        </div>
+
+                        {selectedCodes.size > 0 && (
+                            <div className="flex gap-2 animate-in fade-in slide-in-from-right-5">
+                                <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={exportSelectedCodes}
+                                >
+                                    <Download className="w-4 h-4 mr-2" />
+                                    Export CSV
+                                </Button>
+                                <Button
+                                    variant="destructive"
+                                    size="sm"
+                                    onClick={deleteSelectedCodes}
+                                    disabled={deleting}
+                                >
+                                    <Trash2 className="w-4 h-4 mr-2" />
+                                    {deleting ? 'Deleting...' : `Delete (${selectedCodes.size})`}
+                                </Button>
                             </div>
                         )}
-                        <h2 className="text-xl font-semibold text-white">
-                            {t('list.total')} <span className="text-gray-500 text-base">({total})</span>
-                        </h2>
                     </div>
 
-                    {selectedCodes.size > 0 && (
-                        <div className="flex gap-2 animate-in fade-in slide-in-from-right-5">
-                            <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={exportSelectedCodes}
-                            >
-                                <Download className="w-4 h-4 mr-2" />
-                                Export CSV
-                            </Button>
-                            <Button
-                                variant="destructive"
-                                size="sm"
-                                onClick={deleteSelectedCodes}
-                                disabled={deleting}
-                            >
-                                <Trash2 className="w-4 h-4 mr-2" />
-                                {deleting ? 'Deleting...' : `Delete (${selectedCodes.size})`}
-                            </Button>
-                        </div>
-                    )}
-                </div>
-
-                {loading ? (
-                    <div className="space-y-3">
-                        {[...Array(5)].map((_, i) => (
-                            <Skeleton key={i} className="h-14 w-full" />
-                        ))}
-                    </div>
-                ) : codes.length === 0 ? (
-                    <div className="text-center py-12 text-gray-500">
-                        <Ticket className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                        <p>{t('list.noCodes')}</p>
-                    </div>
-                ) : (
-                    <>
+                    {loading ? (
                         <div className="space-y-3">
-                            {codes.map((code, index) => (
-                                <motion.div
-                                    key={code.code}
-                                    initial={{ opacity: 0, x: -20 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    transition={{ delay: index * 0.03 }}
-                                    className={`flex items-center justify-between p-4 rounded-lg ${code.redeemed_by
-                                        ? 'bg-gray-800/50'
-                                        : 'bg-gray-800'
-                                        }`}
-                                >
-                                    <div className="flex items-center gap-6">
-                                        <input
-                                            type="checkbox"
-                                            checked={selectedCodes.has(code.code)}
-                                            onChange={() => toggleSelection(code.code)}
-                                            className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-primary"
-                                        />
-                                        <code className="font-mono text-lg text-white min-w-[140px]">{code.code}</code>
-                                        <span className="text-sm text-primary font-medium min-w-[80px]">
-                                            {code.credits} credits
-                                        </span>
-                                        <span className={`text-sm px-2 py-0.5 rounded-full ${code.redeemed_by
-                                            ? 'bg-green-500/20 text-green-400'
-                                            : 'bg-yellow-500/20 text-yellow-400'
-                                            }`}>
-                                            {code.redeemed_by ? t('filters.redeemed') : t('filters.pending')}
-                                        </span>
-                                        <span className="text-sm text-gray-500">
-                                            {new Date(code.created_at).toLocaleDateString('en-US', {
-                                                month: 'short',
-                                                day: 'numeric',
-                                                year: 'numeric',
-                                                hour: '2-digit',
-                                                minute: '2-digit'
-                                            })}
-                                        </span>
+                            {[...Array(5)].map((_, i) => (
+                                <Skeleton key={i} className="h-14 w-full" />
+                            ))}
+                        </div>
+                    ) : codes.length === 0 ? (
+                        <div className="text-center py-12 text-gray-500">
+                            <Ticket className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                            <p>{t('list.noCodes')}</p>
+                        </div>
+                    ) : (
+                        <>
+                            <div className="space-y-3">
+                                {codes.map((code, index) => (
+                                    <motion.div
+                                        key={code.code}
+                                        initial={{ opacity: 0, x: -20 }}
+                                        animate={{ opacity: 1, x: 0 }}
+                                        transition={{ delay: index * 0.03 }}
+                                        className={`flex items-center justify-between p-4 rounded-lg ${code.redeemed_by
+                                            ? 'bg-gray-800/50'
+                                            : 'bg-gray-800'
+                                            }`}
+                                    >
+                                        <div className="flex items-center gap-6">
+                                            <input
+                                                type="checkbox"
+                                                checked={selectedCodes.has(code.code)}
+                                                onChange={() => toggleSelection(code.code)}
+                                                className="w-4 h-4 rounded border-white/20 bg-white/5 checked:bg-primary"
+                                            />
+                                            <code className="font-mono text-lg text-white min-w-[140px]">{code.code}</code>
+                                            <span className="text-sm text-primary font-medium min-w-[80px]">
+                                                {code.credits} credits
+                                            </span>
+                                            <span className={`text-sm px-2 py-0.5 rounded-full ${code.redeemed_by
+                                                ? 'bg-green-500/20 text-green-400'
+                                                : 'bg-yellow-500/20 text-yellow-400'
+                                                }`}>
+                                                {code.redeemed_by ? t('filters.redeemed') : t('filters.pending')}
+                                            </span>
+                                            <span className="text-sm text-gray-500">
+                                                {new Date(code.created_at).toLocaleDateString('en-US', {
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                    year: 'numeric',
+                                                    hour: '2-digit',
+                                                    minute: '2-digit'
+                                                })}
+                                            </span>
+                                        </div>
+                                        <div className="flex items-center gap-3">
+                                            {!code.redeemed_by && (
+                                                <button
+                                                    onClick={() => copyCode(code.code)}
+                                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                                >
+                                                    {copiedCode === code.code ? (
+                                                        <Check className="w-4 h-4 text-green-500" />
+                                                    ) : (
+                                                        <Copy className="w-4 h-4 text-gray-400" />
+                                                    )}
+                                                </button>
+                                            )}
+                                        </div>
+                                    </motion.div>
+                                ))}
+                            </div>
+
+                            {/* Pagination */}
+                            {totalPages > 1 && (
+                                <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/10">
+                                    <p className="text-sm text-gray-400">
+                                        {t('list.page', { current: page, total: totalPages })}
+                                    </p>
+                                    <div className="flex items-center gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setPage(p => Math.max(1, p - 1))}
+                                            disabled={page === 1}
+                                        >
+                                            <ChevronLeft className="w-4 h-4" />
+                                            {t('list.previous')}
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+                                            disabled={page === totalPages}
+                                        >
+                                            {t('list.next')}
+                                            <ChevronRight className="w-4 h-4" />
+                                        </Button>
                                     </div>
-                                    <div className="flex items-center gap-3">
-                                        {!code.redeemed_by && (
+                                </div>
+                            )}
+                        </>
+                    )}
+                </CardContent>
+            </Card>
+
+            {/* Generated Codes Modal */}
+            <AnimatePresence>
+                {showModal && (
+                    <motion.div
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                        className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+                        onClick={() => setShowModal(false)}
+                    >
+                        <motion.div
+                            initial={{ opacity: 0, scale: 0.95, y: 20 }}
+                            animate={{ opacity: 1, scale: 1, y: 0 }}
+                            exit={{ opacity: 0, scale: 0.95, y: 20 }}
+                            onClick={(e) => e.stopPropagation()}
+                            className="bg-gray-900 border border-white/10 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col"
+                        >
+                            {/* Header */}
+                            <div className="flex items-center justify-between p-6 border-b border-white/10">
+                                <div>
+                                    <h2 className="text-xl font-bold text-white">{t('modal.title')}</h2>
+                                    <p className="text-sm text-gray-400 mt-1">
+                                        {generatedCodes.length > 0 && t('modal.subtitle', { count: generatedCodes.length, credits: generatedCodes[0]?.credits })}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                >
+                                    <X className="w-5 h-5 text-gray-400" />
+                                </button>
+                            </div>
+
+                            {/* Codes List */}
+                            <div className="flex-1 overflow-y-auto p-6">
+                                <div className="space-y-2">
+                                    {generatedCodes.map((code, index) => (
+                                        <motion.div
+                                            key={code.code}
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            transition={{ delay: index * 0.05 }}
+                                            className="flex items-center justify-between p-3 bg-gray-800 rounded-lg"
+                                        >
+                                            <code className="font-mono text-white">{code.code}</code>
                                             <button
                                                 onClick={() => copyCode(code.code)}
-                                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
+                                                className="p-1.5 hover:bg-white/10 rounded transition-colors"
                                             >
                                                 {copiedCode === code.code ? (
                                                     <Check className="w-4 h-4 text-green-500" />
@@ -514,128 +607,34 @@ return (
                                                     <Copy className="w-4 h-4 text-gray-400" />
                                                 )}
                                             </button>
-                                        )}
-                                    </div>
-                                </motion.div>
-                            ))}
-                        </div>
-
-                        {/* Pagination */}
-                        {totalPages > 1 && (
-                            <div className="flex items-center justify-between mt-6 pt-6 border-t border-white/10">
-                                <p className="text-sm text-gray-400">
-                                    {t('list.page', { current: page, total: totalPages })}
-                                </p>
-                                <div className="flex items-center gap-2">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPage(p => Math.max(1, p - 1))}
-                                        disabled={page === 1}
-                                    >
-                                        <ChevronLeft className="w-4 h-4" />
-                                        {t('list.previous')}
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => setPage(p => Math.min(totalPages, p + 1))}
-                                        disabled={page === totalPages}
-                                    >
-                                        {t('list.next')}
-                                        <ChevronRight className="w-4 h-4" />
-                                    </Button>
+                                        </motion.div>
+                                    ))}
                                 </div>
                             </div>
-                        )}
-                    </>
-                )}
-            </CardContent>
-        </Card>
 
-        {/* Generated Codes Modal */}
-        <AnimatePresence>
-            {showModal && (
-                <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
-                    onClick={() => setShowModal(false)}
-                >
-                    <motion.div
-                        initial={{ opacity: 0, scale: 0.95, y: 20 }}
-                        animate={{ opacity: 1, scale: 1, y: 0 }}
-                        exit={{ opacity: 0, scale: 0.95, y: 20 }}
-                        onClick={(e) => e.stopPropagation()}
-                        className="bg-gray-900 border border-white/10 rounded-xl w-full max-w-lg mx-4 max-h-[80vh] flex flex-col"
-                    >
-                        {/* Header */}
-                        <div className="flex items-center justify-between p-6 border-b border-white/10">
-                            <div>
-                                <h2 className="text-xl font-bold text-white">{t('modal.title')}</h2>
-                                <p className="text-sm text-gray-400 mt-1">
-                                    {generatedCodes.length > 0 && t('modal.subtitle', { count: generatedCodes.length, credits: generatedCodes[0]?.credits })}
-                                </p>
+                            {/* Footer Actions */}
+                            <div className="flex items-center gap-3 p-6 border-t border-white/10">
+                                <Button
+                                    variant="outline"
+                                    className="flex-1"
+                                    onClick={copyAllCodes}
+                                >
+                                    <Copy className="w-4 h-4 mr-2" />
+                                    {t('modal.copyAll')}
+                                </Button>
+                                <Button
+                                    variant="glow"
+                                    className="flex-1"
+                                    onClick={downloadGeneratedCodes}
+                                >
+                                    <Download className="w-4 h-4 mr-2" />
+                                    {t('modal.downloadCsv')}
+                                </Button>
                             </div>
-                            <button
-                                onClick={() => setShowModal(false)}
-                                className="p-2 hover:bg-white/10 rounded-lg transition-colors"
-                            >
-                                <X className="w-5 h-5 text-gray-400" />
-                            </button>
-                        </div>
-
-                        {/* Codes List */}
-                        <div className="flex-1 overflow-y-auto p-6">
-                            <div className="space-y-2">
-                                {generatedCodes.map((code, index) => (
-                                    <motion.div
-                                        key={code.code}
-                                        initial={{ opacity: 0, x: -10 }}
-                                        animate={{ opacity: 1, x: 0 }}
-                                        transition={{ delay: index * 0.05 }}
-                                        className="flex items-center justify-between p-3 bg-gray-800 rounded-lg"
-                                    >
-                                        <code className="font-mono text-white">{code.code}</code>
-                                        <button
-                                            onClick={() => copyCode(code.code)}
-                                            className="p-1.5 hover:bg-white/10 rounded transition-colors"
-                                        >
-                                            {copiedCode === code.code ? (
-                                                <Check className="w-4 h-4 text-green-500" />
-                                            ) : (
-                                                <Copy className="w-4 h-4 text-gray-400" />
-                                            )}
-                                        </button>
-                                    </motion.div>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Footer Actions */}
-                        <div className="flex items-center gap-3 p-6 border-t border-white/10">
-                            <Button
-                                variant="outline"
-                                className="flex-1"
-                                onClick={copyAllCodes}
-                            >
-                                <Copy className="w-4 h-4 mr-2" />
-                                {t('modal.copyAll')}
-                            </Button>
-                            <Button
-                                variant="glow"
-                                className="flex-1"
-                                onClick={downloadGeneratedCodes}
-                            >
-                                <Download className="w-4 h-4 mr-2" />
-                                {t('modal.downloadCsv')}
-                            </Button>
-                        </div>
+                        </motion.div>
                     </motion.div>
-                </motion.div>
-            )}
-        </AnimatePresence>
-    </div >
-);
+                )}
+            </AnimatePresence>
+        </div >
+    );
 }
