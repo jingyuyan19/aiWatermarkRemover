@@ -14,7 +14,8 @@
         "buyCredits": "Buy Credits",
         "account": "Account",
         "freeCredits": "Get 3 Free Credits",
-        "signIn": "Sign In"
+        "signIn": "Sign In",
+        "selectLanguage": "Select Language"
     },
     "HomePage": {
         "ctaSection": {

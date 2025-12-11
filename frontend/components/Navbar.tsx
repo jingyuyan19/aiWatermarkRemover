@@ -7,6 +7,7 @@ import { BubblyButton } from '@/components/ui/BubblyButton';
 import { useAuth, UserButton, SignInButton, SignUpButton, SignedIn, SignedOut, useUser } from '@clerk/nextjs';
 import { Menu, X } from 'lucide-react';
 import { useTranslations } from 'next-intl';
+import { LanguageSwitcherNew } from './LanguageSwitcherNew';
 
 export function Navbar({ locale }: { locale: string }) {
     const t = useTranslations('Navbar');
@@ -39,7 +40,7 @@ export function Navbar({ locale }: { locale: string }) {
                         </a>
                     </SignedOut>
 
-                    <LanguageSwitcher locale={locale} />
+                    <LanguageSwitcherNew locale={locale} />
 
                     <SignedOut>
                         <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
@@ -91,8 +92,18 @@ export function Navbar({ locale }: { locale: string }) {
                 </div>
 
                 {/* Mobile Menu Button */}
+                {/* Mobile Menu Button & CTA */}
                 <div className="flex md:hidden items-center gap-3">
-                    <LanguageSwitcher locale={locale} compact />
+                    <SignedOut>
+                        <SignUpButton mode="modal" forceRedirectUrl="/dashboard">
+                            <button className="flex items-center gap-2 px-3 py-1.5 rounded-full bg-gradient-to-r from-primary to-accent text-xs font-bold text-white shadow-lg hover:brightness-110 transition-all">
+                                <span>🎁</span>
+                                <span>{t('freeCredits')}</span>
+                            </button>
+                        </SignUpButton>
+                    </SignedOut>
+
+                    <LanguageSwitcherNew locale={locale} />
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="p-2 rounded-lg text-white hover:bg-white/10 transition-colors"
@@ -117,24 +128,19 @@ export function Navbar({ locale }: { locale: string }) {
                             </a>
                         </SignedOut>
 
-                        <SignedOut>
-                            <SignUpButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
-                                <BubblyButton rainbow className="w-full text-base py-4 font-bold contrast-fix justify-center">
-                                    <span className="mr-2">🎁</span>
-                                    {t('freeCredits')}
-                                </BubblyButton>
-                            </SignUpButton>
-                        </SignedOut>
+
 
                         <SignedOut>
-                            <SignInButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
-                                <button
-                                    className="w-full px-4 py-3 rounded-lg text-gray-300 hover:text-white hover:bg-white/10 transition-all font-medium border border-white/10"
-                                    onClick={() => setMobileMenuOpen(false)}
-                                >
-                                    {t('signIn')}
-                                </button>
-                            </SignInButton>
+                            <SignedOut>
+                                <SignInButton mode="modal" forceRedirectUrl={`/${locale}/dashboard`}>
+                                    <button
+                                        className="w-full text-left px-4 py-3 text-gray-300 hover:text-white hover:bg-white/5 transition-colors font-medium border-t border-white/5"
+                                        onClick={() => setMobileMenuOpen(false)}
+                                    >
+                                        {t('signIn')}
+                                    </button>
+                                </SignInButton>
+                            </SignedOut>
                         </SignedOut>
 
                         <SignedIn>
@@ -176,62 +182,7 @@ export function Navbar({ locale }: { locale: string }) {
     );
 }
 
-function LanguageSwitcher({ locale, compact }: { locale: string; compact?: boolean }) {
-    const [isOpen, setIsOpen] = useState(false);
 
-    const languages = [
-        { code: 'en', label: 'English', flag: '🇺🇸' },
-        { code: 'zh-CN', label: '中文', flag: '🇨🇳' },
-    ];
-
-    const currentLang = languages.find(l => l.code === locale) || languages[0];
-
-    return (
-        <div className="relative">
-            <button
-                onClick={() => setIsOpen(!isOpen)}
-                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-sm font-medium transition-colors ${isOpen ? 'bg-white/10 text-white' : 'text-gray-400 hover:text-white hover:bg-white/5'
-                    }`}
-            >
-                <span className="text-base">{currentLang.flag}</span>
-                {!compact && <span>{currentLang.code === 'en' ? 'EN' : '中文'}</span>}
-                <svg className={`w-3 h-3 transition-transform ${isOpen ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-
-            {isOpen && (
-                <>
-                    <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setIsOpen(false)}
-                    />
-                    <div className="absolute right-0 top-full mt-2 py-1 bg-gray-900 border border-white/10 rounded-lg shadow-xl z-50 min-w-[140px]">
-                        {languages.map((lang) => (
-                            <a
-                                key={lang.code}
-                                href={`/${lang.code}`}
-                                className={`flex items-center gap-2 px-3 py-2 text-sm transition-colors ${lang.code === locale
-                                    ? 'bg-primary/20 text-primary'
-                                    : 'text-gray-300 hover:bg-white/5 hover:text-white'
-                                    }`}
-                                onClick={() => setIsOpen(false)}
-                            >
-                                <span>{lang.flag}</span>
-                                <span>{lang.label}</span>
-                                {lang.code === locale && (
-                                    <svg className="w-4 h-4 ml-auto" fill="currentColor" viewBox="0 0 20 20">
-                                        <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                                    </svg>
-                                )}
-                            </a>
-                        ))}
-                    </div>
-                </>
-            )}
-        </div>
-    );
-}
 
 function AdminLink({ locale }: { locale: string }) {
     const { user } = useUser();

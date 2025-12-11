@@ -13,7 +13,8 @@
         "buyCredits": "购买额度",
         "account": "账户设置",
         "freeCredits": "领取3个免费点数",
-        "signIn": "登录"
+        "signIn": "登录",
+        "selectLanguage": "选择语言"
     },
     "HomePage": {
         "ctaSection": {
