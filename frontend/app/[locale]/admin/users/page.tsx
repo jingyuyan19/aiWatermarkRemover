@@ -158,7 +158,6 @@ export default function UsersPage() {
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.role')}</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.jobs')}</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.joined')}</th>
-                                            <th className="text-right py-3 px-4 text-sm text-gray-400 font-medium">{t('table.actions')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -193,9 +192,6 @@ export default function UsersPage() {
                                                 </td>
                                                 <td className="py-3 px-4 text-gray-400 text-sm">
                                                     {new Date(user.created_at).toLocaleDateString()}
-                                                </td>
-                                                <td className="py-3 px-4">
-                                                    {/* Future actions: Delete, Ban, etc. */}
                                                 </td>
                                             </motion.tr>
                                         ))}
