@@ -8,6 +8,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { useAuth } from '@clerk/nextjs';
 import { Pagination, PaginationInfo } from '@/components/ui/Pagination';
 import { toast } from 'sonner';
+import { useTranslations } from 'next-intl';
 
 interface Job {
     id: string;
@@ -27,14 +28,15 @@ interface PaginatedResponse {
     total_pages: number;
 }
 
-const statusConfig: Record<string, { icon: any; color: string; label: string }> = {
-    pending: { icon: Clock, color: 'text-yellow-500', label: 'Pending' },
-    processing: { icon: Loader, color: 'text-blue-500', label: 'Processing' },
-    completed: { icon: CheckCircle, color: 'text-green-500', label: 'Completed' },
-    failed: { icon: XCircle, color: 'text-red-500', label: 'Failed' },
+const statusConfig: Record<string, { icon: any; color: string; labelKey: string }> = {
+    pending: { icon: Clock, color: 'text-yellow-500', labelKey: 'pending' },
+    processing: { icon: Loader, color: 'text-blue-500', labelKey: 'processing' },
+    completed: { icon: CheckCircle, color: 'text-green-500', labelKey: 'completed' },
+    failed: { icon: XCircle, color: 'text-red-500', labelKey: 'failed' },
 };
 
 export default function JobsPage() {
+    const t = useTranslations('Admin.Jobs');
     const { getToken } = useAuth();
     const [data, setData] = useState<PaginatedResponse | null>(null);
     const [loading, setLoading] = useState(true);
@@ -72,8 +74,6 @@ export default function JobsPage() {
     };
 
     useEffect(() => {
-        // Debounce search input? Or just use explicit search button/enter
-        // For simplicity and to match Codes page pattern, we use explicit search query state
         fetchJobs(1);
     }, [getToken, statusFilter, qualityFilter, searchQuery]);
 
@@ -88,10 +88,7 @@ export default function JobsPage() {
         setSearchQuery('');
         setSearchInput('');
         setCurrentPage(1);
-        // fetchJobs(1) will be triggered by useEffect dependencies
     };
-
-
 
     const handlePageChange = (page: number) => {
         setCurrentPage(page);
@@ -102,7 +99,7 @@ export default function JobsPage() {
 
     return (
         <div>
-            <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">All Jobs</h1>
+            <h1 className="text-2xl md:text-3xl font-bold text-white mb-6">{t('title')}</h1>
 
             <Card className="bg-gray-900 border-white/10">
                 <CardContent className="p-4 md:p-6">
@@ -116,7 +113,7 @@ export default function JobsPage() {
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                    placeholder="Search Job ID, User ID or Email..."
+                                    placeholder={t('filters.searchPlaceholder')}
                                     className="flex-1 px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                                 <button
@@ -138,11 +135,11 @@ export default function JobsPage() {
                                 }}
                                 className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
                             >
-                                <option value="all">All Statuses</option>
-                                <option value="pending">Pending</option>
-                                <option value="processing">Processing</option>
-                                <option value="completed">Completed</option>
-                                <option value="failed">Failed</option>
+                                <option value="all">{t('filters.allStatus')}</option>
+                                <option value="pending">{t('status.pending')}</option>
+                                <option value="processing">{t('status.processing')}</option>
+                                <option value="completed">{t('status.completed')}</option>
+                                <option value="failed">{t('status.failed')}</option>
                             </select>
                         </div>
 
@@ -156,9 +153,9 @@ export default function JobsPage() {
                                 }}
                                 className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-primary"
                             >
-                                <option value="all">All Models</option>
-                                <option value="lama">LAMA</option>
-                                <option value="E2FGVI_HQ">E2FGVI HQ</option>
+                                <option value="all">{t('filters.allModels')}</option>
+                                <option value="lama">{t('models.lama')}</option>
+                                <option value="E2FGVI_HQ">{t('models.e2fgvi_hq')}</option>
                             </select>
                         </div>
 
@@ -168,7 +165,7 @@ export default function JobsPage() {
                                 onClick={clearFilters}
                                 className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
                             >
-                                Clear filters
+                                {t('filters.clear')}
                             </button>
                         )}
                     </div>
@@ -176,7 +173,7 @@ export default function JobsPage() {
                     {/* Header with count */}
                     <div className="flex items-center justify-between mb-4">
                         <h2 className="text-lg font-semibold text-white">
-                            Processing History {data && <span className="text-gray-500">({data.total})</span>}
+                            {t('historyTitle')} {data && <span className="text-gray-500">({data.total})</span>}
                         </h2>
                         {data && data.total > 0 && (
                             <PaginationInfo
@@ -196,7 +193,7 @@ export default function JobsPage() {
                     ) : jobs.length === 0 ? (
                         <div className="text-center py-12 text-gray-500">
                             <FileVideo className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                            <p>No jobs found</p>
+                            <p>{t('noJobs')}</p>
                         </div>
                     ) : (
                         <>
@@ -204,12 +201,12 @@ export default function JobsPage() {
                                 <table className="w-full min-w-[600px]">
                                     <thead>
                                         <tr className="border-b border-white/10">
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Job ID</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">User</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Status</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Quality</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Cost</th>
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">Created</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.id')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.user')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.status')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.quality')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.cost')}</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.created')}</th>
                                         </tr>
                                     </thead>
                                     <tbody>
@@ -228,10 +225,10 @@ export default function JobsPage() {
                                                     <td className="py-3 px-4">
                                                         <code
                                                             className="text-xs text-gray-400 font-mono cursor-pointer hover:text-white transition-colors"
-                                                            title="Click to copy full ID"
+                                                            title={t('table.idCopied')}
                                                             onClick={() => {
                                                                 navigator.clipboard.writeText(job.id);
-                                                                toast.success('Job ID copied to clipboard');
+                                                                toast.success(t('table.idCopied'));
                                                             }}
                                                         >
                                                             {job.id.substring(0, 8)}...
@@ -244,7 +241,7 @@ export default function JobsPage() {
                                                                     {job.user_email}
                                                                 </span>
                                                             ) : (
-                                                                <span className="text-sm text-gray-500 italic">No Email</span>
+                                                                <span className="text-sm text-gray-500 italic">{t('table.noEmail')}</span>
                                                             )}
                                                             <code className="text-xs text-gray-600 font-mono" title={job.user_id}>
                                                                 {job.user_id ? `${job.user_id.substring(0, 12)}...` : 'N/A'}
@@ -254,7 +251,7 @@ export default function JobsPage() {
                                                     <td className="py-3 px-4">
                                                         <div className="flex items-center gap-2">
                                                             <StatusIcon className={`w-4 h-4 ${status.color} ${job.status === 'processing' ? 'animate-spin' : ''}`} />
-                                                            <span className={`text-sm ${status.color}`}>{status.label}</span>
+                                                            <span className={`text-sm ${status.color}`}>{t(`status.${status.labelKey}`)}</span>
                                                         </div>
                                                     </td>
                                                     <td className="py-3 px-4">
@@ -263,7 +260,7 @@ export default function JobsPage() {
                                                         </span>
                                                     </td>
                                                     <td className="py-3 px-4 text-white text-sm">
-                                                        {job.cost ?? 1} credit{(job.cost ?? 1) !== 1 ? 's' : ''}
+                                                        {t('table.costValue', { cost: job.cost ?? 1 })}
                                                     </td>
                                                     <td className="py-3 px-4 text-gray-400 text-sm">
                                                         {new Date(job.created_at).toLocaleString()}

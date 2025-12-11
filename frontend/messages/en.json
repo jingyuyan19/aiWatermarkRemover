@@ -582,19 +582,22 @@
             "title": "User Management",
             "allUsers": "All Users",
             "noUsers": "No users found",
-            "searchPlaceholder": "Search by email...",
+            "searchPlaceholder": "Search Email or User ID...",
+            "clearFilters": "Clear filters",
             "roles": {
                 "all": "All Roles",
                 "admin": "Admins",
                 "user": "Users"
             },
             "table": {
+                "id": "User ID",
                 "email": "Email",
                 "credits": "Credits",
                 "role": "Role",
                 "jobs": "Jobs",
                 "joined": "Joined",
-                "actions": "Actions"
+                "actions": "Actions",
+                "idCopied": "User ID copied"
             },
             "toast": {
                 "creditsUpdated": "Credits updated to {credits}",
@@ -611,6 +614,38 @@
                 "confirm": "Confirm",
                 "success": "Updated successfully",
                 "error": "Update failed"
+            }
+        },
+        "Jobs": {
+            "title": "All Jobs",
+            "historyTitle": "Processing History",
+            "noJobs": "No jobs found",
+            "filters": {
+                "searchPlaceholder": "Search Job ID, User ID or Email...",
+                "allStatus": "All Statuses",
+                "allModels": "All Models",
+                "clear": "Clear filters"
+            },
+            "status": {
+                "pending": "Pending",
+                "processing": "Processing",
+                "completed": "Completed",
+                "failed": "Failed"
+            },
+            "models": {
+                "lama": "LAMA",
+                "e2fgvi_hq": "E2FGVI HQ"
+            },
+            "table": {
+                "id": "Job ID",
+                "user": "User",
+                "noEmail": "No Email",
+                "status": "Status",
+                "quality": "Quality",
+                "cost": "Cost",
+                "costValue": "{cost} {cost, plural, one {credit} other {credits}}",
+                "created": "Created",
+                "idCopied": "Job ID copied to clipboard"
             }
         },
         "Codes": {

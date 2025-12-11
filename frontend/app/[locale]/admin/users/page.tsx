@@ -113,7 +113,7 @@ export default function UsersPage() {
                                     value={searchInput}
                                     onChange={(e) => setSearchInput(e.target.value)}
                                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                                    placeholder="Search Email or User ID..."
+                                    placeholder={t('searchPlaceholder')}
                                     className="flex-1 px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white placeholder:text-gray-500 focus:outline-none focus:ring-2 focus:ring-primary"
                                 />
                                 <button
@@ -147,7 +147,7 @@ export default function UsersPage() {
                                 onClick={clearFilters}
                                 className="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors"
                             >
-                                Clear filters
+                                {t('clearFilters')}
                             </button>
                         )}
                     </div>
@@ -183,7 +183,7 @@ export default function UsersPage() {
                                 <table className="w-full min-w-[600px]">
                                     <thead>
                                         <tr className="border-b border-white/10">
-                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">User ID</th>
+                                            <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.id')}</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.email')}</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.credits')}</th>
                                             <th className="text-left py-3 px-4 text-sm text-gray-400 font-medium">{t('table.role')}</th>
@@ -206,7 +206,7 @@ export default function UsersPage() {
                                                         title="Click to copy ID"
                                                         onClick={() => {
                                                             navigator.clipboard.writeText(user.id);
-                                                            toast.success('User ID copied');
+                                                            toast.success(t('table.idCopied'));
                                                         }}
                                                     >
                                                         {user.id.substring(0, 12)}...
