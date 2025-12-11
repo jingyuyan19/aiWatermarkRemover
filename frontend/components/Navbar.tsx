@@ -158,6 +158,13 @@ export function Navbar({ locale }: { locale: string }) {
                             >
                                 {t('history')}
                             </a>
+                            <a
+                                href={`/${locale}/pricing`}
+                                className="block px-4 py-3 rounded-lg text-green-400 hover:text-green-300 hover:bg-green-500/10 transition-colors font-medium"
+                                onClick={() => setMobileMenuOpen(false)}
+                            >
+                                {t('buyCredits')}
+                            </a>
                             <MobileAdminLink locale={locale} onClick={() => setMobileMenuOpen(false)} />
                             <div className="px-4 py-3 flex items-center gap-3">
                                 <UserButton
