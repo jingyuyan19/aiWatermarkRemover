@@ -240,6 +240,15 @@ async def list_users(
     """List all users with stats and pagination (admin only)."""
     verify_admin_role(user_info)
     
+    # Auto-sync: Ensure the requesting admin is marked as admin in DB
+    # This fixes the issue where Clerk admin status isn't reflected in local DB
+    current_admin = await db.execute(select(User).where(User.id == user_info.user_id))
+    admin_user = current_admin.scalar_one_or_none()
+    if admin_user:
+        if admin_user.is_admin != 1:
+            admin_user.is_admin = 1
+            await db.commit()
+    
     # Build base query with optional filters
     base_query = select(User)
     
