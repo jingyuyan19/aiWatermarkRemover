@@ -411,6 +411,19 @@ export default function CodesPage() {
                                 {t('list.total')} <span className="text-gray-500 text-base">({total})</span>
                             </h2>
                         </div>
+
+                        {selectedCodes.size > 0 && (
+                            <Button
+                                variant="destructive"
+                                size="sm"
+                                onClick={deleteSelectedCodes}
+                                disabled={deleting}
+                                className="animate-in fade-in slide-in-from-right-5"
+                            >
+                                <Trash2 className="w-4 h-4 mr-2" />
+                                {deleting ? 'Deleting...' : `Delete (${selectedCodes.size})`}
+                            </Button>
+                        )}
                     </div>
 
                     {loading ? (
