@@ -130,3 +130,28 @@ scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
 
 chunk_size = max(1, min(video_length, scaled_chunk_limit))
 ```
+
+## 7. Lazy Tensor Loading (Memory Optimization)
+
+**Issue:**
+The upstream code performs "Eager Loading", converting the *entire* video into GPU tensors at the start of the `clean()` method. For 4K videos, even 100 frames can consume ~6GB+ of VRAM just for storage, before any processing begins. This base overhead + processing overhead causes OOM.
+
+**Files Modified:**
+- `worker/demark_world/src/demark_world/cleaner/e2fgvi_hq_cleaner.py`
+
+**The Fix:**
+Refactored `clean()` to keep frames in system RAM (NumPy) and only convert the *current chunk* to GPU tensors inside the processing loop.
+
+```python
+# REMOVED:
+# imgs_all, masks_all = numpy_to_tensor(frames, masks)
+
+# ADDED inside chunk loop:
+frames_np_chunk = frames[start_idx:end_idx]
+masks_np_chunk = masks[start_idx:end_idx]
+
+# Lazy load to GPU: Convert only this chunk to tensor
+imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_np_chunk, masks_np_chunk)
+imgs_chunk = imgs_chunk_t.to(device)
+masks_chunk = masks_chunk_t.to(device)
+```

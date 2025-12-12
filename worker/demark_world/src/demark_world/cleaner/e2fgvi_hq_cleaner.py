@@ -199,8 +199,9 @@ class E2FGVIHDCleaner:
         
         step_size = max(1, chunk_size - overlap_size)
         num_chunks = int(np.ceil(video_length / step_size))
-        # Convert to tensors
-        imgs_all, masks_all = numpy_to_tensor(frames, masks)
+        # Convert to tensors - REMOVED EAGER LOADING to save VRAM for 4K video
+        # imgs_all, masks_all = numpy_to_tensor(frames, masks)
+        
         # Prepare binary masks for compositing
         binary_masks = np.expand_dims(masks > 0, axis=-1).astype(np.uint8)  # (T, H, W, 1)
         comp_frames = [None] * video_length
@@ -213,11 +214,16 @@ class E2FGVIHDCleaner:
             end_idx = min(start_idx + chunk_size, video_length)
             actual_chunk_size = end_idx - start_idx
             # logger.debug(f'\nProcessing chunk {chunk_idx + 1}/{num_chunks}: frames {start_idx}-{end_idx}')
-            # Extract chunk data
-            imgs_chunk = imgs_all[:, start_idx:end_idx, :, :, :].to(device)
-            masks_chunk = masks_all[:, start_idx:end_idx, :, :, :].to(device)
+            
+            # Extract chunk data (Numpy slicing - remains in RAM)
             frames_np_chunk = frames[start_idx:end_idx]
+            masks_np_chunk = masks[start_idx:end_idx]
             binary_masks_chunk = binary_masks[start_idx:end_idx]
+            
+            # Lazy load to GPU: Convert only this chunk to tensor
+            imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_np_chunk, masks_np_chunk)
+            imgs_chunk = imgs_chunk_t.to(device)
+            masks_chunk = masks_chunk_t.to(device)
             # Process chunk
             comp_frames_chunk = self.process_frames_chunk(
                 actual_chunk_size,
