@@ -176,7 +176,7 @@ class E2FGVIHDCleaner:
 
     def clean(self, frames: np.ndarray, masks: np.ndarray) -> List[np.ndarray]:
         video_length = len(frames)
-        chunk_size = max(1, int(self.config.chunk_size_ratio * video_length))
+        chunk_size = max(1, min(video_length, self.chunk_size))
         overlap_size = int(self.config.overlap_ratio * video_length)
         # Validate and adjust overlap if needed
         if chunk_size <= overlap_size:
