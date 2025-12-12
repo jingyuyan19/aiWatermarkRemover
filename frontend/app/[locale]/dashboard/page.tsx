@@ -36,6 +36,7 @@ const getFilename = (url: string | null) => {
 
 // Timer Component for Processing Jobs
 const JobTimer = ({ startTime, progress }: { startTime: string, progress: number }) => {
+    const t = useTranslations('Dashboard');
     const [elapsed, setElapsed] = useState(0);
 
     useEffect(() => {
@@ -57,17 +58,17 @@ const JobTimer = ({ startTime, progress }: { startTime: string, progress: number
         if (progress < 10) return null; // Too unstable
         const totalEst = (elapsed / progress) * 100;
         const remaining = totalEst - elapsed;
-        return remaining > 0 ? formatTime(Math.ceil(remaining)) : 'Soon';
+        return remaining > 0 ? formatTime(Math.ceil(remaining)) : t('recentJobs.timer.soon');
     };
 
     return (
         <div className="flex items-center gap-3 text-xs text-gray-400 font-mono mt-1">
             <span className="flex items-center gap-1">
                 <Timer className="w-3 h-3" />
-                {formatTime(elapsed)}
+                {t('recentJobs.timeElapsed', { time: formatTime(elapsed) })}
             </span>
             {progress > 0 && progress < 100 && (
-                <span className="text-gray-600">• Est. {getEstRemaining()}</span>
+                <span className="text-gray-600">• {t('recentJobs.timer.est')} {getEstRemaining()}</span>
             )}
         </div>
     );
@@ -730,11 +731,11 @@ export default function DashboardPage() {
                                                                 </h3>
                                                                 {/* Quality Badge */}
                                                                 <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border border-opacity-20 flex items-center gap-1 ${job.quality === 'e2fgvi_hq'
-                                                                        ? 'bg-purple-500/20 text-purple-200 border-purple-400'
-                                                                        : 'bg-blue-500/20 text-blue-200 border-blue-400'
+                                                                    ? 'bg-purple-500/20 text-purple-200 border-purple-400'
+                                                                    : 'bg-blue-500/20 text-blue-200 border-blue-400'
                                                                     }`}>
                                                                     {job.quality === 'e2fgvi_hq' ? <Sparkles className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
-                                                                    {job.quality === 'e2fgvi_hq' ? 'HQ' : 'FAST'}
+                                                                    {job.quality === 'e2fgvi_hq' ? t('recentJobs.badges.hq') : t('recentJobs.badges.fast')}
                                                                 </span>
                                                             </div>
 

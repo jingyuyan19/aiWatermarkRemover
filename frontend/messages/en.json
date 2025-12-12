@@ -337,7 +337,8 @@
             "pending": "Pending",
             "processing": "Processing",
             "completed": "Completed",
-            "failed": "Failed"
+            "failed": "Failed",
+            "expired": "Expired"
         },
         "upload": {
             "title": "Remove Watermark",
@@ -404,7 +405,15 @@
             "timeElapsed": "Time Elapsed: {time}",
             "estLeft": "Est. Remaining: {time}",
             "calculating": "Calculating...",
-            "unknownFile": "Unknown File"
+            "unknownFile": "Unknown File",
+            "badges": {
+                "hq": "HQ",
+                "fast": "FAST"
+            },
+            "timer": {
+                "est": "Est.",
+                "soon": "Soon"
+            }
         }
     },
     "History": {

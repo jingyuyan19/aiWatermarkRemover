@@ -337,7 +337,8 @@
             "pending": "排队中",
             "processing": "处理中",
             "completed": "已完成",
-            "failed": "失败"
+            "failed": "失败",
+            "expired": "已过期"
         },
         "upload": {
             "title": "去除水印",
@@ -389,7 +390,16 @@
         "recentJobs": {
             "title": "最近任务",
             "viewAll": "查看全部",
-            "empty": "暂无处理记录"
+            "empty": "暂无处理记录",
+            "timeElapsed": "已耗时: {time}",
+            "badges": {
+                "hq": "高质量",
+                "fast": "极速"
+            },
+            "timer": {
+                "est": "预计",
+                "soon": "即将完成"
+            }
         }
     },
     "History": {
