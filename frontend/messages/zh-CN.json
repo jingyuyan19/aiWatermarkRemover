@@ -422,10 +422,16 @@
         "filter": {
             "all": "全部"
         },
+        "unknownFile": "未知文件",
+        "badges": {
+            "hq": "高质量",
+            "fast": "极速"
+        },
         "empty": "暂无视频",
         "goToDashboard": "返回控制台",
         "table": {
             "status": "状态",
+            "fileName": "视频名称",
             "quality": "质量",
             "date": "日期",
             "actions": "操作",
@@ -446,7 +452,13 @@
         "credits": "积分"
     },
     "Common": {
-        "loading": "加载中..."
+        "loading": "加载中...",
+        "pagination": {
+            "showing": "显示",
+            "to": "至",
+            "of": "共",
+            "results": "条结果"
+        }
     },
     "Pricing": {
         "title": "简单透明的定价",

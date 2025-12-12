@@ -89,11 +89,17 @@ export default function HistoryPage() {
     };
 
     const getStatusText = (status: string) => {
-        switch (status) {
-            case 'completed': return t('status.completed');
-            case 'processing': return t('status.processing');
-            case 'failed': return t('status.failed');
-            default: return t('status.pending');
+        // Status keys are already in message files: pending, processing, completed, failed, expired
+        return t(`status.${status}`);
+    };
+
+    const getFilename = (url: string) => {
+        try {
+            const path = new URL(url).pathname;
+            const filename = path.split('/').pop();
+            return filename ? decodeURIComponent(filename) : t('unknownFile');
+        } catch {
+            return t('unknownFile');
         }
     };
 
@@ -176,6 +182,7 @@ export default function HistoryPage() {
                                             <table className="w-full min-w-[500px]">
                                                 <thead className="bg-white/5 border-b border-white/10">
                                                     <tr>
+                                                        <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-400">{t('table.fileName')}</th>
                                                         <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-400">{t('table.status')}</th>
                                                         <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-400">{t('table.quality')}</th>
                                                         <th className="text-left px-4 md:px-6 py-4 text-sm font-medium text-gray-400">{t('table.date')}</th>
@@ -187,6 +194,14 @@ export default function HistoryPage() {
                                                         const status = getEffectiveJobStatus(job);
                                                         return (
                                                             <tr key={job.id} className="hover:bg-white/5 transition-colors">
+                                                                <td className="px-4 md:px-6 py-4">
+                                                                    <div className="flex items-center gap-2 max-w-[200px]">
+                                                                        <Film className="w-4 h-4 text-gray-500 shrink-0" />
+                                                                        <span className="text-sm truncate" title={getFilename(job.input_url || '')}>
+                                                                            {getFilename(job.input_url || '')}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
                                                                 <td className="px-4 md:px-6 py-4">
                                                                     <div className="flex items-center gap-2">
                                                                         {status === 'completed' && <CheckCircle className="w-5 h-5 text-green-400" />}
@@ -200,7 +215,7 @@ export default function HistoryPage() {
                                                                                     status === 'expired' ? 'text-gray-500' :
                                                                                         'text-yellow-400'
                                                                             }`}>
-                                                                            {status === 'expired' ? t('status.expired') : job.status}
+                                                                            {getStatusText(status)}
                                                                         </span>
                                                                     </div>
                                                                 </td>
@@ -209,7 +224,7 @@ export default function HistoryPage() {
                                                                         ? 'bg-purple-500/20 text-purple-400'
                                                                         : 'bg-blue-500/20 text-blue-400'
                                                                         }`}>
-                                                                        {job.quality === 'e2fgvi_hq' ? 'HQ' : 'Fast'}
+                                                                        {job.quality === 'e2fgvi_hq' ? t('badges.hq') : t('badges.fast')}
                                                                     </span>
                                                                 </td>
                                                                 <td className="px-4 md:px-6 py-4 text-gray-400 text-sm">

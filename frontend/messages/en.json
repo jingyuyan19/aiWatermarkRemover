@@ -436,10 +436,16 @@
         "filter": {
             "all": "All"
         },
+        "unknownFile": "Unknown File",
+        "badges": {
+            "hq": "HQ",
+            "fast": "FAST"
+        },
         "empty": "No videos found",
         "goToDashboard": "Go to Dashboard",
         "table": {
             "status": "Status",
+            "fileName": "Video Name",
             "quality": "Quality",
             "date": "Date",
             "actions": "Actions",
@@ -460,7 +466,13 @@
         "credits": "credits"
     },
     "Common": {
-        "loading": "Loading..."
+        "loading": "Loading...",
+        "pagination": {
+            "showing": "Showing",
+            "to": "to",
+            "of": "of",
+            "results": "results"
+        }
     },
     "Pricing": {
         "title": "Simple, Transparent Pricing",

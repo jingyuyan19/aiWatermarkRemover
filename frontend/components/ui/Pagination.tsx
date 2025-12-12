@@ -78,8 +78,8 @@ export function Pagination({
                             key={index}
                             onClick={() => onPageChange(page)}
                             className={`min-w-[36px] h-9 px-3 rounded-lg font-medium transition-colors ${page === currentPage
-                                    ? 'bg-primary text-white'
-                                    : 'text-gray-400 hover:text-white hover:bg-white/10'
+                                ? 'bg-primary text-white'
+                                : 'text-gray-400 hover:text-white hover:bg-white/10'
                                 }`}
                         >
                             {page}
@@ -118,6 +118,8 @@ export function Pagination({
 }
 
 // Shows "Showing X to Y of Z results"
+import { useTranslations } from 'next-intl';
+
 export function PaginationInfo({
     currentPage,
     pageSize,
@@ -127,14 +129,15 @@ export function PaginationInfo({
     pageSize: number;
     total: number;
 }) {
+    const t = useTranslations('Common.pagination');
     const start = (currentPage - 1) * pageSize + 1;
     const end = Math.min(currentPage * pageSize, total);
 
     return (
         <p className="text-sm text-gray-500">
-            Showing <span className="text-white font-medium">{start}</span> to{' '}
-            <span className="text-white font-medium">{end}</span> of{' '}
-            <span className="text-white font-medium">{total}</span> results
+            {t('showing')} <span className="text-white font-medium">{start}</span> {t('to')}{' '}
+            <span className="text-white font-medium">{end}</span> {t('of')}{' '}
+            <span className="text-white font-medium">{total}</span> {t('results')}
         </p>
     );
 }
