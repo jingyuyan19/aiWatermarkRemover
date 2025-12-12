@@ -240,7 +240,7 @@ export default function JobPage() {
                                                 </div>
 
                                                 <h3 className="text-3xl font-light text-white tracking-[0.2em] uppercase opacity-90 drop-shadow-[0_0_20px_rgba(255,255,255,0.3)] animate-pulse">
-                                                    {job.status === 'pending' ? 'Preparing' : 'Processing'}
+                                                    {job.status === 'pending' ? t('overlay.preparing') : t('overlay.processing')}
                                                 </h3>
 
                                                 <div className="h-8 overflow-hidden relative w-full flex justify-center">

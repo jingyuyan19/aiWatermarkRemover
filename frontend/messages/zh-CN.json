@@ -326,6 +326,10 @@
             "title": "处理中",
             "hint": "您可以安全离开此页面。您的视频将保存在{dashboard}中。"
         },
+        "overlay": {
+            "preparing": "准备中",
+            "processing": "处理中"
+        },
         "error": "获取任务状态失败"
     },
     "Dashboard": {

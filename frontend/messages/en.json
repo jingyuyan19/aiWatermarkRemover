@@ -326,6 +326,10 @@
             "title": "PROCESSING",
             "hint": "You can safely leave this page. Your video will be saved in your {dashboard}."
         },
+        "overlay": {
+            "preparing": "Preparing",
+            "processing": "Processing"
+        },
         "error": "Failed to fetch job status"
     },
     "Dashboard": {

@@ -326,6 +326,10 @@
             "title": "PROCESANDO",
             "hint": "Puede salir de esta página de forma segura. Su video se guardará en su {dashboard}."
         },
+        "overlay": {
+            "preparing": "Preparando",
+            "processing": "Procesando"
+        },
         "error": "Error al obtener estado del trabajo"
     },
     "Dashboard": {
