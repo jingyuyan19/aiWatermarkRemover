@@ -322,6 +322,10 @@
             "Verifying output quality...",
             "Finalizing render..."
         ],
+        "processing": {
+            "title": "PROCESSING",
+            "hint": "You can safely leave this page. Your video will be saved in your {dashboard}."
+        },
         "error": "Failed to fetch job status"
     },
     "Dashboard": {

@@ -270,7 +270,7 @@ export default function JobPage() {
                                 <div className="space-y-3 mb-6">
                                     <div className="flex justify-between items-end px-1">
                                         <span className="text-[10px] uppercase tracking-[0.2em] text-blue-300/60 font-semibold">
-                                            PROCESSING
+                                            {t('processing.title')}
                                         </span>
                                         <span className="text-sm font-mono font-medium text-blue-300">
                                             {job.progress || 0}%
@@ -303,7 +303,9 @@ export default function JobPage() {
                                 </div>
 
                                 <p className="text-white/30 text-xs font-light tracking-wide">
-                                    You can safely leave this page. Your video will be saved in your <Link href="/dashboard" className="text-white/50 hover:text-white underline decoration-white/20 transition-colors">Dashboard</Link>.
+                                    {t.rich('processing.hint', {
+                                        dashboard: (chunks) => <Link href={`/${locale}/dashboard`} className="text-white/50 hover:text-white underline decoration-white/20 transition-colors">{chunks}</Link>
+                                    })}
                                 </p>
                             </div>
                         )}
