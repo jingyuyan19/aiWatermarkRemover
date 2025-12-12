@@ -19,6 +19,9 @@ class UserResponse(UserBase):
 
 class JobCreate(BaseModel):
     quality: str = "lama"
+    duration: float = 0.0
+    width: int = 0
+    height: int = 0
 
 class JobResponse(BaseModel):
     id: str

@@ -20,7 +20,7 @@ export default function PricingPage() {
         {
             key: 'starter',
             icon: Zap,
-            credits: 10,
+            credits: 15,
             priceUSD: 4.99,
             priceCNY: 29,
             popular: false,
@@ -29,7 +29,7 @@ export default function PricingPage() {
         {
             key: 'pro',
             icon: Crown,
-            credits: 50,
+            credits: 100,
             priceUSD: 19.99,
             priceCNY: 128,
             popular: true,
@@ -38,7 +38,7 @@ export default function PricingPage() {
         {
             key: 'business',
             icon: Building2,
-            credits: 200,
+            credits: 400,
             priceUSD: 59.99,
             priceCNY: 398,
             popular: false,

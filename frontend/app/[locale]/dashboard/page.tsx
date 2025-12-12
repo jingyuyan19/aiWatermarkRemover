@@ -22,6 +22,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 import { Job } from '@/types/job';
 import { getEffectiveJobStatus } from '@/utils/jobExpiration';
+import { calculateCost } from '@/utils/pricing';
 
 // Removed local Job interface
 
@@ -47,6 +48,21 @@ export default function DashboardPage() {
     const [queue, setQueue] = useState<QueueItem[]>([]);
     const [quality, setQuality] = useState<'lama' | 'e2fgvi_hq'>('lama');
     const [isProcessing, setIsProcessing] = useState(false);
+
+    // Pricing V2.1: Metadata State
+    const [filesMetadata, setFilesMetadata] = useState<Map<string, { duration: number, width: number, height: number }>>(new Map());
+
+    const getFileKey = (file: File) => `${file.name}-${file.size}-${file.lastModified}`;
+
+    const handleMetadataLoaded = useCallback((metadataList: { file: File, duration: number, width: number, height: number }[]) => {
+        setFilesMetadata(prev => {
+            const next = new Map(prev);
+            metadataList.forEach(m => {
+                next.set(getFileKey(m.file), { duration: m.duration, width: m.width, height: m.height });
+            });
+            return next;
+        });
+    }, []);
 
     // Check for payment success
     const searchParams = useSearchParams();
@@ -170,8 +186,19 @@ export default function DashboardPage() {
     const handleProcessAll = async () => {
         if (files.length === 0 || !userId) return;
 
-        // Check credits
-        const totalCost = files.length * (quality === 'e2fgvi_hq' ? 2 : 1);
+        // Calculate total cost dynamically (Pricing V2.1)
+        let totalCost = 0;
+        files.forEach(file => {
+            const meta = filesMetadata.get(getFileKey(file));
+            if (meta) {
+                totalCost += calculateCost(meta.duration, meta.width, meta.height, quality);
+            } else {
+                // Fallback if metadata not ready (should generally alert user or wait)
+                // Default to min cost to avoid blocking, but backend might reject if > 5s
+                totalCost += (quality === 'e2fgvi_hq' ? 2 : 1);
+            }
+        });
+
         if (credits === null) {
             toast.error('Loading credits...', {
                 description: 'Please wait while we fetch your credit balance.',
@@ -230,14 +257,24 @@ export default function DashboardPage() {
                 }
                 const { key } = await uploadResponse.json();
 
-                // Create job
+                // Get metadata for this file
+                const meta = filesMetadata.get(getFileKey(item.file));
+
+                // Create job with V2.1 metadata
+                const jobBody = {
+                    quality,
+                    duration: meta?.duration || 0,
+                    width: meta?.width || 0,
+                    height: meta?.height || 0
+                };
+
                 const jobResponse = await fetch(`${API_URL}/api/jobs?input_key=${encodeURIComponent(key)}`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`,
                     },
-                    body: JSON.stringify({ quality }),
+                    body: JSON.stringify(jobBody),
                 });
 
                 if (!jobResponse.ok) {
@@ -255,8 +292,9 @@ export default function DashboardPage() {
                 ));
                 successCount++;
 
-                // Update credits display
-                setCredits(prev => prev !== null ? prev - (quality === 'e2fgvi_hq' ? 2 : 1) : 0);
+                // Update credits display locally (using accurate cost)
+                const fileCost = meta ? calculateCost(meta.duration, meta.width, meta.height, quality) : (quality === 'e2fgvi_hq' ? 2 : 1);
+                setCredits(prev => prev !== null ? Math.max(0, prev - fileCost) : 0);
 
             } catch (error) {
                 console.error('Error processing file:', item.file.name, error);
@@ -367,6 +405,7 @@ export default function DashboardPage() {
                                                 maxFiles={10}
                                                 disabled={isProcessing}
                                                 className={files.length === 0 ? "flex-1" : ""}
+                                                onMetadataLoaded={handleMetadataLoaded}
                                             />
 
                                             {/* Upload Queue (shows during/after processing) */}
@@ -432,18 +471,17 @@ export default function DashboardPage() {
                                                     {/* Cost Preview */}
                                                     <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl text-sm">
                                                         <span className="text-gray-400">
-                                                            {t('upload.cost.calculation', {
-                                                                count: files.length,
-                                                                s: files.length > 1 ? 's' : '',
-                                                                per: quality === 'e2fgvi_hq' ? '2' : '1',
-                                                                credits: quality === 'e2fgvi_hq' ? 's' : ''
+                                                            {t('upload.cost.estimation', {
+                                                                count: files.length
                                                             })}
                                                         </span>
                                                         <span className="font-semibold text-white">
-                                                            {t('upload.cost.total', { cost: files.length * (quality === 'e2fgvi_hq' ? 2 : 1) })}
+                                                            {files.reduce((acc, file) => {
+                                                                const meta = filesMetadata.get(getFileKey(file));
+                                                                return acc + (meta ? calculateCost(meta.duration, meta.width, meta.height, quality) : 0);
+                                                            }, 0)} Credits
                                                         </span>
                                                     </div>
-
                                                     {/* Process Button */}
                                                     <Button
                                                         type="button"
@@ -634,6 +672,6 @@ export default function DashboardPage() {
                     </motion.div>
                 </div>
             </div>
-        </main>
+        </main >
     );
 }

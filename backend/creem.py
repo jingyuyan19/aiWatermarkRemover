@@ -51,15 +51,15 @@ PRODUCT_IDS = TEST_PRODUCTS if IS_TEST_MODE else PROD_PRODUCTS
 # Credit packs configuration
 CREDIT_PACKS = {
     "starter": {
-        "credits": 10,
+        "credits": 15,
         "price_usd": 499,  # in cents
     },
     "pro": {
-        "credits": 50,
+        "credits": 100,
         "price_usd": 1999,
     },
     "business": {
-        "credits": 200,
+        "credits": 400,
         "price_usd": 5999,
     },
 }

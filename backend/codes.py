@@ -10,6 +10,7 @@ from auth import get_current_user
 from datetime import datetime
 from pydantic import BaseModel
 import clerk_api
+import uuid
 
 router = APIRouter(prefix="/api/codes", tags=["codes"])
 
@@ -116,3 +117,53 @@ async def get_credits(
         if user:
             return CreditsResponse(credits=user.credits)
         return CreditsResponse(credits=3)
+
+
+class BatchGenerateRequest(BaseModel):
+    sku: str = "TB_STD"
+    credits: int = 50
+    count: int = 10
+
+@router.post("/generate_batch")
+async def generate_taobao_batch(
+    req: BatchGenerateRequest,
+    db: AsyncSession = Depends(get_db),
+    user_id: str = Depends(get_current_user)
+):
+    """
+    Generate a batch of codes for Taobao (Admin only).
+    Codes are saved to DB and returned for export.
+    """
+    # 1. Verify Admin
+    user_query = await db.execute(select(User).where(User.id == user_id))
+    user = user_query.scalar_one_or_none()
+    
+    # Check is_admin flag (safely)
+    is_admin = getattr(user, 'is_admin', 0)
+    if not is_admin:
+         raise HTTPException(status_code=403, detail="Admin access required")
+
+    # 2. Generate Codes
+    generated_codes = []
+    
+    for _ in range(req.count):
+        # Format: SKU_UID (e.g. TB_STD_7A8B9C)
+        uid = str(uuid.uuid4()).upper().replace("-", "")[:10]
+        code_str = f"{req.sku}_{uid}"
+        
+        new_code = RedemptionCode(
+            code=code_str,
+            credits=req.credits,
+            created_by=user_id,
+            redeemed_by=None
+        )
+        db.add(new_code)
+        generated_codes.append({"code": code_str, "credits": req.credits})
+    
+    await db.commit()
+    
+    return {
+        "count": len(generated_codes),
+        "sku": req.sku,
+        "codes": generated_codes
+    }

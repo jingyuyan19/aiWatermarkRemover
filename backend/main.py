@@ -11,6 +11,7 @@ import os
 import boto3
 import runpod
 from dotenv import load_dotenv
+import math
 
 import logging
 
@@ -133,10 +134,22 @@ async def upload_file(
     user_id: str = Depends(get_current_user)
 ):
     """Upload file directly through backend (requires auth)"""
+    # 1. Check Content-Length header first (fast fail)
+    content_length = file.headers.get("content-length")
+    if content_length and int(content_length) > 100 * 1024 * 1024:
+        raise HTTPException(status_code=413, detail="File too large (max 100MB)")
+
+    # 2. Check actual stream size during read (if header missing/spoofed)
+    # Note: file.read() loads into memory. For true large file safety we should use streaming,
+    # but for 100MB limit, 413 checks are usually sufficient or we check after read.
+    
     key = f"uploads/{user_id}/{uuid.uuid4()}/{file.filename}"
     try:
         # Read file content
         content = await file.read()
+        
+        if len(content) > 100 * 1024 * 1024:
+             raise HTTPException(status_code=413, detail="File too large (max 100MB)")
         
         # Upload to R2
         s3_client.put_object(
@@ -178,10 +191,29 @@ async def create_job(
         await db.refresh(user)
     
     # 2. Check credits
-    # Dynamically determine cost based on quality mode
-    cost = models.CREDIT_COSTS.get(job_data.quality, 1)  # Default to 1 if unknown
+    # Pricing V2.1: 3D Billing Model (Duration x Quality x Resolution)
     
-    print(f"[DEBUG-COST] User {user_id} Job Quality: '{job_data.quality}' -> Cost: {cost}")
+    # A. Duration Blocks (0.5s grace period)
+    duration_val = max(0, job_data.duration - 0.5)
+    duration_blocks = math.ceil(duration_val / 5.0)
+    duration_blocks = max(1, duration_blocks) # Minimum 1 block
+
+    # B. Multipliers
+    q_mult = 2 if job_data.quality == 'e2fgvi_hq' else 1
+    r_mult = 2 if max(job_data.width, job_data.height) > 1920 else 1
+    
+    cost = duration_blocks * q_mult * r_mult
+    
+    print(f"[DEBUG-COST] User {user_id} Job: {job_data.duration}s ({job_data.width}x{job_data.height}) {job_data.quality} -> Cost: {cost}")
+
+    # C. Safety Fuse (Backend Courtesy Check)
+    # Prevent 4K + HQ tasks > 30s from even starting
+    if q_mult == 2 and r_mult == 2:
+        if job_data.duration > 30:
+             raise HTTPException(
+                 status_code=400, 
+                 detail="4K HQ video is limited to 30s max to prevent server overload."
+             )
     
     if user.credits < cost:
         raise HTTPException(

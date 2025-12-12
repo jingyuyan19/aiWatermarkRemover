@@ -12,10 +12,37 @@ interface FileUploadProps {
     onFileSelect: (file: File) => void;
     selectedFile: File | null;
     onClear: () => void;
+    onMetadataLoaded?: (metadata: { duration: number; width: number; height: number }) => void;
 }
 
-export function FileUpload({ onFileSelect, selectedFile, onClear }: FileUploadProps) {
+export function FileUpload({ onFileSelect, selectedFile, onClear, onMetadataLoaded }: FileUploadProps) {
     const [dragActive, setDragActive] = useState(false);
+
+    const processFile = (file: File) => {
+        if (file.size > 100 * 1024 * 1024) {
+            alert("File larger than 100MB");
+            return;
+        }
+
+        if (file.type.startsWith('video/')) {
+            onFileSelect(file);
+
+            // Extract metadata
+            if (onMetadataLoaded) {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.onloadedmetadata = () => {
+                    onMetadataLoaded({
+                        duration: video.duration,
+                        width: video.videoWidth,
+                        height: video.videoHeight
+                    });
+                    window.URL.revokeObjectURL(video.src);
+                };
+                video.src = window.URL.createObjectURL(file);
+            }
+        }
+    };
 
     const handleDrag = useCallback((e: React.DragEvent) => {
         e.preventDefault();
@@ -33,16 +60,14 @@ export function FileUpload({ onFileSelect, selectedFile, onClear }: FileUploadPr
         setDragActive(false);
 
         if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-            const droppedFile = e.dataTransfer.files[0];
-            if (droppedFile.type.startsWith('video/')) {
-                onFileSelect(droppedFile);
-            }
+            processFile(e.dataTransfer.files[0]);
         }
-    }, [onFileSelect]);
+    }, [onFileSelect, onMetadataLoaded]);
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         if (e.target.files && e.target.files[0]) {
-            onFileSelect(e.target.files[0]);
+            processFile(e.target.files[0]);
+            e.target.value = ''; // Reset input
         }
     };
 

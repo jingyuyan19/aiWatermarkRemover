@@ -10,6 +10,7 @@ import gc
 from pathlib import Path
 from demark_world.core import DeMarkWorld
 from demark_world.schemas import CleanerType
+import ffmpeg
 
 # S3/R2 Configuration
 S3_ENDPOINT_URL = os.getenv("S3_ENDPOINT_URL")
@@ -54,6 +55,32 @@ def handler(job):
         s3_client.download_file(BUCKET_NAME, input_key, str(local_input))
         print(f"[{job_id}] Download complete. File size: {local_input.stat().st_size / 1024 / 1024:.2f} MB")
         
+        # 1b. Verify Metadata & Safety Fuse (V2.1)
+        try:
+            probe = ffmpeg.probe(str(local_input))
+            video_stream = next((stream for stream in probe['streams'] if stream['codec_type'] == 'video'), None)
+            if video_stream:
+                width = int(video_stream['width'])
+                height = int(video_stream['height'])
+                # duration can be in stream or format. Try stream first, then format.
+                duration = float(video_stream.get('duration', 0))
+                if duration == 0:
+                     duration = float(probe['format'].get('duration', 0))
+
+                print(f"[{job_id}] Verified Metadata: {width}x{height}, {duration}s")
+                
+                # Safety Fuse Logic (User Provided)
+                q_mult = 2 if quality == 'e2fgvi_hq' else 1
+                r_mult = 2 if max(width, height) > 1920 else 1
+
+                # Fuse Protection: If 4K + HQ (4x consumption mode)
+                if q_mult == 2 and r_mult == 2:
+                    if duration > 30: # Hard limit 30s
+                        print(f"[{job_id}] REFUSED: 4K HQ > 30s ({duration}s)")
+                        return {"status": "failed", "error": "4K HQ video is limited to 30s max to prevent server overload."}
+        except Exception as e:
+            print(f"[{job_id}] Metadata probe warning: {e}")
+
         # 2. Process video with DeMark-World
         print(f"[{job_id}] Processing video with quality: {quality}...")
         cleaner_type = CleanerType.LAMA if quality == "lama" else CleanerType.E2FGVI_HQ

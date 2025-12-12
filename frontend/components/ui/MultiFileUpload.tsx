@@ -17,6 +17,7 @@ interface MultiFileUploadProps {
     maxFiles?: number;
     disabled?: boolean;
     className?: string;
+    onMetadataLoaded?: (metadata: { file: File; duration: number; width: number; height: number }[]) => void;
 }
 
 export function MultiFileUpload({
@@ -24,7 +25,8 @@ export function MultiFileUpload({
     files,
     maxFiles = 10,
     disabled = false,
-    className
+    className,
+    onMetadataLoaded
 }: MultiFileUploadProps) {
     const t = useTranslations('Dashboard.upload.dropzone');
     const [dragActive, setDragActive] = useState(false);
@@ -41,10 +43,44 @@ export function MultiFileUpload({
     }, [disabled]);
 
     const addFiles = useCallback((newFiles: FileList | File[]) => {
-        const validFiles = Array.from(newFiles).filter(f => f.type.startsWith('video/'));
+        const fileList = Array.from(newFiles);
+        const validSizeFiles = fileList.filter(f => {
+            if (f.size > 100 * 1024 * 1024) {
+                alert(`File ${f.name} is larger than 100MB`);
+                return false;
+            }
+            return true;
+        });
+        const validFiles = validSizeFiles.filter(f => f.type.startsWith('video/'));
         const combined = [...files, ...validFiles].slice(0, maxFiles);
         onFilesChange(combined);
-    }, [files, maxFiles, onFilesChange]);
+
+        // Extract metadata for NEW files only
+        if (onMetadataLoaded && validFiles.length > 0) {
+            const metadataPromises = validFiles.map(file => new Promise<{ file: File; duration: number; width: number; height: number }>((resolve) => {
+                const video = document.createElement('video');
+                video.preload = 'metadata';
+                video.onloadedmetadata = () => {
+                    resolve({
+                        file,
+                        duration: video.duration,
+                        width: video.videoWidth,
+                        height: video.videoHeight
+                    });
+                    window.URL.revokeObjectURL(video.src);
+                };
+                video.onerror = () => {
+                    // Fallback for non-video or error
+                    resolve({ file, duration: 0, width: 0, height: 0 });
+                }
+                video.src = window.URL.createObjectURL(file);
+            }));
+
+            Promise.all(metadataPromises).then(results => {
+                onMetadataLoaded(results);
+            });
+        }
+    }, [files, maxFiles, onFilesChange, onMetadataLoaded]);
 
     const handleDrop = useCallback((e: React.DragEvent) => {
         e.preventDefault();
