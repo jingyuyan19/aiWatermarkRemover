@@ -5,7 +5,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Toaster } from "@/components/ui/sonner";
 import { Footer } from "@/components/ui/Footer";
 import { ClerkProvider } from '@clerk/nextjs';
-import { zhCN } from '@clerk/localizations';
+import { zhCN, esES } from '@clerk/localizations';
 import { NextIntlClientProvider } from 'next-intl';
 import { getMessages, setRequestLocale } from 'next-intl/server';
 import { routing } from '@/i18n/routing';
@@ -88,6 +88,7 @@ export default async function LocaleLayout({ children, params }: Props) {
     // We map our next-intl locale to Clerk's localization object
     const clerkLocaleMap: Record<string, any> = {
         'zh-CN': zhCN,
+        'es': esES,
         'en': undefined // English is default
     };
 
