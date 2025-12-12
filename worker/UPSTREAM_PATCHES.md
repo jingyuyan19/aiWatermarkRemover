@@ -124,7 +124,7 @@ resolution_scale = (h * w) / (1920 * 1080)
 
 # Add safety margin for high-res videos (fragmentation/overhead)
 if resolution_scale > 1.0:
-    resolution_scale *= 6.0  # Drastic penalty for 4K to avoid Activation OOM
+    resolution_scale *= 12.0  # Drastic penalty for 4K to avoid Activation OOM
 
 scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
 
