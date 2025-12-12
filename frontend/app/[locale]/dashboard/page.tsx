@@ -3,10 +3,7 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { motion } from 'framer-motion';
-import {
-    Film, Clock, CheckCircle, XCircle, Loader2,
-    Zap, History, Plus, Upload, PlayCircle
-} from 'lucide-react';
+import { Upload, FileVideo, X, CheckCircle, Clock, XCircle, Loader2, History, Zap, Film, Plus, PlayCircle, Sparkles, Timer, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { MultiFileUpload } from '@/components/ui/MultiFileUpload';
@@ -25,6 +22,56 @@ import { getEffectiveJobStatus } from '@/utils/jobExpiration';
 import { calculateCost, getCostFactors } from '@/utils/pricing';
 
 // Removed local Job interface
+
+// Helper to extract filename
+const getFilename = (url: string | null) => {
+    if (!url) return 'Unknown Video';
+    try {
+        const decoded = decodeURIComponent(url);
+        return decoded.split('/').pop() || 'Unknown Video';
+    } catch {
+        return 'Unknown Video';
+    }
+};
+
+// Timer Component for Processing Jobs
+const JobTimer = ({ startTime, progress }: { startTime: string, progress: number }) => {
+    const [elapsed, setElapsed] = useState(0);
+
+    useEffect(() => {
+        const start = new Date(startTime).getTime();
+        const interval = setInterval(() => {
+            setElapsed(Math.floor((Date.now() - start) / 1000));
+        }, 1000);
+        return () => clearInterval(interval);
+    }, [startTime]);
+
+    const formatTime = (seconds: number) => {
+        const m = Math.floor(seconds / 60);
+        const s = seconds % 60;
+        return `${m}m ${s}s`;
+    };
+
+    // Simple estimation: (elapsed / progress) * remaining_progress
+    const getEstRemaining = () => {
+        if (progress < 10) return null; // Too unstable
+        const totalEst = (elapsed / progress) * 100;
+        const remaining = totalEst - elapsed;
+        return remaining > 0 ? formatTime(Math.ceil(remaining)) : 'Soon';
+    };
+
+    return (
+        <div className="flex items-center gap-3 text-xs text-gray-400 font-mono mt-1">
+            <span className="flex items-center gap-1">
+                <Timer className="w-3 h-3" />
+                {formatTime(elapsed)}
+            </span>
+            {progress > 0 && progress < 100 && (
+                <span className="text-gray-600">• Est. {getEstRemaining()}</span>
+            )}
+        </div>
+    );
+};
 
 export default function DashboardPage() {
     const t = useTranslations('Dashboard');
@@ -656,41 +703,84 @@ export default function DashboardPage() {
                                     <div className="divide-y divide-white/5">
                                         {recentJobs.map((job) => {
                                             const status = getEffectiveJobStatus(job);
+                                            const filename = getFilename(job.input_url);
+                                            const isProcessing = status === 'processing' || status === 'pending';
+
                                             return (
                                                 <Link
                                                     key={job.id}
                                                     href={`/${locale}/job/${job.id}`}
-                                                    className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors"
+                                                    className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group"
                                                 >
-                                                    <div className="flex items-center gap-3 flex-1">
-                                                        {status === 'completed' && <CheckCircle className="w-5 h-5 text-green-400" />}
-                                                        {status === 'processing' && <Loader2 className="w-5 h-5 text-blue-400 animate-spin" />}
-                                                        {status === 'pending' && <Clock className="w-5 h-5 text-yellow-400" />}
-                                                        {status === 'failed' && <XCircle className="w-5 h-5 text-red-400" />}
-                                                        {status === 'expired' && <Clock className="w-5 h-5 text-gray-500" />}
-                                                        <div className="flex-1 max-w-md">
-                                                            <div className="flex items-center justify-between mb-1">
-                                                                <span className={`text-sm font-medium ${status === 'expired' ? 'text-gray-500' : ''}`}>
-                                                                    {status === 'expired' ? t('status.expired') : getStatusText(status)}
+                                                    <div className="flex items-center gap-4 flex-1 min-w-0">
+                                                        {/* Status Icon */}
+                                                        <div className="shrink-0">
+                                                            {status === 'completed' && <CheckCircle className="w-8 h-8 text-green-400" />}
+                                                            {status === 'processing' && <Loader2 className="w-8 h-8 text-blue-400 animate-spin" />}
+                                                            {status === 'pending' && <Clock className="w-8 h-8 text-yellow-400" />}
+                                                            {status === 'failed' && <XCircle className="w-8 h-8 text-red-400" />}
+                                                            {status === 'expired' && <Clock className="w-8 h-8 text-gray-500" />}
+                                                        </div>
+
+                                                        <div className="flex-1 min-w-0">
+                                                            {/* Filename & Badges */}
+                                                            <div className="flex items-center gap-2 mb-1">
+                                                                <h3 className="font-medium text-white truncate text-base" title={filename}>
+                                                                    {filename}
+                                                                </h3>
+                                                                {/* Quality Badge */}
+                                                                <span className={`px-1.5 py-0.5 rounded text-[10px] font-bold uppercase border border-opacity-20 flex items-center gap-1 ${job.quality === 'e2fgvi_hq'
+                                                                        ? 'bg-purple-500/20 text-purple-200 border-purple-400'
+                                                                        : 'bg-blue-500/20 text-blue-200 border-blue-400'
+                                                                    }`}>
+                                                                    {job.quality === 'e2fgvi_hq' ? <Sparkles className="w-3 h-3" /> : <Zap className="w-3 h-3" />}
+                                                                    {job.quality === 'e2fgvi_hq' ? 'HQ' : 'FAST'}
                                                                 </span>
-                                                                {(job.status === 'processing' || job.status === 'pending') && (
-                                                                    <span className="text-xs text-primary font-medium">{job.progress}%</span>
-                                                                )}
                                                             </div>
 
-                                                            {(job.status === 'processing' || job.status === 'pending') ? (
-                                                                <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-2">
-                                                                    <div
-                                                                        className="h-full bg-primary transition-all duration-500 rounded-full"
-                                                                        style={{ width: `${job.progress}%` }}
-                                                                    />
+                                                            {/* Progress / Status Details */}
+                                                            <div className="flex flex-col gap-1">
+                                                                <div className="flex items-center justify-between">
+                                                                    <div className="flex items-center gap-2 text-sm text-gray-400">
+                                                                        <span className={status === 'expired' ? 'text-gray-500' : ''}>
+                                                                            {status === 'expired' ? t('status.expired') : getStatusText(status)}
+                                                                        </span>
+                                                                        <span>•</span>
+                                                                        <span className="text-xs">
+                                                                            {new Date(job.created_at).toLocaleDateString()}
+                                                                        </span>
+                                                                    </div>
+                                                                    {isProcessing && (
+                                                                        <span className="text-xs text-primary font-bold">{job.progress}%</span>
+                                                                    )}
                                                                 </div>
-                                                            ) : (
-                                                                <p className="text-xs text-gray-500 truncate">
-                                                                    {new Date(job.created_at).toLocaleDateString()} • {job.quality === 'e2fgvi_hq' ? 'High Quality' : 'Fast'}
-                                                                </p>
-                                                            )}
+
+                                                                {isProcessing ? (
+                                                                    <>
+                                                                        <div className="w-full h-1.5 bg-white/10 rounded-full overflow-hidden mt-1">
+                                                                            <div
+                                                                                className="h-full bg-primary transition-all duration-500 rounded-full shadow-[0_0_10px_rgba(59,130,246,0.5)]"
+                                                                                style={{ width: `${job.progress}%` }}
+                                                                            />
+                                                                        </div>
+                                                                        <JobTimer startTime={job.created_at} progress={job.progress || 0} />
+                                                                    </>
+                                                                ) : null}
+                                                            </div>
                                                         </div>
+                                                    </div>
+
+                                                    {/* Right Action */}
+                                                    <div className="ml-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                        {status === 'completed' ? (
+                                                            <div className="bg-white/10 p-2 rounded-full hover:bg-white/20">
+                                                                <Download className="w-5 h-5 text-white" />
+                                                            </div>
+                                                        ) : (
+                                                            <div className="text-gray-500">
+                                                                <Clock className="w-5 h-5" />
+                                                            </div>
+                                                        )}
                                                     </div>
                                                 </Link>
                                             );

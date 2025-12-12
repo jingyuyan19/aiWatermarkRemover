@@ -14,7 +14,6 @@
         "buyCredits": "Buy Credits",
         "account": "Account",
         "freeCredits": "Get 3 Free Credits",
-        "signIn": "Sign In",
         "selectLanguage": "Select Language"
     },
     "HomePage": {
@@ -401,7 +400,11 @@
         "recentJobs": {
             "title": "Recent Jobs",
             "viewAll": "View All",
-            "empty": "No videos processed yet"
+            "empty": "No videos processed yet",
+            "timeElapsed": "Time Elapsed: {time}",
+            "estLeft": "Est. Remaining: {time}",
+            "calculating": "Calculating...",
+            "unknownFile": "Unknown File"
         }
     },
     "History": {
