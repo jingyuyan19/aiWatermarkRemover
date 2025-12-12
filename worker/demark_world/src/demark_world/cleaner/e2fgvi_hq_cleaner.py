@@ -176,7 +176,14 @@ class E2FGVIHDCleaner:
 
     def clean(self, frames: np.ndarray, masks: np.ndarray) -> List[np.ndarray]:
         video_length = len(frames)
-        chunk_size = max(1, min(video_length, self.chunk_size))
+        h, w = frames[0].shape[:2]
+        
+        # Adjust chunk size based on resolution (base: 1080p)
+        # 4K video (8MP) needs ~4x more memory than 1080p (2MP), so we reduce chunk size by 4x.
+        resolution_scale = (h * w) / (1920 * 1080)
+        scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
+        
+        chunk_size = max(1, min(video_length, scaled_chunk_limit))
         overlap_size = int(self.config.overlap_ratio * video_length)
         # Validate and adjust overlap if needed
         if chunk_size <= overlap_size:
@@ -187,7 +194,6 @@ class E2FGVIHDCleaner:
         
         step_size = max(1, chunk_size - overlap_size)
         num_chunks = int(np.ceil(video_length / step_size))
-        h, w = frames[0].shape[:2]
         # Convert to tensors
         imgs_all, masks_all = numpy_to_tensor(frames, masks)
         # Prepare binary masks for compositing

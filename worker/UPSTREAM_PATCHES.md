@@ -104,5 +104,24 @@ Updated the `clean` method to respect the dynamically calculated `self.chunk_siz
 # chunk_size = max(1, int(self.config.chunk_size_ratio * video_length))
 
 # To this:
-chunk_size = max(1, min(video_length, self.chunk_size))
+
+## 6. OOM Fix for 4K Video (Resolution Scaling)
+
+**Issue:**
+The standard OOM fix (Section 5) assumes memory usage is roughly constant per frame (based on ~1080p). 4K videos have 4x pixels, so they consume ~4x more memory per frame. The original chunk size calculation would overestimate capacity for 4K videos, causing OOM.
+
+**Files Modified:**
+- `worker/demark_world/src/demark_world/cleaner/e2fgvi_hq_cleaner.py`
+
+**The Fix:**
+Scale the `chunk_size` limit inversely by resolution. If resolution is 4x 1080p, the chunk limit is divided by 4.
+
+```python
+h, w = frames[0].shape[:2]
+
+# Adjust chunk size based on resolution (base: 1080p)
+resolution_scale = (h * w) / (1920 * 1080)
+scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
+
+chunk_size = max(1, min(video_length, scaled_chunk_limit))
 ```
