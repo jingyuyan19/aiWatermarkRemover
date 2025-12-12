@@ -84,6 +84,27 @@ git clone https://github.com/jingyuyan19/DeMark-World.git demark_world
 
 ---
 
+## Quick Update (Local Fixes)
+
+**If you only made changes within the `aiWatermarkRemover` repo (e.g., modifying `worker/demark_world` directly without syncing from upstream), follow these simple steps:**
+
+1.  **Push your changes** to the main repo (`jingyuyan19/aiWatermarkRemover`).
+2.  **SSH into VPS**: `ssh root@YOUR_VPS_IP`
+3.  **Pull changes**:
+    ```bash
+    cd /root/aiWatermarkRemover
+    git pull
+    ```
+4.  **Rebuild Docker Image**:
+    ```bash
+    cd worker
+    docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:latest .
+    docker push jingyuyan19/watermark-worker:latest
+    ```
+5.  **Restart RunPod Worker** to pull the new image.
+
+---
+
 ## Complete Update Workflow (Copy-Paste)
 
 **When upstream has updates, run these commands in order:**
