@@ -345,6 +345,9 @@
             "success": "Video uploaded successfully!",
             "error": "Failed to upload video. Please try again.",
             "processing": "Processing...",
+            "insufficient_funds": "Insufficient credits",
+            "insufficient_funds_desc": "Need {cost} credits, you have {credits}",
+            "buy_credits": "Buy Credits",
             "submit": "Start Removal Magic",
             "quality": {
                 "fast": {

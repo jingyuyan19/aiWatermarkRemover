@@ -255,7 +255,7 @@ export default function DashboardPage() {
         }
         if (credits < totalCost) {
             toast.error(t('upload.insufficient_funds'), {
-                description: `Need ${totalCost} credits, you have ${credits}`,
+                description: t('upload.insufficient_funds_desc', { cost: totalCost, credits }),
                 action: {
                     label: t('upload.buy_credits'),
                     onClick: () => router.push(`/${locale}/pricing`)

@@ -345,6 +345,9 @@
             "success": "视频上传成功！",
             "error": "上传失败，请重试。",
             "processing": "处理中...",
+            "insufficient_funds": "积分不足",
+            "insufficient_funds_desc": "需要 {cost} 积分，您只有 {credits} 积分",
+            "buy_credits": "购买积分",
             "submit": "开始去水印",
             "quality": {
                 "fast": {
