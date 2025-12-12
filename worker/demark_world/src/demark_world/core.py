@@ -21,6 +21,16 @@ from demark_world.utils.imputation_utils import refine_bkps_by_chunk_size
 
 VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm"]
 
+def log_memory_stats(tag=""):
+    try:
+        import torch
+        free, total = torch.cuda.mem_get_info()
+        allocated = torch.cuda.memory_allocated()
+        reserved = torch.cuda.memory_reserved()
+        logger.info(f"[{tag}] CUDA Memory: Free={free/1024**3:.2f}GB, Allocated={allocated/1024**3:.2f}GB, Reserved={reserved/1024**3:.2f}GB")
+    except:
+        pass
+
 
 class DeMarkWorld:
     def __init__(self, cleaner_type: CleanerType = CleanerType.LAMA):
@@ -167,7 +177,16 @@ class DeMarkWorld:
 
         if not quiet:
             logger.debug(f"detect missed frames: {detect_missed}")
+        
+        log_memory_stats("Post-Detection Cleanup")
+
         bkps_full = [0, total_frames]
+        # ... (rest of logic) ...
+            
+        # Process isolation handles memory cleanup now.
+        log_memory_stats("Pre-Clean Start")
+
+        if self.cleaner_type == CleanerType.LAMA:
         if detect_missed:
             # 1. find the bkps of the bbox centers
             bkps = find_2d_data_bkps(bbox_centers)
