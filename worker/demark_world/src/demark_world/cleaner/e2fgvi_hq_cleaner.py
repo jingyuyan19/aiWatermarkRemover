@@ -184,7 +184,7 @@ class E2FGVIHDCleaner:
         
         # Add safety margin for high-res videos (fragmentation/overhead)
         if resolution_scale > 1.0:
-            resolution_scale *= 2.0
+            resolution_scale *= 6.0  # Drastic penalty for 4K to avoid Activation OOM
             
         scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
         
@@ -209,6 +209,7 @@ class E2FGVIHDCleaner:
             f"Processing {video_length} frames in {num_chunks} chunks (chunk_size={chunk_size}, overlap={overlap_size})"
         )
 
+        import gc
         for chunk_idx in tqdm(range(num_chunks), desc="Chunk", position=0, leave=True):
             start_idx = chunk_idx * (chunk_size - overlap_size)
             end_idx = min(start_idx + chunk_size, video_length)
@@ -246,6 +247,7 @@ class E2FGVIHDCleaner:
             # Clear GPU memory
             del imgs_chunk, masks_chunk, comp_frames_chunk
             try:
+                gc.collect()
                 torch.cuda.empty_cache()
             except:
                 pass
