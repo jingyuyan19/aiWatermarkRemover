@@ -121,6 +121,11 @@ h, w = frames[0].shape[:2]
 
 # Adjust chunk size based on resolution (base: 1080p)
 resolution_scale = (h * w) / (1920 * 1080)
+
+# Add safety margin for high-res videos (fragmentation/overhead)
+if resolution_scale > 1.0:
+    resolution_scale *= 2.0
+
 scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
 
 chunk_size = max(1, min(video_length, scaled_chunk_limit))
