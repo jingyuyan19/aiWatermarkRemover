@@ -22,7 +22,7 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL ?? 'http://localhost:8000';
 
 import { Job } from '@/types/job';
 import { getEffectiveJobStatus } from '@/utils/jobExpiration';
-import { calculateCost } from '@/utils/pricing';
+import { calculateCost, getCostFactors } from '@/utils/pricing';
 
 // Removed local Job interface
 
@@ -469,18 +469,48 @@ export default function DashboardPage() {
                                                     </div>
 
                                                     {/* Cost Preview */}
-                                                    <div className="flex items-center justify-between p-3 bg-white/5 rounded-xl text-sm">
-                                                        <span className="text-gray-400">
-                                                            {t('upload.cost.estimation', {
-                                                                count: files.length
-                                                            })}
-                                                        </span>
-                                                        <span className="font-semibold text-white">
-                                                            {files.reduce((acc, file) => {
-                                                                const meta = filesMetadata.get(getFileKey(file));
-                                                                return acc + (meta ? calculateCost(meta.duration, meta.width, meta.height, quality) : 0);
-                                                            }, 0)} Credits
-                                                        </span>
+                                                    {/* Cost Preview & Smart Badges */}
+                                                    <div className="flex flex-col gap-2 p-3 bg-white/5 rounded-xl text-sm">
+                                                        {/* Badges Row (Only show if multiplier > 1) */}
+                                                        {files.length === 1 && (() => {
+                                                            const meta = filesMetadata.get(getFileKey(files[0]));
+                                                            if (!meta) return null;
+                                                            const factors = getCostFactors(meta.duration, meta.width, meta.height, quality);
+
+                                                            if (!factors.isLong && !factors.isHQ && !factors.is4K) return null;
+
+                                                            return (
+                                                                <div className="flex flex-wrap gap-2 mb-1">
+                                                                    {factors.isLong && (
+                                                                        <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-200 rounded text-xs border border-yellow-500/30">
+                                                                            {t('upload.cost.factors.duration')} ({Math.ceil(meta.duration)}s)
+                                                                        </span>
+                                                                    )}
+                                                                    {factors.is4K && (
+                                                                        <span className="px-2 py-0.5 bg-purple-500/20 text-purple-200 rounded text-xs border border-purple-500/30">
+                                                                            {t('upload.cost.factors.resolution')}
+                                                                        </span>
+                                                                    )}
+                                                                    {factors.isHQ && (
+                                                                        <span className="px-2 py-0.5 bg-blue-500/20 text-blue-200 rounded text-xs border border-blue-500/30">
+                                                                            {t('upload.cost.factors.highQuality')} (x2)
+                                                                        </span>
+                                                                    )}
+                                                                </div>
+                                                            );
+                                                        })()}
+
+                                                        <div className="flex items-center justify-between">
+                                                            <span className="text-gray-400">
+                                                                {t('upload.cost.estimation')}
+                                                            </span>
+                                                            <span className="font-semibold text-white text-lg">
+                                                                {files.reduce((acc, file) => {
+                                                                    const meta = filesMetadata.get(getFileKey(file));
+                                                                    return acc + (meta ? calculateCost(meta.duration, meta.width, meta.height, quality) : 0);
+                                                                }, 0)} Credits
+                                                            </span>
+                                                        </div>
                                                     </div>
                                                     {/* Process Button */}
                                                     <Button

@@ -369,7 +369,13 @@
             },
             "cost": {
                 "calculation": "{count} video{s} × {per} credit{s}",
-                "total": "Total: {cost} credits"
+                "total": "Total: {cost} credits",
+                "estimation": "Estimated Cost",
+                "factors": {
+                    "duration": "Long Video",
+                    "highQuality": "HQ Mode",
+                    "resolution": "4K Ultra HD"
+                }
             },
             "processButton": "Process {count} Video",
             "processButtonPlural": "Process {count} Videos",
