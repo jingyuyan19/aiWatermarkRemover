@@ -193,9 +193,9 @@ async def create_job(
     # 2. Check credits
     # Pricing V2.1: 3D Billing Model (Duration x Quality x Resolution)
     
-    # A. Duration Blocks (0.5s grace period)
-    duration_val = max(0, job_data.duration - 0.5)
-    duration_blocks = math.ceil(duration_val / 5.0)
+    # A. Duration Blocks (1.0s grace period)
+    duration_val = max(0, job_data.duration - 1.0)
+    duration_blocks = math.ceil(duration_val / 10.0)
     duration_blocks = max(1, duration_blocks) # Minimum 1 block
 
     # B. Multipliers
