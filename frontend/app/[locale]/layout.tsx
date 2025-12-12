@@ -41,6 +41,10 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
             template: '%s | Vanishly',
             default: metadata?.title || "Vanishly - AI Video Watermark Remover"
         },
+        icons: {
+            icon: '/vanishly_logo_black.jpeg',
+            apple: '/vanishly_logo_black.jpeg',
+        },
         description: metadata?.description || "Remove watermarks, subtitles, and logos from videos instantly using advanced AI. Supports Sora, Runway, Pika, and more.",
         keywords: ["ai watermark remover", "video eraser", "remove logo from video", "cleanup video", "inpainting"],
         openGraph: {
