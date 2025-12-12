@@ -1,0 +1,762 @@
+{
+    "Metadata": {
+        "title": "Vanishly | Eliminación de Marcas de Agua con IA",
+        "description": "Elimina marcas de agua de tus videos al instante usando tecnología de IA avanzada."
+    },
+    "Navbar": {
+        "brand": "Vanishly",
+        "signIn": "Iniciar Sesión",
+        "features": "Características",
+        "pricing": "Precios",
+        "faq": "Preguntas Frecuentes",
+        "dashboard": "Panel de Control",
+        "history": "Historial",
+        "buyCredits": "Comprar Créditos",
+        "account": "Cuenta",
+        "freeCredits": "Obtén 3 Créditos Gratis",
+        "selectLanguage": "Seleccionar Idioma"
+    },
+    "HomePage": {
+        "ctaSection": {
+            "title": "¿Listo para eliminar marcas de agua?",
+            "subtitle": "Únete a miles de creadores que usan Vanishly para limpiar sus videos en segundos.",
+            "button": "Comenzar Ahora",
+            "noCard": "No se requiere tarjeta de crédito"
+        },
+        "badge": "Nuevo: Optimizado para Videos Grandes",
+        "title": "Eliminar Marcas de Agua",
+        "titleHighlight": "en Segundos",
+        "subtitle": "Eliminación de marcas de agua de grado profesional impulsada por IA avanzada. Sube tu video y deja que nuestras redes neuronales hagan la magia.",
+        "cta": "Comenzar a Eliminar",
+        "ctaDashboard": "Ir al Panel",
+        "ctaSecondary": "Ver Cómo Funciona",
+        "slider": {
+            "before": "Original",
+            "after": "Eliminado"
+        },
+        "signInPrompt": {
+            "title": "Inicia sesión para comenzar",
+            "description": "Crea una cuenta gratuita para subir videos y rastrear tu historial de eliminación de marcas de agua.",
+            "button": "Comenzar"
+        },
+        "upload": {
+            "clickToUpload": "Haz clic para subir",
+            "dragAndDrop": "o arrastra y suelta",
+            "formats": "MP4, MOV, AVI (máx 100MB)",
+            "success": "¡Carga exitosa! Procesamiento iniciado.",
+            "error": "Error en la carga. Inténtalo de nuevo.",
+            "insufficient_funds": "¡Créditos insuficientes! Se requiere 1 crédito.",
+            "buy_credits": "Comprar Créditos"
+        },
+        "quality": {
+            "fast": {
+                "title": "Modo Rápido",
+                "description": "Modelo LaMa • 1-2 min"
+            },
+            "hq": {
+                "title": "Alta Calidad",
+                "description": "Modelo E2FGVI • 5-10 min"
+            }
+        },
+        "trust": {
+            "title": "Con la confianza de más de 10,000 Creadores",
+            "companies": [
+                "Netflix",
+                "YouTube",
+                "Twitch",
+                "TikTok",
+                "Vimeo"
+            ]
+        },
+        "submitButton": "Comenzar Magia de Eliminación",
+        "processing": "Procesando Video...",
+        "legal": "Al usar este servicio, confirmas que tienes derecho a modificar el contenido subido. Esta herramienta está destinada para uso personal en contenido de tu propiedad."
+    },
+    "Features": {
+        "title": "Por Qué Elegirnos",
+        "subtitle": "Características potentes diseñadas para creadores de contenido",
+        "items": {
+            "ai": {
+                "title": "Precisión Impulsada por IA",
+                "description": "Nuestras redes neuronales analizan y eliminan marcas de agua con precisión a nivel de píxel, preservando la calidad del video."
+            },
+            "fast": {
+                "title": "Ultrarrápido",
+                "description": "Procesa videos en minutos, no horas. Nuestro pipeline optimizado entrega resultados 10 veces más rápido que los métodos tradicionales."
+            },
+            "privacy": {
+                "title": "Privacidad Primero",
+                "description": "Tus videos están encriptados y se eliminan automáticamente después del procesamiento. Nunca almacenamos ni compartimos tu contenido."
+            },
+            "formats": {
+                "title": "Todos los Formatos Soportados",
+                "description": "Sube MP4, MOV, AVI y más. Exporta en tu formato preferido sin pérdida de calidad."
+            },
+            "noWatermark": {
+                "title": "Sin Marca de Agua de Salida",
+                "description": "A diferencia de otras herramientas, nunca agregamos nuestra propia marca de agua. Tu video limpio es verdaderamente limpio."
+            },
+            "cloud": {
+                "title": "Procesamiento en la Nube",
+                "description": "Sin software para instalar. Procesa videos desde cualquier dispositivo con solo un navegador web."
+            }
+        }
+    },
+    "HowItWorks": {
+        "title": "Cómo Funciona",
+        "subtitle": "Elimina marcas de agua en tres pasos simples",
+        "steps": {
+            "upload": {
+                "title": "Sube Tu Video",
+                "description": "Arrastra y suelta o selecciona tu archivo de video. Soportamos todos los formatos principales hasta 100MB."
+            },
+            "process": {
+                "title": "Procesamiento IA",
+                "description": "Nuestra red neuronal analiza y elimina las marcas de agua mientras preserva la calidad del video."
+            },
+            "download": {
+                "title": "Descargar Resultado",
+                "description": "Obtén tu video limpio listo para usar. Sin marcas de agua, sin pérdida de calidad."
+            }
+        }
+    },
+    "Demo": {
+        "liveDemo": "Demo En Vivo",
+        "dropVideo": "Suelta tu video aquí",
+        "formats": "MP4, MOV, AVI hasta 100MB",
+        "sampleFile": "video_ejemplo.mp4",
+        "fileSize": "2.8 MB",
+        "dropToUpload": "Suelta para subir",
+        "uploading": "Subiendo...",
+        "complete": "¡Completado!",
+        "download": "Descargar",
+        "processing": "🪄 La IA está eliminando marcas de agua...",
+        "success": "✨ ¡Marca de agua eliminada exitosamente!",
+        "steps": {
+            "upload": "Subir",
+            "process": "Procesar",
+            "download": "Descargar"
+        }
+    },
+    "Platforms": {
+        "badge": "✨ Soporte de Video IA",
+        "title": "Funciona con Todas las Plataformas de Video IA",
+        "description": "Elimina marcas de agua de videos generados por las plataformas líderes de IA",
+        "items": {
+            "sora": {
+                "name": "Sora",
+                "subtitle": "de OpenAI"
+            },
+            "veo": {
+                "name": "Google Veo",
+                "subtitle": "de Google"
+            },
+            "runway": {
+                "name": "Runway",
+                "subtitle": "Gen-3"
+            },
+            "pika": {
+                "name": "Pika",
+                "subtitle": "Labs"
+            },
+            "kling": {
+                "name": "Kling",
+                "subtitle": "de Kuaishou"
+            },
+            "hailuo": {
+                "name": "Hailuo",
+                "subtitle": "MiniMax"
+            },
+            "luma": {
+                "name": "Luma",
+                "subtitle": "Dream Machine"
+            }
+        }
+    },
+    "Technology": {
+        "badge": "Cómo Funciona Nuestra IA",
+        "title": "Impulsado por IA Avanzada",
+        "subtitle": "Tecnología de grado empresarial construida para creadores",
+        "items": {
+            "parallel": {
+                "title": "Procesamiento GPU Paralelo",
+                "description": "Sube múltiples videos a la vez. Nuestra infraestructura en la nube los procesa simultáneamente en trabajadores GPU dedicados."
+            },
+            "detection": {
+                "title": "Detección Inteligente",
+                "description": "Redes neuronales basadas en YOLO detectan y localizan automáticamente las marcas de agua con un 99% de precisión."
+            },
+            "inpainting": {
+                "title": "Restauración Inteligente",
+                "description": "La tecnología de inpainting LaMa de última generación rellena las áreas eliminadas a la perfección."
+            },
+            "temporal": {
+                "title": "Resultados Perfectos por Cuadro",
+                "description": "El procesamiento de video especializado asegura que la eliminación sea consistente en todos los cuadros."
+            }
+        }
+    },
+    "Comparison": {
+        "title": "Mira la Diferencia",
+        "before": "Antes",
+        "after": "Después"
+    },
+    "Stats": {
+        "videosProcessed": "Videos Procesados",
+        "happyUsers": "Usuarios Felices",
+        "successRate": "Tasa de Éxito",
+        "availability": "Disponibilidad"
+    },
+    "Testimonials": {
+        "title": "Lo Que Dicen los Creadores",
+        "subtitle": "Únete a miles de creadores de contenido satisfechos",
+        "items": {
+            "creator": {
+                "name": "Alex Chen",
+                "role": "Creador de YouTube",
+                "quote": "Vanishly me ahorró horas de edición manual. La IA elimina las marcas de agua perfectamente sin afectar la calidad del video."
+            },
+            "editor": {
+                "name": "Sarah Miller",
+                "role": "Editora de Video",
+                "quote": "Como editora profesional, la calidad lo es todo. Vanishly entrega resultados limpios cada vez."
+            },
+            "agency": {
+                "name": "Marcus Johnson",
+                "role": "Dueño de Agencia Creativa",
+                "quote": "Nuestra agencia procesa cientos de videos mensualmente. La velocidad y confiabilidad de Vanishly lo convirtieron en nuestra herramienta principal."
+            }
+        }
+    },
+    "FAQ": {
+        "title": "Preguntas Frecuentes",
+        "items": {
+            "quality": {
+                "question": "¿Se verá afectada la calidad del video?",
+                "answer": "No, nuestra IA preserva la calidad original del video. Usamos tecnología avanzada de inpainting que rellena las áreas eliminadas sin problemas."
+            },
+            "types": {
+                "question": "¿Qué tipos de marcas de agua se pueden eliminar?",
+                "answer": "Nuestra IA puede eliminar marcas de agua de texto, superposiciones de logos, marcas de tiempo y la mayoría de las marcas semitransparentes."
+            },
+            "time": {
+                "question": "¿Cuánto tiempo toma el procesamiento?",
+                "answer": "El modo rápido toma 1-2 minutos para la mayoría de los videos. El modo de alta calidad toma 5-10 minutos pero proporciona mejores resultados."
+            },
+            "privacy": {
+                "question": "¿Son seguros mis datos de video?",
+                "answer": "Sí, todas las cargas están encriptadas. Los videos se eliminan automáticamente de nuestros servidores dentro de las 24 horas posteriores al procesamiento."
+            },
+            "legal": {
+                "question": "¿Es legal eliminar marcas de agua?",
+                "answer": "Solo debes eliminar marcas de agua del contenido que posees o tienes derechos para modificar."
+            }
+        }
+    },
+    "Footer": {
+        "tagline": "Eliminación profesional de marcas de agua con IA para creadores de contenido.",
+        "product": {
+            "title": "Producto",
+            "features": "Características",
+            "pricing": "Precios",
+            "api": "API"
+        },
+        "company": {
+            "title": "Compañía",
+            "about": "Sobre Nosotros",
+            "contact": "Contacto",
+            "careers": "Carreras"
+        },
+        "legal": {
+            "title": "Legal",
+            "privacy": "Política de Privacidad",
+            "terms": "Términos de Servicio"
+        },
+        "contact": {
+            "title": "Contacto",
+            "contactUs": "Contáctanos"
+        },
+        "copyright": "© {year} Vanishly. Todos los derechos reservados."
+    },
+    "JobPage": {
+        "backToHome": "Volver al Panel",
+        "title": "Estado del Trabajo",
+        "loading": "Cargando detalles del trabajo...",
+        "status": "Estado",
+        "statusLabels": {
+            "pending": "PENDIENTE",
+            "processing": "PROCESANDO",
+            "completed": "COMPLETADO",
+            "failed": "FALLIDO"
+        },
+        "messages": {
+            "pending": "⏳ Tu video está en la cola. El procesamiento comenzará en breve...",
+            "processing": "🎬 Procesando tu video... Esto puede tomar unos minutos.",
+            "failed": "❌ El procesamiento falló. Por favor intenta de nuevo o contacta soporte.",
+            "completed": "✅ ¡Tu video ha sido procesado exitosamente!"
+        },
+        "result": {
+            "original": "Original",
+            "processed": "Procesado",
+            "download": "Descargar Video Procesado"
+        },
+        "details": {
+            "jobId": "ID del Trabajo",
+            "created": "Creado"
+        },
+        "activity": [
+            "Inicializando entorno seguro...",
+            "Asignando vRAM de GPU dedicada...",
+            "Cargando modelo LaMa-Inpaint v2...",
+            "Analizando estructura de video...",
+            "Detectando superposiciones estáticas...",
+            "Mapeando coordenadas temporales...",
+            "Generando máscaras de oclusión...",
+            "Sintetizando parches de textura...",
+            "Aplicando propagación guiada por flujo...",
+            "Pase de refinamiento 1/3 (Grueso)...",
+            "Pase de refinamiento 2/3 (Detalle)...",
+            "Pase de refinamiento 3/3 (Temporal)...",
+            "Igualando color de cuadros...",
+            "Recodificando flujo de video...",
+            "Verificando calidad de salida...",
+            "Finalizando renderizado..."
+        ],
+        "error": "Error al obtener estado del trabajo"
+    },
+    "Dashboard": {
+        "title": "Panel de Control",
+        "subtitle": "Elimina marcas de agua de tus videos",
+        "stats": {
+            "credits": "Créditos Restantes",
+            "processed": "Videos Procesados",
+            "buyCredits": "¿Necesitas Más Créditos?",
+            "topUp": "Recargar Ahora →"
+        },
+        "status": {
+            "pending": "Pendiente",
+            "processing": "Procesando",
+            "completed": "Completado",
+            "failed": "Fallido",
+            "expired": "Expirado"
+        },
+        "upload": {
+            "title": "Eliminar Marca de Agua",
+            "success": "¡Video subido exitosamente!",
+            "error": "Error al subir video. Por favor intenta de nuevo.",
+            "processing": "Procesando...",
+            "insufficient_funds": "Créditos insuficientes",
+            "insufficient_funds_desc": "Necesitas {cost} créditos, tienes {credits}",
+            "buy_credits": "Comprar Créditos",
+            "submit": "Comenzar Magia de Eliminación",
+            "quality": {
+                "fast": {
+                    "title": "Modo Rápido",
+                    "description": "LaMa • 1-2 min"
+                },
+                "hq": {
+                    "title": "Alta Calidad",
+                    "description": "E2FGVI • 5-10 min"
+                }
+            },
+            "dropzone": {
+                "click": "Haz clic para subir",
+                "drag": "o arrastra y suelta",
+                "batch": "Procesar por lotes hasta {count} videos",
+                "formats": "MP4 • MOV • AVI",
+                "addMore": "Agregar más archivos",
+                "selectedCount": "{count} de {total} archivos seleccionados",
+                "clearAll": "Limpiar todo",
+                "fileSelected": "{count} archivo seleccionado",
+                "filesSelected": "{count} archivos seleccionados"
+            },
+            "cost": {
+                "calculation": "{count} video{s} × {per} crédito{s}",
+                "total": "Total: {cost} créditos",
+                "estimation": "Costo Estimado",
+                "factors": {
+                    "duration": "Video Largo",
+                    "highQuality": "Modo HQ",
+                    "resolution": "4K Ultra HD"
+                }
+            },
+            "processButton": "Procesar {count} Video",
+            "processButtonPlural": "Procesar {count} Videos",
+            "queue": {
+                "processing": "Procesando {current}/{total}",
+                "completedCount": "✓ {count} completados",
+                "failedCount": "✗ {count} fallidos",
+                "pendingCount": "{count} pendientes",
+                "clearCompleted": "Limpiar completados",
+                "status": {
+                    "queued": "En cola para procesamiento",
+                    "failed": "Error en la carga",
+                    "uploading": "Subiendo...",
+                    "waiting": "Esperando..."
+                },
+                "fileUpload": {
+                    "click": "Haz clic para subir",
+                    "drag": "o arrastra y suelta",
+                    "formats": "MP4, MOV, AVI (máx 100MB)"
+                }
+            }
+        },
+        "recentJobs": {
+            "title": "Trabajos Recientes",
+            "viewAll": "Ver Todos",
+            "empty": "Aún no se han procesado videos",
+            "timeElapsed": "Tiempo Transcurrido: {time}",
+            "estLeft": "Est. Restante: {time}",
+            "calculating": "Calculando...",
+            "unknownFile": "Archivo Desconocido",
+            "badges": {
+                "hq": "HQ",
+                "fast": "RÁPIDO"
+            },
+            "timer": {
+                "est": "Est.",
+                "soon": "Pronto"
+            }
+        }
+    },
+    "History": {
+        "title": "Historial de Procesamiento",
+        "subtitle": "Ver todos tus videos procesados",
+        "backToDashboard": "Volver al Panel",
+        "stats": {
+            "total": "Total",
+            "completed": "Completado",
+            "processing": "Procesando",
+            "failed": "Fallido"
+        },
+        "status": {
+            "pending": "Pendiente",
+            "processing": "Procesando",
+            "completed": "Completado",
+            "failed": "Fallido",
+            "expired": "Expirado"
+        },
+        "filter": {
+            "all": "Todos"
+        },
+        "unknownFile": "Archivo Desconocido",
+        "badges": {
+            "hq": "HQ",
+            "fast": "RÁPIDO"
+        },
+        "empty": "No se encontraron videos",
+        "goToDashboard": "Ir al Panel",
+        "table": {
+            "status": "Estado",
+            "fileName": "Nombre del Video",
+            "quality": "Calidad",
+            "date": "Fecha",
+            "actions": "Acciones",
+            "view": "Ver",
+            "download": "Descargar"
+        }
+    },
+    "Redeem": {
+        "title": "Canjear Código",
+        "subtitle": "Ingresa tu código de compra",
+        "placeholder": "Ingresa código...",
+        "button": "Canjear",
+        "enterCode": "Por favor ingresa un código",
+        "success": "¡Código canjeado exitosamente!",
+        "invalidCode": "Código inválido o ya usado",
+        "error": "Error al canjear código",
+        "newBalance": "Nuevo saldo",
+        "credits": "créditos"
+    },
+    "Common": {
+        "loading": "Cargando...",
+        "pagination": {
+            "showing": "Mostrando",
+            "to": "a",
+            "of": "de",
+            "results": "resultados"
+        }
+    },
+    "Pricing": {
+        "title": "Precios Simples y Transparentes",
+        "subtitle": "Compra créditos una vez, úsalos cuando quieras. Sin suscripciones, sin cargos ocultos.",
+        "badge": "Precios Basados en Créditos",
+        "credits": "créditos",
+        "oneTime": "pago único",
+        "mostPopular": "Mejor Valor",
+        "buyNow": "Comprar Ahora",
+        "processing": "Procesando...",
+        "getStarted": "Comenzar",
+        "questions": "¿Tienes preguntas?",
+        "faqLink": "Revisa nuestras FAQ",
+        "freeCredits": "¡Nuevos usuarios obtienen 3 créditos GRATIS para probar el servicio!",
+        "perCredit": "Costo por crédito",
+        "videoCredits": "créditos de video",
+        "howCreditsWork": "Cómo Funcionan los Créditos",
+        "creditInfo": {
+            "fast": "crédito = 1 video modo Rápido (hasta 5 min)",
+            "hq": "créditos = 1 video modo HQ (hasta 5 min)"
+        },
+        "features": {
+            "noExpiry": "Los créditos nunca expiran",
+            "allModes": "Acceso a todos los modos de procesamiento",
+            "priority": "Cola de procesamiento prioritaria"
+        },
+        "plans": {
+            "starter": {
+                "name": "Inicial"
+            },
+            "pro": {
+                "name": "Profesional"
+            },
+            "business": {
+                "name": "Empresarial"
+            }
+        },
+        "redeemTitle": "¿Tienes un Código?",
+        "redeemSubtitle": "Ingresa tu código promocional o tarjeta de regalo abajo para agregar créditos al instante."
+    },
+    "Privacy": {
+        "title": "Política de Privacidad",
+        "lastUpdated": "Última Actualización",
+        "sections": {
+            "intro": {
+                "title": "Introducción",
+                "content": "En Vanishly, tomamos tu privacidad en serio. Esta Política de Privacidad explica cómo recopilamos, usamos, divulgamos y protegemos tu información cuando usas nuestro servicio de eliminación de marcas de agua."
+            },
+            "dataCollection": {
+                "title": "Información que Recopilamos",
+                "content": "Recopilamos información que nos proporcionas directamente, como cuando creas una cuenta, subes videos o nos contactas para soporte. Esto incluye tu dirección de correo electrónico, nombre y los videos que subes para procesamiento."
+            },
+            "dataUsage": {
+                "title": "Cómo Usamos Tu Información",
+                "content": "Usamos la información que recopilamos para proporcionar, mantener y mejorar nuestros servicios, procesar tus solicitudes de eliminación de marcas de agua, comunicarnos contigo sobre tu cuenta y enviarte avisos técnicos."
+            },
+            "dataStorage": {
+                "title": "Almacenamiento y Seguridad de Datos",
+                "content": "Tus videos subidos se almacenan temporalmente para procesamiento y se eliminan automáticamente dentro de las 24 horas posteriores a la finalización del procesamiento."
+            },
+            "thirdParty": {
+                "title": "Servicios de Terceros",
+                "content": "Usamos servicios de terceros para autenticación (Clerk), procesamiento de pagos (Stripe) y almacenamiento en la nube (Cloudflare R2)."
+            },
+            "contact": {
+                "title": "Contáctanos",
+                "content": "Si tienes alguna pregunta sobre esta Política de Privacidad, por favor contáctanos en privacy@vanishly.io."
+            }
+        }
+    },
+    "Terms": {
+        "title": "Términos de Servicio",
+        "lastUpdated": "Última Actualización",
+        "sections": {
+            "acceptance": {
+                "title": "Aceptación de Términos",
+                "content": "Al acceder o usar Vanishly, aceptas estar sujeto a estos Términos de Servicio. Si no estás de acuerdo con estos términos, por favor no uses nuestro servicio."
+            },
+            "service": {
+                "title": "Descripción del Servicio",
+                "content": "Vanishly proporciona un servicio de eliminación de marcas de agua de video impulsado por IA."
+            },
+            "accounts": {
+                "title": "Cuentas de Usuario",
+                "content": "Debes crear una cuenta para usar nuestro servicio. Eres responsable de mantener la confidencialidad de las credenciales de tu cuenta."
+            },
+            "content": {
+                "title": "Contenido del Usuario",
+                "content": "Conservas la propiedad de todos los videos que subes. Al usar nuestro servicio, garantizas que tienes el derecho de procesar el contenido que subes."
+            },
+            "payment": {
+                "title": "Términos de Pago",
+                "content": "Los créditos se compran por única vez y no expiran. Todas las compras son finales y no reembolsables."
+            },
+            "liability": {
+                "title": "Limitación de Responsabilidad",
+                "content": "Vanishly se proporciona 'tal cual' sin garantías de ningún tipo."
+            },
+            "changes": {
+                "title": "Cambios a los Términos",
+                "content": "Nos reservamos el derecho de modificar estos términos en cualquier momento."
+            }
+        }
+    },
+    "Contact": {
+        "title": "Contáctanos",
+        "subtitle": "¿Tienes una pregunta o necesitas ayuda? Nos encantaría escucharte.",
+        "email": {
+            "title": "Soporte por Correo"
+        },
+        "response": {
+            "title": "Tiempo de Respuesta",
+            "time": "Usualmente dentro de 24 horas"
+        },
+        "faq": {
+            "title": "Respuestas Rápidas",
+            "link": "Revisa nuestras FAQ →"
+        },
+        "form": {
+            "name": "Tu Nombre",
+            "namePlaceholder": "Juan Pérez",
+            "email": "Correo Electrónico",
+            "emailPlaceholder": "juan@ejemplo.com",
+            "subject": "Asunto",
+            "subjectPlaceholder": "¿Cómo podemos ayudarte?",
+            "message": "Mensaje",
+            "messagePlaceholder": "Cuéntanos más sobre tu pregunta...",
+            "submit": "Enviar Mensaje"
+        },
+        "sending": "Enviando...",
+        "successTitle": "¡Mensaje Enviado!",
+        "successMessage": "Gracias por contactarnos. Te responderemos pronto.",
+        "sendAnother": "Enviar Otro Mensaje"
+    },
+    "Admin": {
+        "Users": {
+            "title": "Gestión de Usuarios",
+            "allUsers": "Todos los Usuarios",
+            "noUsers": "No se encontraron usuarios",
+            "searchPlaceholder": "Buscar Email o ID...",
+            "clearFilters": "Limpiar filtros",
+            "roles": {
+                "all": "Todos los Roles",
+                "admin": "Admins",
+                "user": "Usuarios"
+            },
+            "table": {
+                "id": "ID Usuario",
+                "email": "Email",
+                "credits": "Créditos",
+                "role": "Rol",
+                "jobs": "Trabajos",
+                "joined": "Unido",
+                "actions": "Acciones",
+                "idCopied": "ID de usuario copiado"
+            },
+            "toast": {
+                "creditsUpdated": "Créditos actualizados a {credits}",
+                "updateFailed": "Error al actualizar créditos"
+            },
+            "Adjustment": {
+                "title": "Ajustar Créditos",
+                "current": "Actual",
+                "add": "Agregar",
+                "remove": "Quitar",
+                "set": "Establecer A",
+                "newBalance": "Nuevo Saldo",
+                "cancel": "Cancelar",
+                "confirm": "Confirmar",
+                "success": "Actualizado exitosamente",
+                "error": "Error al actualizar"
+            }
+        },
+        "Jobs": {
+            "title": "Todos los Trabajos",
+            "historyTitle": "Historial de Procesamiento",
+            "noJobs": "No se encontraron trabajos",
+            "filters": {
+                "searchPlaceholder": "Buscar Job ID, User ID o Email...",
+                "allStatus": "Todos los Estados",
+                "allModels": "Todos los Modelos",
+                "clear": "Limpiar filtros"
+            },
+            "status": {
+                "pending": "Pendiente",
+                "processing": "Procesando",
+                "completed": "Completado",
+                "failed": "Fallido"
+            },
+            "models": {
+                "lama": "LAMA",
+                "e2fgvi_hq": "E2FGVI HQ"
+            },
+            "table": {
+                "id": "ID Trabajo",
+                "user": "Usuario",
+                "noEmail": "Sin Email",
+                "status": "Estado",
+                "quality": "Calidad",
+                "cost": "Costo",
+                "costValue": "{cost} {cost, plural, one {crédito} other {créditos}}",
+                "created": "Creado",
+                "idCopied": "ID de trabajo copiado"
+            }
+        },
+        "Codes": {
+            "title": "Códigos de Canje",
+            "export": "Exportar Sin Canjear",
+            "generate": {
+                "title": "Generar Códigos",
+                "creditsPerCode": "Créditos por código",
+                "numberOfCodes": "Número de códigos",
+                "prefix": "Prefijo",
+                "button": "Generar",
+                "generating": "Generando..."
+            },
+            "filters": {
+                "searchPlaceholder": "Buscar códigos...",
+                "allStatus": "Todos",
+                "pending": "Pendiente",
+                "redeemed": "Canjeado",
+                "allCredits": "Todos los Créditos",
+                "clear": "Limpiar"
+            },
+            "list": {
+                "total": "Códigos",
+                "noCodes": "No se encontraron códigos",
+                "page": "Página {current} de {total}",
+                "previous": "Anterior",
+                "next": "Siguiente"
+            },
+            "modal": {
+                "title": "Códigos Generados",
+                "subtitle": "{count} código{s} • {credits} créditos c/u",
+                "copyAll": "Copiar Todos",
+                "downloadCsv": "Descargar CSV"
+            },
+            "toast": {
+                "generated": "¡Generados {count} código(s)!",
+                "generateFailed": "Error al generar códigos",
+                "csvDownloaded": "¡CSV descargado!",
+                "allCopied": "¡Todos los códigos copiados!",
+                "copied": "¡Código copiado!",
+                "exported": "Exportados {count} códigos sin canjear",
+                "exportFailed": "Error al exportar códigos"
+            }
+        }
+    },
+    "Components": {
+        "Redeem": {
+            "title": "Canjear Código",
+            "subtitle": "Desbloquea funciones premium",
+            "placeholder": "INGRESAR CÓDIGO",
+            "button": "Canjear",
+            "loading": "...",
+            "success": "¡Código canjeado exitosamente!",
+            "error": "Error al canjear código",
+            "enterCode": "Por favor ingresa un código",
+            "newBalance": "Nuevo saldo",
+            "credits": "créditos",
+            "invalidCode": "Código inválido"
+        },
+        "Comparison": {
+            "before": "Original",
+            "after": "Eliminado",
+            "watermark": "MARCA DE AGUA"
+        }
+    },
+    "Pages": {
+        "NotFound": {
+            "title": "Página No Encontrada",
+            "description": "La página que buscas no existe o ha sido movida.",
+            "goHome": "Ir al Inicio"
+        },
+        "Error": {
+            "title": "Algo salió mal",
+            "description": "Ocurrió un error inesperado. Por favor intenta de nuevo.",
+            "retry": "Intentar de Nuevo"
+        },
+        "Loading": {
+            "text": "Cargando..."
+        }
+    }
+}

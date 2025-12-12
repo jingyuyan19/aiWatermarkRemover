@@ -14,6 +14,7 @@ interface Language {
 const languages: Language[] = [
     { code: 'en', label: 'English', englishLabel: 'English' },
     { code: 'zh-CN', label: '中文', englishLabel: 'Chinese' },
+    { code: 'es', label: 'Español', englishLabel: 'Spanish' },
     // Adding others from the screenshot simulation for visualization, 
     // though functionality relies on routing setup.
     // { code: 'ja', label: '日本語', englishLabel: 'Japanese' },
