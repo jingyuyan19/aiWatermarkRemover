@@ -156,21 +156,20 @@ imgs_chunk = imgs_chunk_t.to(device)
 masks_chunk = masks_chunk_t.to(device)
 ```
 
-## 8. Detector Memory Leak Fix (Stream Mode + GC)
+## 8. Detector Process Isolation (OOM Fix)
 
 **Issue:**
-The YOLO detector used `stream=False` (default), which accumulates results and keeps references to input tensors (GPU images). For a 4K video (192 frames), this leaked ~19GB of VRAM effectively locking the GPU before the cleaner started.
+The YOLO detector accumulates massive VRAM usage (~100MB/frame, ~19GB for 4K video) that is **not** released by PyTorch's garbage collector or `empty_cache()`, even with `stream=True`. This unkillable "leak" causes OOM when the Cleaner subsequently tries to load.
 
 **Files Modified:**
-- `worker/demark_world/src/demark_world/watermark_detector.py`: Switched `predict` to `stream=True`.
-- `worker/demark_world/src/demark_world/core.py`: Added explicit `gc.collect()` and `torch.cuda.empty_cache()` after detection loop.
+- `worker/demark_world/src/demark_world/core.py`: Refactored to run detection in a **subprocess**.
+- `worker/demark_world/run_detection.py`: New standalone script for the subprocess.
+
+**The Fix:**
+Moved detection to a separate process. When `run_detection.py` exits, the Operating System enforces a hard reclamation of all GPU resources, guaranteeing a clean slate for the Cleaner.
 
 ```python
-# watermark_detector.py
-# Generator - processes one item then discards tensors
-results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=True)
-
 # core.py
-gc.collect()
-torch.cuda.empty_cache()
+subprocess.run([sys.executable, "run_detection.py", ...], check=True)
+# Results loaded from pickle file
 ```

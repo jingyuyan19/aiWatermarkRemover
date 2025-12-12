@@ -24,7 +24,7 @@ VIDEO_EXTENSIONS = [".mp4", ".avi", ".mov", ".mkv", ".flv", ".wmv", ".webm"]
 
 class DeMarkWorld:
     def __init__(self, cleaner_type: CleanerType = CleanerType.LAMA):
-        self.detector = DeMarkWorldDetector()
+        # self.detector = DeMarkWorldDetector()  <-- REMOVED: Now runs in subprocess to avoid memory leaks
         self.cleaner = WaterMarkCleaner(cleaner_type)
         self.cleaner_type = cleaner_type
 
@@ -117,38 +117,54 @@ class DeMarkWorld:
             .run_async(pipe_stdin=True)
         )
 
-        frame_bboxes = {}
-        detect_missed = []
-        bbox_centers = []
-        bboxes = []
+        # -------------------------------------------------------------------------
+        # ISOLATED DETECTION PHASE (The "Nuclear Option" for Memory Leaks)
+        # We run detection in a separate process. When it finishes, the OS guarantees
+        # that ALL 19GB+ of VRAM it used is reclaimed.
+        # -------------------------------------------------------------------------
+        import subprocess
+        import pickle
+        import sys
+        
+        detection_output_path = output_video_path.parent / f"detection_{output_video_path.stem}.pkl"
+        detection_script = Path(__file__).parent.parent.parent / "run_detection.py"
+        
         if not quiet:
-            logger.debug(
-                f"total frames: {total_frames}, fps: {fps}, width: {width}, height: {height}"
-            )
-        for idx, frame in enumerate(
-            tqdm(
-                input_video_loader,
-                total=total_frames,
-                desc="Detect watermarks",
-                disable=quiet,
-            )
-        ):
-            detection_result = self.detector.detect(frame)
-            if detection_result["detected"]:
-                frame_bboxes[idx] = {"bbox": detection_result["bbox"]}
-                x1, y1, x2, y2 = detection_result["bbox"]
-                bbox_centers.append((int((x1 + x2) / 2), int((y1 + y2) / 2)))
-                bboxes.append((x1, y1, x2, y2))
+            logger.info("Starting isolated detection subprocess...")
+            
+        try:
+            cmd = [
+                sys.executable,
+                str(detection_script),
+                "--video_path", str(input_video_path),
+                "--output_path", str(detection_output_path)
+            ]
+            subprocess.run(cmd, check=True)
+            
+            # Load results
+            with open(detection_output_path, 'rb') as f:
+                det_results = pickle.load(f)
+            
+            frame_bboxes = det_results["frame_bboxes"]
+            detect_missed = det_results["detect_missed"]
+            bbox_centers = det_results["bbox_centers"]
+            bboxes = det_results["bboxes"]
+            
+            # Clean up temp file
+            if detection_output_path.exists():
+                detection_output_path.unlink()
+                
+        except subprocess.CalledProcessError as e:
+            logger.error(f"Detection subprocess failed: {e}")
+            raise e
+        except Exception as e:
+            logger.error(f"Failed to load detection results: {e}")
+            raise e
 
-            else:
-                frame_bboxes[idx] = {"bbox": None}
-                detect_missed.append(idx)
-                bbox_centers.append(None)
-                bboxes.append(None)
-            # 10% - 50%
-            if progress_callback and idx % 10 == 0:
-                progress = 10 + int((idx / total_frames) * 40)
-                progress_callback(progress)
+        # Report progress (simulate detection progress for callback)
+        if progress_callback:
+            progress_callback(50)
+
         if not quiet:
             logger.debug(f"detect missed frames: {detect_missed}")
         bkps_full = [0, total_frames]
@@ -197,14 +213,8 @@ class DeMarkWorld:
             del bbox_centers
             del detect_missed
             
-        # FORCE CLEANUP: The detector can leave GPU tensors hanging even with stream=True
-        # This is critical for 4K video processing to reclaim the ~19GB used during detection.
-        gc.collect()
-        try:
-            torch.cuda.empty_cache()
-            logger.debug("Force cleared CUDA cache after detection phase.")
-        except Exception as e:
-            logger.warning(f"Failed to empty CUDA cache: {e}")
+        # Process isolation handles memory cleanup now.
+        
 
         if self.cleaner_type == CleanerType.LAMA:
             ## 1. Lama Cleaner Strategy.
