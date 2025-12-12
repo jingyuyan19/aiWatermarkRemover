@@ -372,7 +372,13 @@
             },
             "cost": {
                 "calculation": "{count} 个视频 × {per} 积分",
-                "total": "总计: {cost} 积分"
+                "total": "总计: {cost} 积分",
+                "estimation": "预计消耗",
+                "factors": {
+                    "duration": "长视频",
+                    "highQuality": "高质量模式",
+                    "resolution": "4K超高清"
+                }
             },
             "processButton": "处理 {count} 个视频",
             "processButtonPlural": "处理 {count} 个视频",
