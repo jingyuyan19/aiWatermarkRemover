@@ -87,3 +87,22 @@ class CleanerType(StrEnum):
 from enum import Enum
 class CleanerType(str, Enum):
 ```
+
+## 5. OOM Fix (E2FGVI_HQ Dynamic Chunking)
+
+**Issue:**
+The upstream code used a hardcoded `chunk_size_ratio` (0.2) to determine chunk size, ignoring the dynamic VRAM-based `adapted_chunk_size` calculation. This caused frequent Out-Of-Memory (OOM) errors on 24GB GPUs when processing longer videos (e.g., >100 frames), as it attempted to load too many frames at once.
+
+**Files Modified:**
+- `worker/demark_world/src/demark_world/cleaner/e2fgvi_hq_cleaner.py`
+
+**The Fix:**
+Updated the `clean` method to respect the dynamically calculated `self.chunk_size` (based on free VRAM), ensuring chunks fit within memory limits.
+
+```python
+# Change this:
+# chunk_size = max(1, int(self.config.chunk_size_ratio * video_length))
+
+# To this:
+chunk_size = max(1, min(video_length, self.chunk_size))
+```
