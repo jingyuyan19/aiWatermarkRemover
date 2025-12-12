@@ -186,7 +186,6 @@ class DeMarkWorld:
         # Process isolation handles memory cleanup now.
         log_memory_stats("Pre-Clean Start")
 
-        if self.cleaner_type == CleanerType.LAMA:
         if detect_missed:
             # 1. find the bkps of the bbox centers
             bkps = find_2d_data_bkps(bbox_centers)
