@@ -31,24 +31,32 @@ class DeMarkWorldDetector:
         # cv2.imwrite("input_image.png", input_image)
         # raise RuntimeError()
 
-        results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=False)
-        # logger.error(f"input_image.shape:{input_image.shape}\nresults: {results}")
+        # Use stream=True to avoid accumulating results in memory (checks for OOM on 4K)
+        box = None
+        confidence = None
+        center_x = None
+        center_y = None
+        
+        # Generator - processes one item then discards tensors
+        results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=True)
+        
+        for result in results:
+            if len(result.boxes) > 0:
+                box_obj = result.boxes[0]
+                xyxy = box_obj.xyxy[0].cpu().numpy()
+                x1, y1, x2, y2 = float(xyxy[0]), float(xyxy[1]), float(xyxy[2]), float(xyxy[3])
+                confidence = float(box_obj.conf[0].cpu().numpy())
+                center_x = (x1 + x2) / 2
+                center_y = (y1 + y2) / 2
+                box = (int(x1), int(y1), int(x2), int(y2))
+                break # Only need the first detection per frame
 
-        result = results[0]
-
-        if len(result.boxes) == 0:
+        if box is None:
             return {"detected": False, "bbox": None, "confidence": None, "center": None}
-
-        box = result.boxes[0]
-        xyxy = box.xyxy[0].cpu().numpy()
-        x1, y1, x2, y2 = float(xyxy[0]), float(xyxy[1]), float(xyxy[2]), float(xyxy[3])
-        confidence = float(box.conf[0].cpu().numpy())
-        center_x = (x1 + x2) / 2
-        center_y = (y1 + y2) / 2
 
         return {
             "detected": True,
-            "bbox": (int(x1), int(y1), int(x2), int(y2)),
+            "bbox": box,
             "confidence": confidence,
             "center": (int(center_x), int(center_y)),
         }

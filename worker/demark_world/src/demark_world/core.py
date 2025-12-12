@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import Any, Callable
 
 import numpy as np
+import torch
+import gc # Added for explicit memory cleanup
 from loguru import logger
 from tqdm import tqdm
 
@@ -194,6 +196,15 @@ class DeMarkWorld:
             del bboxes
             del bbox_centers
             del detect_missed
+            
+        # FORCE CLEANUP: The detector can leave GPU tensors hanging even with stream=True
+        # This is critical for 4K video processing to reclaim the ~19GB used during detection.
+        gc.collect()
+        try:
+            torch.cuda.empty_cache()
+            logger.debug("Force cleared CUDA cache after detection phase.")
+        except Exception as e:
+            logger.warning(f"Failed to empty CUDA cache: {e}")
 
         if self.cleaner_type == CleanerType.LAMA:
             ## 1. Lama Cleaner Strategy.

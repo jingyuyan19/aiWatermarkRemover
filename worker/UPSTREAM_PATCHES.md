@@ -155,3 +155,22 @@ imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_np_chunk, masks_np_chunk)
 imgs_chunk = imgs_chunk_t.to(device)
 masks_chunk = masks_chunk_t.to(device)
 ```
+
+## 8. Detector Memory Leak Fix (Stream Mode + GC)
+
+**Issue:**
+The YOLO detector used `stream=False` (default), which accumulates results and keeps references to input tensors (GPU images). For a 4K video (192 frames), this leaked ~19GB of VRAM effectively locking the GPU before the cleaner started.
+
+**Files Modified:**
+- `worker/demark_world/src/demark_world/watermark_detector.py`: Switched `predict` to `stream=True`.
+- `worker/demark_world/src/demark_world/core.py`: Added explicit `gc.collect()` and `torch.cuda.empty_cache()` after detection loop.
+
+```python
+# watermark_detector.py
+# Generator - processes one item then discards tensors
+results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=True)
+
+# core.py
+gc.collect()
+torch.cuda.empty_cache()
+```
