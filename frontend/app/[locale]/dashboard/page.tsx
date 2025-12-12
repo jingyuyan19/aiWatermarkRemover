@@ -707,12 +707,10 @@ export default function DashboardPage() {
                                             const filename = getFilename(job.input_url);
                                             const isProcessing = status === 'processing' || status === 'pending';
 
-                                            return (
-                                                <Link
-                                                    key={job.id}
-                                                    href={`/${locale}/job/${job.id}`}
-                                                    className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group"
-                                                >
+                                            const isExpired = status === 'expired';
+
+                                            const content = (
+                                                <>
                                                     <div className="flex items-center gap-4 flex-1 min-w-0">
                                                         {/* Status Icon */}
                                                         <div className="shrink-0">
@@ -772,17 +770,40 @@ export default function DashboardPage() {
                                                     </div>
 
                                                     {/* Right Action */}
-                                                    <div className="ml-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-                                                        {status === 'completed' ? (
-                                                            <div className="bg-white/10 p-2 rounded-full hover:bg-white/20">
-                                                                <Download className="w-5 h-5 text-white" />
-                                                            </div>
-                                                        ) : (
-                                                            <div className="text-gray-500">
-                                                                <Clock className="w-5 h-5" />
-                                                            </div>
-                                                        )}
+                                                    {!isExpired && (
+                                                        <div className="ml-4 shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
+                                                            {status === 'completed' ? (
+                                                                <div className="bg-white/10 p-2 rounded-full hover:bg-white/20">
+                                                                    <Download className="w-5 h-5 text-white" />
+                                                                </div>
+                                                            ) : (
+                                                                <div className="text-gray-500">
+                                                                    <Clock className="w-5 h-5" />
+                                                                </div>
+                                                            )}
+                                                        </div>
+                                                    )}
+                                                </>
+                                            );
+
+                                            if (isExpired) {
+                                                return (
+                                                    <div
+                                                        key={job.id}
+                                                        className="flex items-center justify-between p-4 opacity-50 cursor-not-allowed"
+                                                    >
+                                                        {content}
                                                     </div>
+                                                );
+                                            }
+
+                                            return (
+                                                <Link
+                                                    key={job.id}
+                                                    href={`/${locale}/job/${job.id}`}
+                                                    className="flex items-center justify-between p-4 hover:bg-white/5 transition-colors group"
+                                                >
+                                                    {content}
                                                 </Link>
                                             );
                                         })}
