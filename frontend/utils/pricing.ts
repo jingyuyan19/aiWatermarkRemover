@@ -6,9 +6,9 @@ export const calculateCost = (duration: number, width: number, height: number, q
 
 // Detailed breakdown for UI
 export const getCostFactors = (duration: number, width: number, height: number, quality: string) => {
-    // 1. Durations (1s Buffer, 10s Blocks)
-    const adjustedDuration = Math.max(0, duration - 1.0);
-    const durationBlocks = Math.max(1, Math.ceil(adjustedDuration / 10));
+    // 1. Durations (0.5s Buffer, 5s Blocks)
+    const adjustedDuration = Math.max(0, duration - 0.5);
+    const durationBlocks = Math.max(1, Math.ceil(adjustedDuration / 5));
 
     // 2. Multipliers
     const qualityMult = quality === 'e2fgvi_hq' ? 2 : 1;
