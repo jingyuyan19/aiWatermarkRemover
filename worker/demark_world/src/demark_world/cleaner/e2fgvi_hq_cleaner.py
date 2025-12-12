@@ -174,7 +174,7 @@ class E2FGVIHDCleaner:
 
         return comp_frames_chunk
 
-    def clean(self, frames: np.ndarray, masks: np.ndarray) -> List[np.ndarray]:
+    def clean(self, frames: np.ndarray, masks: np.ndarray, progress_callback=None) -> List[np.ndarray]:
         video_length = len(frames)
         h, w = frames[0].shape[:2]
         
@@ -190,12 +190,18 @@ class E2FGVIHDCleaner:
         
         chunk_size = max(1, min(video_length, scaled_chunk_limit))
         overlap_size = int(self.config.overlap_ratio * video_length)
-        # Validate and adjust overlap if needed
+        
+        # CRITICAL FIX for small chunks: Cap overlap to ensure we advance by at least 1 frame (ideally more)
+        # If chunk is small (e.g. 6 frames), overlap of 5 means step=1 (Very Slow).
+        # We cap overlap at 50% of chunk_size to ensure step >= chunk_size / 2.
+        max_overlap = max(0, int(chunk_size * 0.5))
+        if overlap_size > max_overlap:
+            logger.warning(f"Overlap size ({overlap_size}) too large for chunk size ({chunk_size}). Capping at {max_overlap}.")
+            overlap_size = max_overlap
+        
+        # Ensure overlap is valid relative to chunk size
         if chunk_size <= overlap_size:
-            logger.warning(f"Chunk size ({chunk_size}) <= Overlap size ({overlap_size}). Adjusting overlap.")
-            overlap_size = max(1, int(chunk_size * 0.5))
-            if overlap_size >= chunk_size:
-                overlap_size = 0  # Fallback
+             overlap_size = max(0, chunk_size - 1)
         
         step_size = max(1, chunk_size - overlap_size)
         num_chunks = int(np.ceil(video_length / step_size))
@@ -206,15 +212,18 @@ class E2FGVIHDCleaner:
         binary_masks = np.expand_dims(masks > 0, axis=-1).astype(np.uint8)  # (T, H, W, 1)
         comp_frames = [None] * video_length
         logger.debug(
-            f"Processing {video_length} frames in {num_chunks} chunks (chunk_size={chunk_size}, overlap={overlap_size})"
+            f"Processing {video_length} frames in {num_chunks} chunks (chunk_size={chunk_size}, overlap={overlap_size}, step={step_size})"
         )
 
         import gc
         for chunk_idx in tqdm(range(num_chunks), desc="Chunk", position=0, leave=True):
-            start_idx = chunk_idx * (chunk_size - overlap_size)
+            start_idx = chunk_idx * step_size
             end_idx = min(start_idx + chunk_size, video_length)
             actual_chunk_size = end_idx - start_idx
-            # logger.debug(f'\nProcessing chunk {chunk_idx + 1}/{num_chunks}: frames {start_idx}-{end_idx}')
+            
+            # Report progress via callback if provided
+            if progress_callback:
+                progress_callback(chunk_idx / num_chunks)
             
             # Extract chunk data (Numpy slicing - remains in RAM)
             frames_np_chunk = frames[start_idx:end_idx]

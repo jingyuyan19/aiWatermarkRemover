@@ -315,7 +315,17 @@ class DeMarkWorld:
                         # offset
                         idx_offset = idx - start
                         masks[idx_offset][y1:y2, x1:x2] = 255
-                cleaned_frames = self.cleaner.clean(frames, masks)
+                def update_clean_progress(p: float):
+                    if progress_callback:
+                        # Estimate current frame index being processed relative to the whole video
+                        # p is 0.0-1.0 within this segment
+                        current_segment_frame = int(p * (end - start))
+                        current_total_frame = start + current_segment_frame
+                        # Map total progress (50% to 95%) 
+                        global_p = 50 + int((current_total_frame / total_frames) * 45)
+                        progress_callback(min(95, global_p))
+
+                cleaned_frames = self.cleaner.clean(frames, masks, progress_callback=update_clean_progress)
 
                 # Merge with overlap blending support
                 all_cleaned_frames = merge_frames_with_overlap(

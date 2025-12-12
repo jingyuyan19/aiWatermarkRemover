@@ -129,18 +129,26 @@ if resolution_scale > 1.0:
 scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
 
 chunk_size = max(1, min(video_length, scaled_chunk_limit))
+
+# CRITICAL FIX for small chunks: Cap overlap to ensure we advance by at least 1 frame
+max_overlap = max(0, int(chunk_size * 0.5))
+if overlap_size > max_overlap:
+    overlap_size = max_overlap
+
+if chunk_size <= overlap_size:
+    overlap_size = max(0, chunk_size - 1)
 ```
 
-## 7. Lazy Tensor Loading (Memory Optimization)
-
-**Issue:**
-The upstream code performs "Eager Loading", converting the *entire* video into GPU tensors at the start of the `clean()` method. For 4K videos, even 100 frames can consume ~6GB+ of VRAM just for storage, before any processing begins. This base overhead + processing overhead causes OOM.
+## 7. Lazy Tensor Loading & Progress Reporting
+**Issue 1:** The upstream code performs "Eager Loading", converting the *entire* video into GPU tensors at the start.
+**Issue 2:** The cleaning process is a blocking call that can take minutes for high-res video, with no progress updates.
 
 **Files Modified:**
 - `worker/demark_world/src/demark_world/cleaner/e2fgvi_hq_cleaner.py`
 
 **The Fix:**
-Refactored `clean()` to keep frames in system RAM (NumPy) and only convert the *current chunk* to GPU tensors inside the processing loop.
+1. Refactored `clean()` to keep frames in system RAM (NumPy) and only convert the *current chunk* to GPU tensors.
+2. Added `progress_callback` argument to `clean()` and called it inside the loop.
 
 ```python
 # REMOVED:
