@@ -293,15 +293,13 @@ export default function CodesPage() {
                     <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
                         <div>
                             <label className="block text-sm text-gray-400 mb-2">{t('generate.creditsPerCode')}</label>
-                            <select
+                            <input
+                                type="number"
+                                min={1}
                                 value={credits}
                                 onChange={(e) => setCredits(Number(e.target.value))}
                                 className="w-full px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                            >
-                                <option value={10}>10 (Starter - $4.99)</option>
-                                <option value={50}>50 (Pro - $19.99)</option>
-                                <option value={200}>200 (Business - $59.99)</option>
-                            </select>
+                            />
                         </div>
                         <div>
                             <label className="block text-sm text-gray-400 mb-2">{t('generate.numberOfCodes')}</label>
@@ -377,19 +375,16 @@ export default function CodesPage() {
 
                         {/* Credits Filter */}
                         <div>
-                            <select
+                            <input
+                                type="number"
+                                placeholder={t('filters.allCredits')}
                                 value={creditsFilter || ''}
                                 onChange={(e) => {
                                     setCreditsFilter(e.target.value ? Number(e.target.value) : null);
                                     setPage(1);
                                 }}
-                                className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white"
-                            >
-                                <option value="">{t('filters.allCredits')}</option>
-                                <option value="10">10 Credits</option>
-                                <option value="50">50 Credits</option>
-                                <option value="200">200 Credits</option>
-                            </select>
+                                className="px-4 py-2 bg-gray-800 border border-white/10 rounded-lg text-white w-[140px]"
+                            />
                         </div>
 
                         {/* Clear Filters */}
