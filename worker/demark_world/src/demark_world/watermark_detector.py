@@ -1,5 +1,6 @@
 from pathlib import Path
 
+import time
 import numpy as np
 from loguru import logger
 from ultralytics import YOLO
@@ -40,7 +41,11 @@ class DeMarkWorldDetector:
         # Generator - processes one item then discards tensors
         # v1.25 Optimization: Downscale to 640px + FP16 for speed (Detection < 3s)
         # YOLO auto-resizes internally and returns coords in original scale.
+        t0 = time.time()
         results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=True, imgsz=640, half=True)
+        t1 = time.time()
+        if logger:
+             logger.debug(f"Inference: {t1 - t0:.4f}s | Device: {self.model.device}")
         
         for result in results:
             if len(result.boxes) > 0:

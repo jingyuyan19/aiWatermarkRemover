@@ -174,13 +174,16 @@ class DeMarkWorld:
                     if not line and process.poll() is not None:
                         break
                     if line:
-                        # Log debug info from subprocess
-                        # if not quiet:
-                        #    logger.debug(f"[DETECTOR] {line.strip()}")
-                        
                         # Parse progress
                         match = tqdm_pattern.search(line)
                         if match:
+                            det_p = int(match.group(1))
+                            # ... (existing logic)
+                        else:
+                            # Log non-progress lines (debug info)
+                            # This allows us to see "Inference: 0.1s | Device: cuda:0"
+                            if not quiet:
+                                logger.debug(f"[DETECTOR] {line.strip()}")
                             det_p = int(match.group(1))
                             overall = int(det_p * 0.5)
                             
