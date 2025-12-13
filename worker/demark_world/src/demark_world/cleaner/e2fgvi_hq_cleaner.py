@@ -263,27 +263,42 @@ class E2FGVIHDCleaner:
             # Find largest safe T based on Budget
             while True:
                 masks_slice = masks[cursor : cursor + final_t]
-                h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=PAD)
                 
-                if h_crop == 0: 
-                    final_h, final_w = h_crop, w_crop
+                # v1.22 Optimization B: Spatial Clustering (Fix "Static Bloat")
+                final_rois = self.optimize_roi_strategy(masks_slice, PAD)
+                
+                # Calculate total cost of all ROIs
+                total_cost = 0
+                max_h, max_w = 0, 0
+                
+                for roi_params in final_rois:
+                     # h, w, y1, y2, x1, x2
+                     h_r, w_r, _, _, _, _ = roi_params
+                     total_cost += final_t * h_r * w_r
+                     if h_r > max_h: max_h = h_r
+                     if w_r > max_w: max_w = w_r
+                
+                # If no mask (empty rois), cost is 0
+                if total_cost == 0:
+                    final_h, final_w = 0, 0
                     break
                 
-                cost = final_t * h_crop * w_crop
-                
-                if cost <= VOXEL_BUDGET:
-                    final_h, final_w = h_crop, w_crop
+                if total_cost <= VOXEL_BUDGET:
+                    # ACCEPT
+                    final_h, final_w = max_h, max_w # Just for log
                     break
                 else:
-                    area = max(1, h_crop * w_crop)
+                    area = 1
+                    for roi_params in final_rois:
+                         h_r, w_r, _, _, _, _ = roi_params
+                         area += h_r * w_r
+                         
                     ideal_t = int(VOXEL_BUDGET / area)
                     next_t = min(final_t - 1, ideal_t)
                     
                     if next_t < MIN_T:
-                        # logger.warning(f"Frame {cursor}: Massive ROI. Forcing Min Chunk {MIN_T}.")
                         final_t = MIN_T
-                        h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks[cursor:cursor+final_t], pad=PAD)
-                        final_h, final_w = h_crop, w_crop
+                        final_rois = self.optimize_roi_strategy(masks[cursor:cursor+final_t], PAD)
                         break
                     
                     final_t = next_t
@@ -294,11 +309,10 @@ class E2FGVIHDCleaner:
             
             while not success:
                 try:
-                    # If retrying, we might need to recalculate bbox for smaller T
+                    # If retrying, recalculate ROIs for smaller T
                     if attempt_t != final_t:
                         masks_slice = masks[cursor : cursor + attempt_t]
-                        h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=PAD)
-                        final_h, final_w = h_crop, w_crop
+                        final_rois = self.optimize_roi_strategy(masks_slice, PAD)
                     
                     end_idx = cursor + attempt_t
                     actual_chunk_size = attempt_t
@@ -306,43 +320,48 @@ class E2FGVIHDCleaner:
                     if progress_callback:
                         progress_callback(cursor / video_length)
 
-                    if final_h > 0 and final_w > 0:
+                    if len(final_rois) > 0 and final_rois[0][0] > 0:
+                        # Process each ROI
+                        comp_frames_chunk = [frames[i].copy() for i in range(cursor, end_idx)]
+                        
                         frames_np_chunk = frames[cursor:end_idx]
                         masks_np_chunk = masks[cursor:end_idx]
                         binary_masks_chunk = binary_masks[cursor:end_idx]
-                        
-                        frames_crop = frames_np_chunk[:, y1:y2, x1:x2, :]
-                        masks_crop = masks_np_chunk[:, y1:y2, x1:x2]
-                        binary_masks_crop = binary_masks_chunk[:, y1:y2, x1:x2, :]
-                        
-                        imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_crop, masks_crop)
-                        imgs_chunk = imgs_chunk_t.to(device)
-                        masks_chunk = masks_chunk_t.to(device)
-                        
-                        msg = f"Proc {cursor}-{end_idx} (T={attempt_t}, ROI={final_w}x{final_h})"
-                        pbar.set_description(msg)
-                        
-                        with torch.cuda.amp.autocast():
-                            cleaned_crops = self.process_frames_chunk(
-                                actual_chunk_size,
-                                self.config.neighbor_stride,
-                                imgs_chunk,
-                                masks_chunk,
-                                binary_masks_crop,
-                                frames_crop,
-                                final_h,
-                                final_w,
-                            )
+
+                        roi_idx = 0
+                        for (h_crop, w_crop, y1, y2, x1, x2) in final_rois:
+                            roi_idx += 1
+                            if h_crop == 0 or w_crop == 0: continue
                             
-                        # Paste
-                        comp_frames_chunk = []
-                        for i in range(actual_chunk_size):
-                            full_frame = frames_np_chunk[i].copy()
-                            if cleaned_crops[i] is not None:
-                                full_frame[y1:y2, x1:x2] = cleaned_crops[i]
-                            comp_frames_chunk.append(full_frame)
+                            frames_crop = frames_np_chunk[:, y1:y2, x1:x2, :]
+                            masks_crop = masks_np_chunk[:, y1:y2, x1:x2]
+                            binary_masks_crop = binary_masks_chunk[:, y1:y2, x1:x2, :]
                             
-                        del imgs_chunk, masks_chunk, cleaned_crops
+                            imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_crop, masks_crop)
+                            imgs_chunk = imgs_chunk_t.to(device)
+                            masks_chunk = masks_chunk_t.to(device)
+                            
+                            msg = f"Proc {cursor}-{end_idx} (T={attempt_t}, ROI#{roi_idx}={w_crop}x{h_crop})"
+                            pbar.set_description(msg)
+                            
+                            with torch.cuda.amp.autocast():
+                                cleaned_crops = self.process_frames_chunk(
+                                    actual_chunk_size,
+                                    self.config.neighbor_stride,
+                                    imgs_chunk,
+                                    masks_chunk,
+                                    binary_masks_crop,
+                                    frames_crop,
+                                    h_crop,
+                                    w_crop,
+                                )
+                            
+                            # Paste back onto the compositing frames
+                            for i in range(actual_chunk_size):
+                                if cleaned_crops[i] is not None:
+                                    comp_frames_chunk[i][y1:y2, x1:x2] = cleaned_crops[i]
+                            
+                            del imgs_chunk, masks_chunk, cleaned_crops
                         
                     else:
                         # No mask

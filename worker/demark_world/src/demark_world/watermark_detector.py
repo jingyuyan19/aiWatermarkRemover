@@ -38,7 +38,9 @@ class DeMarkWorldDetector:
         center_y = None
         
         # Generator - processes one item then discards tensors
-        results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=True)
+        # v1.22 Optimization: Downscale to 1280px for speed (was Full 4K)
+        # YOLO auto-resizes internally and returns coords in original scale.
+        results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=True, imgsz=1280)
         
         for result in results:
             if len(result.boxes) > 0:
