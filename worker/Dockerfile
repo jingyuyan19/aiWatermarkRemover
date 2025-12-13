@@ -21,6 +21,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 RUN mkdir -p /app/demark_world_code/resources/checkpoint/
 RUN wget -O /app/demark_world_code/resources/checkpoint/E2FGVI-HQ-CVPR22.pth https://github.com/linkedlist771/SoraWatermarkCleaner/releases/download/V0.0.1/E2FGVI-HQ-CVPR22.pth
 RUN wget -O /app/demark_world_code/resources/checkpoint/spynet_20210409-c6c1bd09.pth https://download.openmmlab.com/mmediting/restorers/basicvsr/spynet_20210409-c6c1bd09.pth
+RUN wget -O /app/demark_world_code/resources/checkpoint/watermark-best.pt https://github.com/linkedlist771/DeMark-World/releases/download/V0.0.1/watermark-best.pt
 
 # Copy application code
 # Copy application code

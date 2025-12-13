@@ -175,8 +175,8 @@ class DeMarkWorld:
                         break
                     if line:
                         # Log debug info from subprocess
-                        if not quiet:
-                           logger.debug(f"[DETECTOR] {line.strip()}")
+                        # if not quiet:
+                        #    logger.debug(f"[DETECTOR] {line.strip()}")
                         
                         # Parse progress
                         match = tqdm_pattern.search(line)
