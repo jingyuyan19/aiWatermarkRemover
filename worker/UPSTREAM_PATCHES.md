@@ -131,25 +131,32 @@ scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
 # ...
 ```
 
-# ROI Optimization allows us to use standard chunk sizes even for 4K.
-chunk_size = 50 
-chunk_size = min(chunk_size, 60)
+# v1.20 Elastic Voxel Budgeting
+# Budget limit for 24GB VRAM
+VOXEL_BUDGET = 65_000_000 
 
-# ROI Logic inside loop
-chunk_union_mask = np.max(masks_np_chunk, axis=0)
-# ... crop logic ...
-# ... inference on crops ...
-# ... paste back ...
+while cursor < video_length:
+    # Elastic Loop: Find safe T
+    while True:
+        # Measure Union ROI
+        h_crop, w_crop = get_union_bbox(masks[cursor:cursor+final_t])
+        cost = final_t * h_crop * w_crop
+        
+        if cost <= BUDGET: break
+        else: final_t = min(final_t-1, int(BUDGET / (h*w)))
+    
+    # Process final_t frames...
 ```
 
-## 7. Dynamic ROI Inpainting & Safe FP16
-**Issue:**  `O(T * H * W)` scaling of E2FGVI caused 4K videos to crash (OOM) or run extremely slowly (1FPS).
+## 7. Elastic Voxel Budgeting (v1.20)
+**Issue:**  Previous ROI logic (v1.17) used a fixed `chunk_size=50`. If the watermark *moved* significantly, the "Union Bounding Box" expanded to cover the entire 4K screen, causing an OOM loop.
 **Solution:**
-1.  **Dynamic ROI**: Instead of processing the full 4K frame, the cleaner detects the **bounding box** of the watermark mask, adds **256px padding** for context, and crops the region.
-2.  **Impact**: The model processes small crops (e.g., 800x600) instead of 4K. VRAM usage drops by ~90%, and speed increases by ~10x.
-3.  **Large Chunks**: Because memory is low, we increased `chunk_size` to **50 frames**, restoring temporal consistency.
-4.  **Safe FP16**: Monkey-patched `torch.nn.functional.grid_sample` to run in FP32 (inside FP16 autocast) to prevent numerical instability/crashes.
-5.  **Progress Streaming**: Fixed `core.py` to stream detector progress in real-time.
+1.  **Elastic Budgeting**: Replaced the fixed loop with a dynamic negotiation loop.
+2.  **Predictive VRAM Control**: Before processing, the code calculates the `Cost = Time * Height * Width` of the proposed chunk.
+3.  **Dynamic Throttling**:
+    *   **Static Watermark**: ROI is small -> `Chunk Size` scales up to **60 frames** (Fast).
+    *   **Moving Watermark**: ROI is large -> `Chunk Size` scales down (e.g. to **10 frames**) to fit the 24GB budget.
+4.  **Result**: Guarantees stability for *any* watermark motion while maximizing speed for static parts.
 
 ```python
 # REMOVED:

@@ -194,97 +194,136 @@ class E2FGVIHDCleaner:
 
 
 
+    def get_union_bbox(self, masks, pad=128):
+        """Returns (h, w, y1, y2, x1, x2) of the union bbox for a stack of masks with padding."""
+        if len(masks) == 0: return 0, 0, 0, 0, 0, 0
+        
+        # Optimization: Use numpy to project masks to 1D axes
+        union_mask = np.max(masks, axis=0) # Collapse Time
+        rows = np.any(union_mask, axis=1)
+        cols = np.any(union_mask, axis=0)
+        
+        if not np.any(rows): return 0, 0, 0, 0, 0, 0
+        
+        y_min, y_max = np.where(rows)[0][[0, -1]]
+        x_min, x_max = np.where(cols)[0][[0, -1]]
+        
+        h_frame, w_frame = masks.shape[1], masks.shape[2]
+        
+        y1 = max(0, y_min - pad)
+        y2 = min(h_frame, y_max + 1 + pad)
+        x1 = max(0, x_min - pad)
+        x2 = min(w_frame, x_max + 1 + pad)
+        
+        # Ensure dimensions are even (mod 8 for safety)
+        dh = y2 - y1
+        dw = x2 - x1
+        y2 -= dh % 8
+        x2 -= dw % 8
+        
+        return (y2-y1), (x2-x1), y1, y2, x1, x2
+
     def clean(self, frames: np.ndarray, masks: np.ndarray, progress_callback=None) -> List[np.ndarray]:
         video_length = len(frames)
         h, w = frames[0].shape[:2]
         
-        # ROI Optimization allows us to use standard chunk sizes even for 4K.
-        # We rely on specific crops to fit in VRAM.
-        # Use a reasonably large chunk for temporal consistency.
-        # "Chunk size 50" suggested by analysis.
-        chunk_size = 50 
-        
-        # Respect memory profiling if valid, but ignore 4K penalty
-        if self.adapted_chunk_size and self.adapted_chunk_size > 0:
-             # Basic safety: reduce chunk size if calculated safe size is very small
-             chunk_size = max(10, self.adapted_chunk_size)
-        
-        # Override for high-res: The 4K penalty is REMOVED because we process crops.
-        # We cap at 60 to prevent too much temporal drift/memory usage if watermark is large.
-        chunk_size = min(chunk_size, 60)
-        
-        overlap_size = int(self.config.overlap_ratio * video_length)
-        
-        # Standard overlap logic (ROI allows generous chunks again)
-        max_overlap = max(0, int(chunk_size * 0.3))
-        if overlap_size > max_overlap:
-            overlap_size = max_overlap
-        if chunk_size <= overlap_size:
-             overlap_size = max(0, chunk_size - 1)
-        
-        step_size = max(1, chunk_size - overlap_size)
-        num_chunks = int(np.ceil(video_length / step_size))
+        # v1.20 Elastic Voxel Budgeting
+        # Goal: Keep memory usage under 24GB VRAM
+        # Limit: Approx 65 Million Voxels (T * H * W)
+        # Safety margin derived from v1.19 crash logs (108M crashed)
+        VOXEL_BUDGET = 65_000_000 
+        MAX_T = 60          # Max speed (Diminishing returns above 60)
+        MIN_T = 6           # Min context required for flow
         
         # Prepare binary masks for compositing
         binary_masks = np.expand_dims(masks > 0, axis=-1).astype(np.uint8)  # (T, H, W, 1)
         comp_frames = [None] * video_length
-        logger.debug(
-            f"Processing {video_length} frames in {num_chunks} chunks (chunk_size={chunk_size}, overlap={overlap_size}, step={step_size}) with ROI Optimization"
-        )
+        
+        logger.info(f"Starting Elastic Cleaning: {video_length} frames, Budget={VOXEL_BUDGET/1e6:.1f}M voxels")
 
         import gc
-        for chunk_idx in tqdm(range(num_chunks), desc="Chunk", position=0, leave=True):
-            start_idx = chunk_idx * step_size
-            end_idx = min(start_idx + chunk_size, video_length)
-            actual_chunk_size = end_idx - start_idx
+        
+        cursor = 0
+        pbar = tqdm(total=video_length, desc="Elastic Progress", position=0, leave=True)
+        
+        while cursor < video_length:
+            # 1. Optimistic Proposal
+            proposal_t = min(MAX_T, video_length - cursor)
             
-            # Report progress via callback if provided
+            # 2. Budget Negotiation Loop
+            final_t = proposal_t
+            final_h, final_w = 0, 0
+            y1, y2, x1, x2 = 0, 0, 0, 0
+            
+            # Iteratively find the largest safe T
+            while True:
+                # A. Peek at masks
+                masks_slice = masks[cursor : cursor + final_t]
+                
+                # B. Measure Geometry using helper
+                h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=128)
+                
+                # If no mask, size is full frame cost (effectively 0 for inpainting, but we treat as copy)
+                if h_crop == 0: 
+                    # No mask case is cheap, accept max T
+                    final_h, final_w = h_crop, w_crop
+                    break
+                
+                # C. Calculate Cost
+                cost = final_t * h_crop * w_crop
+                
+                # D. Decision
+                if cost <= VOXEL_BUDGET:
+                    # ACCEPT
+                    final_h, final_w = h_crop, w_crop
+                    break
+                else:
+                    # REJECT: Too expensive. Solve for T = Budget / Area
+                    area = max(1, h_crop * w_crop)
+                    ideal_t = int(VOXEL_BUDGET / area)
+                    
+                    # Reduce T (dampened)
+                    next_t = min(final_t - 1, ideal_t)
+                    
+                    if next_t < MIN_T:
+                        logger.warning(f"Frame {cursor}: Massive ROI ({h_crop}x{w_crop}). Forcing Min Chunk {MIN_T}.")
+                        final_t = MIN_T
+                        # Recalculate dimensions for the forced tiny chunk
+                        h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks[cursor:cursor+final_t], pad=128)
+                        final_h, final_w = h_crop, w_crop
+                        break
+                    
+                    final_t = next_t
+            
+            # 3. Execution
+            end_idx = cursor + final_t
+            actual_chunk_size = final_t
+            
             if progress_callback:
-                progress_callback(chunk_idx / num_chunks)
+                progress_callback(cursor / video_length)
+                
+            # Extract
+            frames_np_chunk = frames[cursor:end_idx]
+            masks_np_chunk = masks[cursor:end_idx]
+            binary_masks_chunk = binary_masks[cursor:end_idx]
             
-            # Extract chunk data (Numpy slicing - remains in RAM)
-            frames_np_chunk = frames[start_idx:end_idx]
-            masks_np_chunk = masks[start_idx:end_idx]
-            binary_masks_chunk = binary_masks[start_idx:end_idx]
-
-            # --- ROI LOGIC START ---
-            # 1. Calculate Union Bounding Box for the masks in this chunk
-            # Collapsing T dimension to find spatial extent
-            chunk_union_mask = np.max(masks_np_chunk, axis=0) # (H, W)
-            y_ind, x_ind = np.where(chunk_union_mask > 0)
-            
-            if len(y_ind) > 0:
-                y1_roi, y2_roi = y_ind.min(), y_ind.max() + 1
-                x1_roi, x2_roi = x_ind.min(), x_ind.max() + 1
+            # Processing Logic
+            if final_h > 0 and final_w > 0:
+                # Crop
+                frames_crop = frames_np_chunk[:, y1:y2, x1:x2, :]
+                masks_crop = masks_np_chunk[:, y1:y2, x1:x2]
+                binary_masks_crop = binary_masks_chunk[:, y1:y2, x1:x2, :]
                 
-                # 2. Add Context Padding (256px)
-                # "Expand this box by 256 pixels on all sides"
-                padding = 256
-                y1_crop = max(0, y1_roi - padding)
-                y2_crop = min(h, y2_roi + padding)
-                x1_crop = max(0, x1_roi - padding)
-                x2_crop = min(w, x2_roi + padding)
-                
-                # Ensure even dimensions for model (mod 8 or 16 usually safer)
-                # E2FGVI downsamples, so modulo 16 is good practice
-                dh = y2_crop - y1_crop
-                dw = x2_crop - x1_crop
-                y2_crop -= dh % 8 # adjust to mod 8
-                x2_crop -= dw % 8
-                
-                # logger.debug(f"Chunk {chunk_idx}: ROI Crop ({x1_crop},{y1_crop}) to ({x2_crop},{y2_crop}) size {x2_crop-x1_crop}x{y2_crop-y1_crop}")
-                
-                # 3. Crop Frames and Masks
-                frames_crop = frames_np_chunk[:, y1_crop:y2_crop, x1_crop:x2_crop, :]
-                masks_crop = masks_np_chunk[:, y1_crop:y2_crop, x1_crop:x2_crop]
-                binary_masks_crop = binary_masks_chunk[:, y1_crop:y2_crop, x1_crop:x2_crop, :]
-                
-                # 4. Lazy load CROPS to GPU
+                # To GPU
                 imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_crop, masks_crop)
                 imgs_chunk = imgs_chunk_t.to(device)
                 masks_chunk = masks_chunk_t.to(device)
                 
-                # 5. Process Chunk (Inference on CROPS)
+                # Infer
+                msg = f"Proc {cursor}-{end_idx} (T={final_t}, ROI={final_w}x{final_h})"
+                # logger.debug(msg)
+                pbar.set_description(msg)
+                
                 with torch.cuda.amp.autocast():
                     cleaned_crops = self.process_frames_chunk(
                         actual_chunk_size,
@@ -293,45 +332,46 @@ class E2FGVIHDCleaner:
                         masks_chunk,
                         binary_masks_crop,
                         frames_crop,
-                        y2_crop - y1_crop, # h for crop
-                        x2_crop - x1_crop, # w for crop
+                        final_h,
+                        final_w,
                     )
                 
-                # 6. Paste Results back to Full Frame Canvas
-                # process_frames_chunk returns a list of numpy arrays (the cleaned crops)
-                # We need to construct full frame results
+                # Paste
                 comp_frames_chunk = []
                 for i in range(actual_chunk_size):
-                    # Start with original frame
                     full_frame = frames_np_chunk[i].copy()
                     if cleaned_crops[i] is not None:
-                         # Paste cleaned crop
-                         full_frame[y1_crop:y2_crop, x1_crop:x2_crop] = cleaned_crops[i]
+                        full_frame[y1:y2, x1:x2] = cleaned_crops[i]
                     comp_frames_chunk.append(full_frame)
                     
-                # Clean gpu memory for next chunk
                 del imgs_chunk, masks_chunk, cleaned_crops
-                
             else:
-                # No mask in this chunk - skip inference
                 comp_frames_chunk = [f.copy() for f in frames_np_chunk]
 
-            # --- ROI LOGIC END ---
-
-            # Merge results with blending in overlap region (using full frames)
+            # 4. Advance (Dynamic Overlap)
+            # Large T -> Large overlap (smoothness). Small T -> Small overlap (progress).
+            overlap_size = 6 if final_t > 15 else 2
+            
+            # Merge
             comp_frames = merge_frames_with_overlap(
                 result_frames=comp_frames,
                 chunk_frames=comp_frames_chunk,
-                start_idx=start_idx,
+                start_idx=cursor,
                 overlap_size=overlap_size,
-                is_first_chunk=(chunk_idx == 0),
+                is_first_chunk=(cursor == 0),
             )
+            
+            step = max(1, final_t - overlap_size)
+            cursor += step
+            pbar.update(step)
             
             try:
                 gc.collect()
                 torch.cuda.empty_cache()
             except:
                 pass
+        
+        pbar.close()
         return comp_frames
 
 

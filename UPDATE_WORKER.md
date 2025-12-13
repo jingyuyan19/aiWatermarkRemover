@@ -141,30 +141,25 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.18 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.20 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.18
+docker push jingyuyan19/watermark-worker:v1.20
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
 ```
 
-### Force RunPod to Use New Image
+## 4. RunPod "Cold Start" (Force Update)
+RunPod caches images aggressively. To force it to pull your new code:
 
-1. Go to [RunPod Console](https://www.runpod.io/console/serverless)
-2. Open your endpoint
-3. Click **Restart Workers** or wait for auto-scale to 0 + new job
-
-### Switching to a Specific Version (e.g., v1.1)
-
-1.  Go to **RunPod Console > Serverless**.
+1.  Go to **RunPod Console** > **Endpoints**.
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.18`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.20`.
 6.  Click **Save**.
-7.  The next cold start will pull `v1.18`. This effectively "locks" your worker to that version.
+7.  The next cold start will pull `v1.20`. This effectively "locks" your worker to that version.
 
 ---
 
