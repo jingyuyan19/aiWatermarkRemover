@@ -15,6 +15,23 @@ from demark_world.utils.video_utils import merge_frames_with_overlap
 from demark_world.utils.mem_utils import memory_profiling
 from demark_world.constants import CHUNK_SIZE_PER_GB_VRAM
 
+# Monkey-patch grid_sample to force Float32 execution for stability in FP16
+# Define this at module level to ensure it applies before ANY usage
+import torch.nn.functional as F
+original_grid_sample = F.grid_sample
+
+def safe_grid_sample(input, grid, **kwargs):
+    # Cast input and grid to float32 for the sensitive warping operation
+    if input.dtype == torch.float16 or grid.dtype == torch.float16:
+        out = original_grid_sample(input.float(), grid.float(), **kwargs)
+        # Cast back to float16 for the next layer
+        return out.half()
+    return original_grid_sample(input, grid, **kwargs)
+
+torch.nn.functional.grid_sample = safe_grid_sample
+from demark_world.utils.mem_utils import memory_profiling
+from demark_world.constants import CHUNK_SIZE_PER_GB_VRAM
+
 
 def get_ref_index(
     frame_idx: int, neighbor_ids: List[int], length: int, ref_length: int, num_ref: int
@@ -174,19 +191,7 @@ class E2FGVIHDCleaner:
 
         return comp_frames_chunk
 
-# Monkey-patch grid_sample to force Float32 execution for stability in FP16
-import torch.nn.functional as F
-original_grid_sample = F.grid_sample
 
-def safe_grid_sample(input, grid, **kwargs):
-    # Cast input and grid to float32 for the sensitive warping operation
-    if input.dtype == torch.float16 or grid.dtype == torch.float16:
-        out = original_grid_sample(input.float(), grid.float(), **kwargs)
-        # Cast back to float16 for the next layer
-        return out.half()
-    return original_grid_sample(input, grid, **kwargs)
-
-torch.nn.functional.grid_sample = safe_grid_sample
 
 
     def clean(self, frames: np.ndarray, masks: np.ndarray, progress_callback=None) -> List[np.ndarray]:
