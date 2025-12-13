@@ -178,12 +178,7 @@ class DeMarkWorld:
                         match = tqdm_pattern.search(line)
                         if match:
                             det_p = int(match.group(1))
-                            # ... (existing logic)
-                        else:
-                            # Log non-progress lines (debug info)
-                            # This allows us to see "Inference: 0.1s | Device: cuda:0"
-                            if not quiet:
-                                logger.debug(f"[DETECTOR] {line.strip()}")
+                            overall = int(det_p * 0.5)
                             
                             # Monotonic Check & Throttling
                             # Only report if progress has INCREASED (int change) or completed
@@ -191,6 +186,11 @@ class DeMarkWorld:
                                 progress_callback(overall)
                                 logger.debug(f"Progress sent: {overall}%")
                                 last_reported_progress = overall
+                        else:
+                            # Log non-progress lines (debug info)
+                            # This allows us to see "Inference: 0.1s | Device: cuda:0"
+                            if not quiet and "Inference:" in line:
+                                logger.debug(f"[DETECTOR] {line.strip()}")
                             
             # Check exit code
             func_return = process.wait()
