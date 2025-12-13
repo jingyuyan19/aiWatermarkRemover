@@ -168,6 +168,16 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  **Detection Speed**: `imgsz=640` + `half=True`. Detection time should drop to **~3s**.
 3.  **Debug**: Added precise timing logs to find the "54s Ghost Gap".
 
+## Troubleshooting: "No space left on device"
+If your Docker build fails with disk space errors:
+```bash
+# 1. Prune unused docker data (Answers "y" automatically)
+docker system prune -a -f
+
+# 2. Retry build
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.25 -t jingyuyan19/watermark-worker:latest .
+```
+
 ---
 
 ## Detailed Step-by-Step Guide
