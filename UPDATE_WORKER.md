@@ -141,10 +141,10 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.7 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.8 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.26.7
+docker push jingyuyan19/watermark-worker:v1.26.8
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
@@ -157,9 +157,15 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.7`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.8`.
 6.  Click **Save**.
-7.  The next cold start will pull `v1.26.7`. This effectively "locks" your worker to that version.
+7.  The next cold start will pull `v1.26.8`. This effectively "locks" your worker to that version.
+
+## 18. The "Hotfix" Update (v1.26.8)
+**Goal:** Fix Syntax Error.
+**Changes:**
+1.  **Syntax Fix**: Removed accidental double `if line:` check in `core.py` that caused startup crash.
+2.  **Cleanup**: Removed duplicate comments in `watermark_detector.py`.
 
 ## 17. The "Force CUDA" Update (v1.26.7)
 **Goal:** Fix Slow Detection & Missing Logs.

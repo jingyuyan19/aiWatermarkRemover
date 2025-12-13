@@ -174,7 +174,7 @@ class DeMarkWorld:
                     if not line and process.poll() is not None:
                         break
                     if line:
-                    if line:
+
                         # Log non-progress lines (debug info)
                         # Check this FIRST and independently to ensure we capture it even if mixed with tqdm output
                         if "Inference:" in line or "[DETECTOR]" in line:

@@ -41,8 +41,7 @@ class DeMarkWorldDetector:
         # Generator - processes one item then discards tensors
         # v1.25 Optimization: Downscale to 640px + FP16 for speed (Detection < 3s)
         # YOLO auto-resizes internally and returns coords in original scale.
-        # v1.25 Optimization: Downscale to 640px + FP16 for speed (Detection < 3s)
-        # YOLO auto-resizes internally and returns coords in original scale.
+
         t0 = time.time()
         device = str(get_device())
         results = self.model.predict(source=input_image, conf=0.05, verbose=False, stream=True, imgsz=640, half=True, device=device)
