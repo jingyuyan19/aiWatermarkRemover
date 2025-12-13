@@ -174,47 +174,57 @@ class E2FGVIHDCleaner:
 
         return comp_frames_chunk
 
+# Monkey-patch grid_sample to force Float32 execution for stability in FP16
+import torch.nn.functional as F
+original_grid_sample = F.grid_sample
+
+def safe_grid_sample(input, grid, **kwargs):
+    # Cast input and grid to float32 for the sensitive warping operation
+    if input.dtype == torch.float16 or grid.dtype == torch.float16:
+        out = original_grid_sample(input.float(), grid.float(), **kwargs)
+        # Cast back to float16 for the next layer
+        return out.half()
+    return original_grid_sample(input, grid, **kwargs)
+
+torch.nn.functional.grid_sample = safe_grid_sample
+
+
     def clean(self, frames: np.ndarray, masks: np.ndarray, progress_callback=None) -> List[np.ndarray]:
         video_length = len(frames)
         h, w = frames[0].shape[:2]
         
-        # Adjust chunk size based on resolution (base: 1080p)
-        # 4K video (8MP) needs ~4x more memory than 1080p (2MP), so we reduce chunk size by 4x.
-        resolution_scale = (h * w) / (1920 * 1080)
+        # ROI Optimization allows us to use standard chunk sizes even for 4K.
+        # We rely on specific crops to fit in VRAM.
+        # Use a reasonably large chunk for temporal consistency.
+        # "Chunk size 50" suggested by analysis.
+        chunk_size = 50 
         
-        # Add safety margin for high-res videos (fragmentation/overhead)
-        # Add safety margin for high-res videos (fragmentation/overhead)
-        # Add safety margin for high-res videos (fragmentation/overhead)
-        if resolution_scale > 1.0:
-            resolution_scale *= 12.0  # FP16 isn't enough, 13 frames crashed. Reverting to 12.0x (Safe).
-            
-        scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
+        # Respect memory profiling if valid, but ignore 4K penalty
+        if self.adapted_chunk_size and self.adapted_chunk_size > 0:
+             # Basic safety: reduce chunk size if calculated safe size is very small
+             chunk_size = max(10, self.adapted_chunk_size)
         
-        chunk_size = max(1, min(video_length, scaled_chunk_limit))
+        # Override for high-res: The 4K penalty is REMOVED because we process crops.
+        # We cap at 60 to prevent too much temporal drift/memory usage if watermark is large.
+        chunk_size = min(chunk_size, 60)
+        
         overlap_size = int(self.config.overlap_ratio * video_length)
         
-        # CRITICAL FIX for small chunks: Cap overlap to ensure we advance by at least 1 frame (ideally more)
-        # If chunk is small (e.g. 6 frames), overlap of 5 means step=1 (Very Slow).
-        # We cap overlap at 50% of chunk_size to ensure step >= chunk_size / 2.
-        max_overlap = max(0, int(chunk_size * 0.5))
+        # Standard overlap logic (ROI allows generous chunks again)
+        max_overlap = max(0, int(chunk_size * 0.3))
         if overlap_size > max_overlap:
-            logger.warning(f"Overlap size ({overlap_size}) too large for chunk size ({chunk_size}). Capping at {max_overlap}.")
             overlap_size = max_overlap
-        
-        # Ensure overlap is valid relative to chunk size
         if chunk_size <= overlap_size:
              overlap_size = max(0, chunk_size - 1)
         
         step_size = max(1, chunk_size - overlap_size)
         num_chunks = int(np.ceil(video_length / step_size))
-        # Convert to tensors - REMOVED EAGER LOADING to save VRAM for 4K video
-        # imgs_all, masks_all = numpy_to_tensor(frames, masks)
         
         # Prepare binary masks for compositing
         binary_masks = np.expand_dims(masks > 0, axis=-1).astype(np.uint8)  # (T, H, W, 1)
         comp_frames = [None] * video_length
         logger.debug(
-            f"Processing {video_length} frames in {num_chunks} chunks (chunk_size={chunk_size}, overlap={overlap_size}, step={step_size})"
+            f"Processing {video_length} frames in {num_chunks} chunks (chunk_size={chunk_size}, overlap={overlap_size}, step={step_size}) with ROI Optimization"
         )
 
         import gc
@@ -231,25 +241,79 @@ class E2FGVIHDCleaner:
             frames_np_chunk = frames[start_idx:end_idx]
             masks_np_chunk = masks[start_idx:end_idx]
             binary_masks_chunk = binary_masks[start_idx:end_idx]
+
+            # --- ROI LOGIC START ---
+            # 1. Calculate Union Bounding Box for the masks in this chunk
+            # Collapsing T dimension to find spatial extent
+            chunk_union_mask = np.max(masks_np_chunk, axis=0) # (H, W)
+            y_ind, x_ind = np.where(chunk_union_mask > 0)
             
-            # Lazy load to GPU: Convert only this chunk to tensor
-            imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_np_chunk, masks_np_chunk)
-            imgs_chunk = imgs_chunk_t.to(device)
-            masks_chunk = masks_chunk_t.to(device)
-            
-            # Process chunk with Mixed Precision (FP16)
-            with torch.cuda.amp.autocast():
-                comp_frames_chunk = self.process_frames_chunk(
-                    actual_chunk_size,
-                    self.config.neighbor_stride,
-                    imgs_chunk,
-                    masks_chunk,
-                    binary_masks_chunk,
-                    frames_np_chunk,
-                    h,
-                    w,
-                )
-            # Merge results with blending in overlap region
+            if len(y_ind) > 0:
+                y1_roi, y2_roi = y_ind.min(), y_ind.max() + 1
+                x1_roi, x2_roi = x_ind.min(), x_ind.max() + 1
+                
+                # 2. Add Context Padding (256px)
+                # "Expand this box by 256 pixels on all sides"
+                padding = 256
+                y1_crop = max(0, y1_roi - padding)
+                y2_crop = min(h, y2_roi + padding)
+                x1_crop = max(0, x1_roi - padding)
+                x2_crop = min(w, x2_roi + padding)
+                
+                # Ensure even dimensions for model (mod 8 or 16 usually safer)
+                # E2FGVI downsamples, so modulo 16 is good practice
+                dh = y2_crop - y1_crop
+                dw = x2_crop - x1_crop
+                y2_crop -= dh % 8 # adjust to mod 8
+                x2_crop -= dw % 8
+                
+                # logger.debug(f"Chunk {chunk_idx}: ROI Crop ({x1_crop},{y1_crop}) to ({x2_crop},{y2_crop}) size {x2_crop-x1_crop}x{y2_crop-y1_crop}")
+                
+                # 3. Crop Frames and Masks
+                frames_crop = frames_np_chunk[:, y1_crop:y2_crop, x1_crop:x2_crop, :]
+                masks_crop = masks_np_chunk[:, y1_crop:y2_crop, x1_crop:x2_crop]
+                binary_masks_crop = binary_masks_chunk[:, y1_crop:y2_crop, x1_crop:x2_crop, :]
+                
+                # 4. Lazy load CROPS to GPU
+                imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_crop, masks_crop)
+                imgs_chunk = imgs_chunk_t.to(device)
+                masks_chunk = masks_chunk_t.to(device)
+                
+                # 5. Process Chunk (Inference on CROPS)
+                with torch.cuda.amp.autocast():
+                    cleaned_crops = self.process_frames_chunk(
+                        actual_chunk_size,
+                        self.config.neighbor_stride,
+                        imgs_chunk,
+                        masks_chunk,
+                        binary_masks_crop,
+                        frames_crop,
+                        y2_crop - y1_crop, # h for crop
+                        x2_crop - x1_crop, # w for crop
+                    )
+                
+                # 6. Paste Results back to Full Frame Canvas
+                # process_frames_chunk returns a list of numpy arrays (the cleaned crops)
+                # We need to construct full frame results
+                comp_frames_chunk = []
+                for i in range(actual_chunk_size):
+                    # Start with original frame
+                    full_frame = frames_np_chunk[i].copy()
+                    if cleaned_crops[i] is not None:
+                         # Paste cleaned crop
+                         full_frame[y1_crop:y2_crop, x1_crop:x2_crop] = cleaned_crops[i]
+                    comp_frames_chunk.append(full_frame)
+                    
+                # Clean gpu memory for next chunk
+                del imgs_chunk, masks_chunk, cleaned_crops
+                
+            else:
+                # No mask in this chunk - skip inference
+                comp_frames_chunk = [f.copy() for f in frames_np_chunk]
+
+            # --- ROI LOGIC END ---
+
+            # Merge results with blending in overlap region (using full frames)
             comp_frames = merge_frames_with_overlap(
                 result_frames=comp_frames,
                 chunk_frames=comp_frames_chunk,
@@ -257,8 +321,7 @@ class E2FGVIHDCleaner:
                 overlap_size=overlap_size,
                 is_first_chunk=(chunk_idx == 0),
             )
-            # Clear GPU memory
-            del imgs_chunk, masks_chunk, comp_frames_chunk
+            
             try:
                 gc.collect()
                 torch.cuda.empty_cache()
