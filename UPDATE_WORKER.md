@@ -141,10 +141,10 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.4 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.5 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.26.4
+docker push jingyuyan19/watermark-worker:v1.26.5
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
@@ -157,15 +157,15 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.4`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.5`.
 6.  Click **Save**.
-7.  The next cold start will pull `v1.26.4`. This effectively "locks" your worker to that version.
+7.  The next cold start will pull `v1.26.5`. This effectively "locks" your worker to that version.
 
-## 14. Stable Debug (v1.26.4)
-**Goal:** Fix Crash + Diagnose Slow Detection.
+## 15. The "Truth" Update (v1.26.5)
+**Goal:** Definitive Logs.
 **Changes:**
-1.  **Bug Fix**: Correctly placed progress logic inside `if match:` block.
-2.  **Debug Logs**: `core.py` now filters specifically for "Inference:" logs to avoid spamming other stderr garbage.
+1.  **Timing Fix**: Moved `time.time()` to wrap the actual execution loop (generator iteration).
+2.  **Print Fix**: Switched from `logger` to `print(flush=True)` to guarantee visibility.
 
 ## 10. Zero-Latency Update (v1.25)
 **Goal:** Reduce total job time from 3m -> 90s.
