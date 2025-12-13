@@ -30,12 +30,14 @@ def run_detection(video_path: str, output_path: str):
     # We still use direct video inference (source=video_path) because it is faster than the Python loop.
     logger.info("Subprocess: Starting Detection (Every Frame)...")
     
+    import time
+    start_time = time.time()
+    
     # We use the detector's model directly to leverage ultralytics' optimized video handling
     results_generator = detector.model.predict(
         source=video_path,
         imgsz=640,
         conf=0.10,
-        # vid_stride=1, # Process every frame
         stream=True,
         verbose=False,
         device=detector.model.device
@@ -43,9 +45,12 @@ def run_detection(video_path: str, output_path: str):
     
     for idx, result in enumerate(results_generator):
         # Report progress
-        if idx % 10 == 0:
+        if idx % 5 == 0:
             percentage = min(100, int((idx / total_frames) * 100))
-            print(f"Detecting (Subprocess): {percentage}%|", flush=True)
+            elapsed = time.time() - start_time
+            fps = (idx + 1) / elapsed if elapsed > 0 else 0
+            # Adding [DETECTOR] prefix forces core.py to log this line!
+            print(f"[DETECTOR] Detecting frame {idx}/{total_frames} ({percentage}%|) FPS: {fps:.1f}", flush=True)
         
         box = None
         if len(result.boxes) > 0:
@@ -68,7 +73,8 @@ def run_detection(video_path: str, output_path: str):
             bboxes.append(None)
 
     # v1.27.1: No interpolation needed (We processed every frame)
-    logger.info(f"Subprocess: Detection complete. Missed {len(detect_missed)} frames.")
+    total_time = time.time() - start_time
+    logger.info(f"Subprocess: Detection complete. Missed {len(detect_missed)} frames. Total: {total_time:.2f}s ({total_frames/total_time:.1f} FPS)")
 
     results = {
         "frame_bboxes": frame_bboxes,
