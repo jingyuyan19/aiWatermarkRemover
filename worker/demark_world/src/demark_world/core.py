@@ -165,6 +165,10 @@ class DeMarkWorld:
                 # Pattern to match tqdm percentage: " 45%|"
                 tqdm_pattern = re.compile(r'(\d+)%\|')
                 
+                # Pattern to match tqdm percentage: " 45%|"
+                tqdm_pattern = re.compile(r'(\d+)%\|')
+                last_reported_progress = 0
+                
                 while True:
                     line = process.stdout.readline()
                     if not line and process.poll() is not None:
@@ -177,10 +181,13 @@ class DeMarkWorld:
                         # Parse progress
                         match = tqdm_pattern.search(line)
                         if match:
-                            # Map 0-100% detection to 0-50% overall
                             det_p = int(match.group(1))
                             overall = int(det_p * 0.5)
-                            progress_callback(overall)
+                            
+                            # Monotonic Check: Ignore backward jumps (fixes "0% reset" glitch)
+                            if overall >= last_reported_progress:
+                                progress_callback(overall)
+                                last_reported_progress = overall
                             
             # Check exit code
             func_return = process.wait()
