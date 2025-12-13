@@ -46,11 +46,18 @@ def run_detection(video_path: str, output_path: str):
         "bboxes": bboxes
     }
     
+    import time
+    t0 = time.time()
     logger.info(f"Subprocess: Saving results to {output_path}")
     with open(output_path, 'wb') as f:
         pickle.dump(results, f)
-        
-    logger.info("Subprocess: Detection complete. Terminating.")
+    t1 = time.time()
+    logger.info(f"Subprocess: Results saved in {t1-t0:.2f}s. Terminating.")
+    
+    # Explicitly clean up detector to free VRAM immediately (v1.25 optimization: check for hang)
+    del detector
+    import gc
+    gc.collect()
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

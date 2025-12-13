@@ -14,7 +14,13 @@ RUN pip install mmcv-full==1.7.2 -f https://download.openmmlab.com/mmcv/dist/cu1
 RUN apt-get update && apt-get install -y ffmpeg && rm -rf /var/lib/apt/lists/*
 
 # Install python dependencies using Tsinghua mirror (faster in China)
+# Install python dependencies using Tsinghua mirror (faster in China)
 RUN pip install --no-cache-dir -r requirements.txt
+
+# Bake models into image (Zero-Latency Startup)
+RUN mkdir -p /app/demark_world_code/resources/checkpoint/
+RUN wget -O /app/demark_world_code/resources/checkpoint/E2FGVI-HQ-CVPR22.pth https://github.com/linkedlist771/SoraWatermarkCleaner/releases/download/V0.0.1/E2FGVI-HQ-CVPR22.pth
+RUN wget -O /app/demark_world_code/resources/checkpoint/spynet_20210409-c6c1bd09.pth https://download.openmmlab.com/mmediting/restorers/basicvsr/spynet_20210409-c6c1bd09.pth
 
 # Copy application code
 # Copy application code

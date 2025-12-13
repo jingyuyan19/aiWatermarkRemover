@@ -141,10 +141,10 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.24.1 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.25 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.24.1
+docker push jingyuyan19/watermark-worker:v1.25
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
@@ -157,9 +157,16 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.24.1`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.25`.
 6.  Click **Save**.
-7.  The next cold start will pull `v1.24.1`. This effectively "locks" your worker to that version.
+7.  The next cold start will pull `v1.25`. This effectively "locks" your worker to that version.
+
+## 10. Zero-Latency Update (v1.25)
+**Goal:** Reduce total job time from 3m -> 90s.
+**Changes:**
+1.  **Docker Baking**: Models now download during `docker build`, saving **35s** per run.
+2.  **Detection Speed**: `imgsz=640` + `half=True`. Detection time should drop to **~3s**.
+3.  **Debug**: Added precise timing logs to find the "54s Ghost Gap".
 
 ---
 
