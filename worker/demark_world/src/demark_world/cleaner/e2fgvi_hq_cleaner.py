@@ -1,3 +1,7 @@
+import os
+# [CRITICAL] Set this BEFORE any other torch code/imports to fix fragmentation
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"
+
 from pathlib import Path
 from typing import List
 
@@ -227,24 +231,25 @@ class E2FGVIHDCleaner:
         video_length = len(frames)
         h, w = frames[0].shape[:2]
         
-        # v1.20 Elastic Voxel Budgeting
-        # Goal: Keep memory usage under 24GB VRAM
-        # Limit: Approx 65 Million Voxels (T * H * W)
-        # Safety margin derived from v1.19 crash logs (108M crashed)
-        VOXEL_BUDGET = 65_000_000 
-        MAX_T = 60          # Max speed (Diminishing returns above 60)
-        MIN_T = 6           # Min context required for flow
+        # v1.21 Self-Healing Loop
+        # Budget limit for 24GB VRAM (Safe Zone)
+        VOXEL_BUDGET = 45_000_000 
+        PAD = 72
+        MAX_T = 60
+        MIN_T = 5
         
         # Prepare binary masks for compositing
         binary_masks = np.expand_dims(masks > 0, axis=-1).astype(np.uint8)  # (T, H, W, 1)
         comp_frames = [None] * video_length
         
-        logger.info(f"Starting Elastic Cleaning: {video_length} frames, Budget={VOXEL_BUDGET/1e6:.1f}M voxels")
+        logger.info(f"Starting Self-Healing Cleaning (v1.21): {video_length} frames, Budget={VOXEL_BUDGET/1e6:.1f}M, Pad={PAD}")
 
         import gc
+        torch.cuda.empty_cache()
+        gc.collect()
         
         cursor = 0
-        pbar = tqdm(total=video_length, desc="Elastic Progress", position=0, leave=True)
+        pbar = tqdm(total=video_length, desc="Self-Healing Progress", position=0, leave=True)
         
         while cursor < video_length:
             # 1. Optimistic Proposal
@@ -255,104 +260,114 @@ class E2FGVIHDCleaner:
             final_h, final_w = 0, 0
             y1, y2, x1, x2 = 0, 0, 0, 0
             
-            # Iteratively find the largest safe T
+            # Find largest safe T based on Budget
             while True:
-                # A. Peek at masks
                 masks_slice = masks[cursor : cursor + final_t]
+                h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=PAD)
                 
-                # B. Measure Geometry using helper
-                h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=128)
-                
-                # If no mask, size is full frame cost (effectively 0 for inpainting, but we treat as copy)
                 if h_crop == 0: 
-                    # No mask case is cheap, accept max T
                     final_h, final_w = h_crop, w_crop
                     break
                 
-                # C. Calculate Cost
                 cost = final_t * h_crop * w_crop
                 
-                # D. Decision
                 if cost <= VOXEL_BUDGET:
-                    # ACCEPT
                     final_h, final_w = h_crop, w_crop
                     break
                 else:
-                    # REJECT: Too expensive. Solve for T = Budget / Area
                     area = max(1, h_crop * w_crop)
                     ideal_t = int(VOXEL_BUDGET / area)
-                    
-                    # Reduce T (dampened)
                     next_t = min(final_t - 1, ideal_t)
                     
                     if next_t < MIN_T:
-                        logger.warning(f"Frame {cursor}: Massive ROI ({h_crop}x{w_crop}). Forcing Min Chunk {MIN_T}.")
+                        # logger.warning(f"Frame {cursor}: Massive ROI. Forcing Min Chunk {MIN_T}.")
                         final_t = MIN_T
-                        # Recalculate dimensions for the forced tiny chunk
-                        h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks[cursor:cursor+final_t], pad=128)
+                        h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks[cursor:cursor+final_t], pad=PAD)
                         final_h, final_w = h_crop, w_crop
                         break
                     
                     final_t = next_t
-            
-            # 3. Execution
-            end_idx = cursor + final_t
-            actual_chunk_size = final_t
-            
-            if progress_callback:
-                progress_callback(cursor / video_length)
-                
-            # Extract
-            frames_np_chunk = frames[cursor:end_idx]
-            masks_np_chunk = masks[cursor:end_idx]
-            binary_masks_chunk = binary_masks[cursor:end_idx]
-            
-            # Processing Logic
-            if final_h > 0 and final_w > 0:
-                # Crop
-                frames_crop = frames_np_chunk[:, y1:y2, x1:x2, :]
-                masks_crop = masks_np_chunk[:, y1:y2, x1:x2]
-                binary_masks_crop = binary_masks_chunk[:, y1:y2, x1:x2, :]
-                
-                # To GPU
-                imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_crop, masks_crop)
-                imgs_chunk = imgs_chunk_t.to(device)
-                masks_chunk = masks_chunk_t.to(device)
-                
-                # Infer
-                msg = f"Proc {cursor}-{end_idx} (T={final_t}, ROI={final_w}x{final_h})"
-                # logger.debug(msg)
-                pbar.set_description(msg)
-                
-                with torch.cuda.amp.autocast():
-                    cleaned_crops = self.process_frames_chunk(
-                        actual_chunk_size,
-                        self.config.neighbor_stride,
-                        imgs_chunk,
-                        masks_chunk,
-                        binary_masks_crop,
-                        frames_crop,
-                        final_h,
-                        final_w,
-                    )
-                
-                # Paste
-                comp_frames_chunk = []
-                for i in range(actual_chunk_size):
-                    full_frame = frames_np_chunk[i].copy()
-                    if cleaned_crops[i] is not None:
-                        full_frame[y1:y2, x1:x2] = cleaned_crops[i]
-                    comp_frames_chunk.append(full_frame)
-                    
-                del imgs_chunk, masks_chunk, cleaned_crops
-            else:
-                comp_frames_chunk = [f.copy() for f in frames_np_chunk]
 
-            # 4. Advance (Dynamic Overlap)
-            # Large T -> Large overlap (smoothness). Small T -> Small overlap (progress).
-            overlap_size = 6 if final_t > 15 else 2
+            # 3. REACTIVE EXECUTION (Safety Net)
+            success = False
+            attempt_t = final_t
             
-            # Merge
+            while not success:
+                try:
+                    # If retrying, we might need to recalculate bbox for smaller T
+                    if attempt_t != final_t:
+                        masks_slice = masks[cursor : cursor + attempt_t]
+                        h_crop, w_crop, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=PAD)
+                        final_h, final_w = h_crop, w_crop
+                    
+                    end_idx = cursor + attempt_t
+                    actual_chunk_size = attempt_t
+                    
+                    if progress_callback:
+                        progress_callback(cursor / video_length)
+
+                    if final_h > 0 and final_w > 0:
+                        frames_np_chunk = frames[cursor:end_idx]
+                        masks_np_chunk = masks[cursor:end_idx]
+                        binary_masks_chunk = binary_masks[cursor:end_idx]
+                        
+                        frames_crop = frames_np_chunk[:, y1:y2, x1:x2, :]
+                        masks_crop = masks_np_chunk[:, y1:y2, x1:x2]
+                        binary_masks_crop = binary_masks_chunk[:, y1:y2, x1:x2, :]
+                        
+                        imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_crop, masks_crop)
+                        imgs_chunk = imgs_chunk_t.to(device)
+                        masks_chunk = masks_chunk_t.to(device)
+                        
+                        msg = f"Proc {cursor}-{end_idx} (T={attempt_t}, ROI={final_w}x{final_h})"
+                        pbar.set_description(msg)
+                        
+                        with torch.cuda.amp.autocast():
+                            cleaned_crops = self.process_frames_chunk(
+                                actual_chunk_size,
+                                self.config.neighbor_stride,
+                                imgs_chunk,
+                                masks_chunk,
+                                binary_masks_crop,
+                                frames_crop,
+                                final_h,
+                                final_w,
+                            )
+                            
+                        # Paste
+                        comp_frames_chunk = []
+                        for i in range(actual_chunk_size):
+                            full_frame = frames_np_chunk[i].copy()
+                            if cleaned_crops[i] is not None:
+                                full_frame[y1:y2, x1:x2] = cleaned_crops[i]
+                            comp_frames_chunk.append(full_frame)
+                            
+                        del imgs_chunk, masks_chunk, cleaned_crops
+                        
+                    else:
+                        # No mask
+                         comp_frames_chunk = [frames[i].copy() for i in range(cursor, end_idx)]
+
+                    success = True
+
+                except RuntimeError as e:
+                    if "out of memory" in str(e):
+                        logger.warning(f"!!! OOM at T={attempt_t}. Retrying with T={attempt_t//2} !!!")
+                        torch.cuda.empty_cache()
+                        gc.collect()
+                        
+                        new_t = attempt_t // 2
+                        if new_t < MIN_T:
+                             logger.error("CRITICAL: Segment too complex even for Min Chunk.")
+                             raise e
+                        attempt_t = new_t
+                    else:
+                        raise e
+
+            # 4. Advance
+            # Use attempt_t (the actual successful duration)
+            overlap_size = 6 if attempt_t > 15 else 2
+            
             comp_frames = merge_frames_with_overlap(
                 result_frames=comp_frames,
                 chunk_frames=comp_frames_chunk,
@@ -361,10 +376,11 @@ class E2FGVIHDCleaner:
                 is_first_chunk=(cursor == 0),
             )
             
-            step = max(1, final_t - overlap_size)
+            step = max(1, attempt_t - overlap_size)
             cursor += step
             pbar.update(step)
             
+            # Aggressive cleanup for v1.21
             try:
                 gc.collect()
                 torch.cuda.empty_cache()

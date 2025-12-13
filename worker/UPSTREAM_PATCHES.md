@@ -131,32 +131,34 @@ scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
 # ...
 ```
 
-# v1.20 Elastic Voxel Budgeting
-# Budget limit for 24GB VRAM
-VOXEL_BUDGET = 65_000_000 
+# v1.21 Self-Healing Loop
+# 1. Config for Defrag
+os.environ["PYTORCH_CUDA_ALLOC_CONF"] = "max_split_size_mb:128"
 
-while cursor < video_length:
-    # Elastic Loop: Find safe T
-    while True:
-        # Measure Union ROI
-        h_crop, w_crop = get_union_bbox(masks[cursor:cursor+final_t])
-        cost = final_t * h_crop * w_crop
-        
-        if cost <= BUDGET: break
-        else: final_t = min(final_t-1, int(BUDGET / (h*w)))
-    
-    # Process final_t frames...
+# 2. Conservative Budget
+VOXEL_BUDGET = 45_000_000 
+PAD = 72
+
+# 3. Reactive Logic
+while not success:
+    try:
+        # Inference...
+    except RuntimeError as e:
+        if "out of memory" in str(e):
+             # Slash and Retry
+             attempt_t = attempt_t // 2
+             continue
 ```
 
-## 7. Elastic Voxel Budgeting (v1.20)
-**Issue:**  Previous ROI logic (v1.17) used a fixed `chunk_size=50`. If the watermark *moved* significantly, the "Union Bounding Box" expanded to cover the entire 4K screen, causing an OOM loop.
+## 7. Self-Healing Loop (v1.21)
+**Issue:**  v1.20 fixed the algorithmic OOM but hit a physical memory limit (Fragmentation + Peak Usage > 24GB).
 **Solution:**
-1.  **Elastic Budgeting**: Replaced the fixed loop with a dynamic negotiation loop.
-2.  **Predictive VRAM Control**: Before processing, the code calculates the `Cost = Time * Height * Width` of the proposed chunk.
-3.  **Dynamic Throttling**:
-    *   **Static Watermark**: ROI is small -> `Chunk Size` scales up to **60 frames** (Fast).
-    *   **Moving Watermark**: ROI is large -> `Chunk Size` scales down (e.g. to **10 frames**) to fit the 24GB budget.
-4.  **Result**: Guarantees stability for *any* watermark motion while maximizing speed for static parts.
+1.  **Fragmentation Fix**: Set `PYTORCH_CUDA_ALLOC_CONF=max_split_size_mb:128` to keep memory blocks contiguous.
+2.  **Safety Buffer**: Reduced `VOXEL_BUDGET` to **45M** and `PAD` to **72px**.
+3.  **Self-Healing**: Implemented a `try-except` loop that detects OOM crashes in real-time. If an OOM occurs, it immediately:
+    *   Clears GPU Cache.
+    *   Halves the chunk size ($T/2$).
+    *   Retries automatically without killing the worker.
 
 ```python
 # REMOVED:
