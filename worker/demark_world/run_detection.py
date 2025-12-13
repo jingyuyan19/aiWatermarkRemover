@@ -58,6 +58,9 @@ def run_detection(video_path: str, output_path: str):
     del detector
     import gc
     gc.collect()
+    
+    logger.info("Subprocess: Exiting now.")
+    sys.exit(0)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
