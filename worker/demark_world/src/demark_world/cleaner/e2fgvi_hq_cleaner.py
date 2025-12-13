@@ -227,6 +227,33 @@ class E2FGVIHDCleaner:
         
         return (y2-y1), (x2-x1), y1, y2, x1, x2
 
+    def get_geometry_proxy(self, masks_slice, scale=8):
+        """
+        v1.24: Fast geometry check using 1/Nth resolution (Speed 64x).
+        Returns: h_est (4K), w_est (4K), masks_proxy
+        """
+        if len(masks_slice) == 0: return 0, 0, None
+
+        # Instant Slicing
+        masks_proxy = masks_slice[:, ::scale, ::scale]
+        union_proxy = np.max(masks_proxy, axis=0) # Fast
+        
+        rows = np.any(union_proxy, axis=1)
+        cols = np.any(union_proxy, axis=0)
+        
+        if not np.any(rows): return 0, 0, masks_proxy
+        
+        y_min, y_max = np.where(rows)[0][[0, -1]]
+        x_min, x_max = np.where(cols)[0][[0, -1]]
+        
+        # Scale back to 4K + Padding (Estimate)
+        # We use a slightly generous padding to be safe
+        pad = 72
+        h = (y_max - y_min + 1) * scale + (pad * 2) 
+        w = (x_max - x_min + 1) * scale + (pad * 2)
+        
+        return h, w, masks_proxy
+
     def clean(self, frames: np.ndarray, masks: np.ndarray, progress_callback=None) -> List[np.ndarray]:
         video_length = len(frames)
         h, w = frames[0].shape[:2]
@@ -255,53 +282,36 @@ class E2FGVIHDCleaner:
             # 1. Optimistic Proposal
             proposal_t = min(MAX_T, video_length - cursor)
             
-            # 2. Budget Negotiation Loop
+            # 2. Budget Negotiation (v1.24 Direct Solve)
             final_t = proposal_t
-            final_h, final_w = 0, 0
-            y1, y2, x1, x2 = 0, 0, 0, 0
             
-            # Find largest safe T based on Budget
-            while True:
+            # v1.24: Use Proxy for Speed (Eliminate 55s Lag)
+            masks_slice = masks[cursor : cursor + proposal_t]
+            h_est, w_est, masks_proxy = self.get_geometry_proxy(masks_slice, scale=8)
+            
+            # Clamp to image size
+            h_est = min(h_est, h)
+            w_est = min(w_est, w)
+            
+            cost = proposal_t * h_est * w_est
+            
+            if cost <= VOXEL_BUDGET:
+                # Safe
+                final_t = proposal_t
+            else:
+                # Direct Solve: T = Budget / Area
+                area = max(1, h_est * w_est)
+                ideal_t = int(VOXEL_BUDGET / area)
+                final_t = max(MIN_T, ideal_t)
+                final_t = min(final_t, proposal_t - 1) # Reduce at least 1
+                
+                # Re-slice proxy for final_t (since we reduced T)
                 masks_slice = masks[cursor : cursor + final_t]
-                
-                # v1.22 Optimization B: Spatial Clustering (Fix "Static Bloat")
-                final_rois = self.optimize_roi_strategy(masks_slice, PAD)
-                
-                # Calculate total cost of all ROIs
-                total_cost = 0
-                max_h, max_w = 0, 0
-                
-                for roi_params in final_rois:
-                     # h, w, y1, y2, x1, x2
-                     h_r, w_r, _, _, _, _ = roi_params
-                     total_cost += final_t * h_r * w_r
-                     if h_r > max_h: max_h = h_r
-                     if w_r > max_w: max_w = w_r
-                
-                # If no mask (empty rois), cost is 0
-                if total_cost == 0:
-                    final_h, final_w = 0, 0
-                    break
-                
-                if total_cost <= VOXEL_BUDGET:
-                    # ACCEPT
-                    final_h, final_w = max_h, max_w # Just for log
-                    break
-                else:
-                    area = 1
-                    for roi_params in final_rois:
-                         h_r, w_r, _, _, _, _ = roi_params
-                         area += h_r * w_r
-                         
-                    ideal_t = int(VOXEL_BUDGET / area)
-                    next_t = min(final_t - 1, ideal_t)
-                    
-                    if next_t < MIN_T:
-                        final_t = MIN_T
-                        final_rois = self.optimize_roi_strategy(masks[cursor:cursor+final_t], PAD)
-                        break
-                    
-                    final_t = next_t
+                h_est, w_est, masks_proxy = self.get_geometry_proxy(masks_slice, scale=8) # Fast enough to call twice
+
+            # v1.22/v1.24: Spatial Clustering on Proxy
+            # We pass the PROXY masks to optimize_roi_strategy to keep it fast
+            final_rois = self.optimize_roi_strategy(masks_proxy, PAD, scale=8)
 
             # 3. REACTIVE EXECUTION (Safety Net)
             success = False
@@ -312,7 +322,9 @@ class E2FGVIHDCleaner:
                     # If retrying, recalculate ROIs for smaller T
                     if attempt_t != final_t:
                         masks_slice = masks[cursor : cursor + attempt_t]
-                        final_rois = self.optimize_roi_strategy(masks_slice, PAD)
+                        # Use Proxy even in retry
+                        _, _, masks_proxy = self.get_geometry_proxy(masks_slice, scale=8)
+                        final_rois = self.optimize_roi_strategy(masks_proxy, PAD, scale=8)
                     
                     end_idx = cursor + attempt_t
                     actual_chunk_size = attempt_t
@@ -409,14 +421,16 @@ class E2FGVIHDCleaner:
         pbar.close()
         return comp_frames
 
-    def optimize_roi_strategy(self, masks_slice, padding):
+    def optimize_roi_strategy(self, masks_slice, padding, scale=1):
         """
         v1.22: Spatial Clustering to fix "Static Bloat".
-        If the Union BBox is huge but mostly empty (two distant watermarks),
-        split it into separate ROIs.
+        v1.24: Added 'scale' support to work on Proxy masks.
         """
         # 1. Standard Union BBox
-        h_raw, w_raw, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=padding)
+        # If scale > 1, downscale padding
+        proxy_pad = max(1, padding // scale) if scale > 1 else padding
+        
+        h_raw, w_raw, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=proxy_pad)
         if h_raw == 0: return []
         
         giant_area = h_raw * w_raw
@@ -442,26 +456,36 @@ class E2FGVIHDCleaner:
                         h = stats[i, cv2.CC_STAT_HEIGHT]
                         
                         # Add padding
-                        cx1 = max(0, x - padding)
-                        cy1 = max(0, y - padding)
-                        cx2 = min(union_mask.shape[1], x + w + padding)
-                        cy2 = min(union_mask.shape[0], y + h + padding)
+                        cx1 = max(0, x - proxy_pad)
+                        cy1 = max(0, y - proxy_pad)
+                        cx2 = min(union_mask.shape[1], x + w + proxy_pad)
+                        cy2 = min(union_mask.shape[0], y + h + proxy_pad)
                         
                         ch = cy2 - cy1
                         cw = cx2 - cx1
                         
-                        # Ensure divisible by 8 (model requirement)
-                        ch = (ch // 8) * 8
-                        cw = (cw // 8) * 8
-                        if ch == 0 or cw == 0: continue
+                        # Upscale logic for return
+                        final_h = ch * scale
+                        final_w = cw * scale
+                        final_y1 = cy1 * scale
+                        final_y2 = cy2 * scale
+                        final_x1 = cx1 * scale
+                        final_x2 = cx2 * scale
                         
-                        clusters.append((ch, cw, cy1, cy1+ch, cx1, cx1+cw))
-                        total_cluster_area += ch * cw
+                        # Ensure divisible by 8 (model requirement)
+                        final_h = (final_h // 8) * 8
+                        final_w = (final_w // 8) * 8
+                        
+                        if final_h == 0 or final_w == 0: continue
+                        
+                        clusters.append((final_h, final_w, final_y1, final_y1+final_h, final_x1, final_x1+final_w))
+                        total_cluster_area += final_h * final_w
                         
                     # Decision: Is splitting cheaper?
                     # If clusters use < 70% of the giant box, SPLIT.
-                    if total_cluster_area < 0.7 * giant_area:
-                        # logger.info(f"Spatial Clustering: Split giant ROI ({giant_area} px) into {len(clusters)} chunks ({total_cluster_area} px)")
+                    # Compare scaled areas
+                    scaled_giant_area = (h_raw * scale) * (w_raw * scale)
+                    if total_cluster_area < 0.7 * scaled_giant_area:
                         return clusters
 
             except ImportError:
@@ -470,8 +494,14 @@ class E2FGVIHDCleaner:
         except Exception as e:
             logger.warning(f"Clustering failed: {e}. Using Single ROI.")
             
-        # Default: Single Giant ROI
-        return [(h_raw, w_raw, y1, y2, x1, x2)]
+        # Default: Single Giant ROI (Upscaled)
+        # Fix: ensure divisibility after scaling
+        f_h = (h_raw * scale // 8) * 8
+        f_w = (w_raw * scale // 8) * 8
+        f_y1 = y1 * scale
+        f_x1 = x1 * scale
+        
+        return [(f_h, f_w, f_y1, f_y1+f_h, f_x1, f_x1+f_w)]
 
 
 if __name__ == "__main__":
