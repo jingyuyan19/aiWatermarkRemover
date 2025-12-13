@@ -142,18 +142,22 @@ def optimize_roi_strategy(...):
 
 # 3. Clean Loop
 for roi in rois:
-    # Process ROI 1 (Top-Right)
-    # Process ROI 2 (Bottom-Left)
-    # Paste both onto canvas
+    # Process ROI 1...
+    # Process ROI 2...
 ```
 
-## 8. Speed Optimization (v1.22)
-**Issue:**
-1.  **Detection Bottleneck**: Detection took 30% of total time.
-2.  **Static Bloat**: Two small logos (Top-Right, Bottom-Left) created a massive 4K ROI, slowing Inpainting to 0.7 FPS.
+## 9. Math Optimization (v1.24)
+**Issue:** v1.23 successfully sped up GPU work, but revealed a **55s CPU Lag** between segments. This was due to the budget negotiation loop calculating `np.max` on 500M pixels (60 x 4K) repeatedly.
 **Solution:**
-1.  **Downscale**: Detection now runs at 1280px (`imgsz=1280`), speeding it up by ~5x.
-2.  **Clustering**: The standard union bounding box is now analyzed. If it contains separate "islands" (connected components), it is split into multiple smaller crops. This restores 5+ FPS for complex multi-watermark scenarios.
+1.  **Proxy Geometry**: Use `1/8th` scale masks for all geometry checks (64x faster).
+2.  **Direct Solve**: Instead of `while cost > budget: T -= 1`, we use `T = Budget / Area`. This replaces O(N) loops with O(1) math.
+```python
+# v1.24 Direct Solve
+h, w, proxy = get_geometry_proxy(masks, scale=8)
+cost = h * w * T
+if cost > BUDGET:
+    T = int(BUDGET / (h * w)) # Instant
+```
 
 ```python
 # REMOVED:
