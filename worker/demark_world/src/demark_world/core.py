@@ -149,7 +149,43 @@ class DeMarkWorld:
                 "--video_path", str(input_video_path),
                 "--output_path", str(detection_output_path)
             ]
-            subprocess.run(cmd, check=True)
+            
+            # Use Popen to stream output line-by-line
+            process = subprocess.Popen(
+                cmd,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.STDOUT,  # Merge stderr into stdout (tqdm prints to stderr sometimes)
+                universal_newlines=True,
+                bufsize=1
+            )
+            
+            # Read output and parse progress
+            if progress_callback:
+                import re
+                # Pattern to match tqdm percentage: " 45%|"
+                tqdm_pattern = re.compile(r'(\d+)%\|')
+                
+                while True:
+                    line = process.stdout.readline()
+                    if not line and process.poll() is not None:
+                        break
+                    if line:
+                        # Log debug info from subprocess
+                        # if not quiet:
+                        #    logger.debug(f"[DETECTOR] {line.strip()}")
+                        
+                        # Parse progress
+                        match = tqdm_pattern.search(line)
+                        if match:
+                            # Map 0-100% detection to 0-50% overall
+                            det_p = int(match.group(1))
+                            overall = int(det_p * 0.5)
+                            progress_callback(overall)
+                            
+            # Check exit code
+            func_return = process.wait()
+            if func_return != 0:
+                raise subprocess.CalledProcessError(func_return, cmd)
             
             # Load results
             with open(detection_output_path, 'rb') as f:

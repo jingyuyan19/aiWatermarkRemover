@@ -123,34 +123,28 @@ h, w = frames[0].shape[:2]
 resolution_scale = (h * w) / (1920 * 1080)
 
 # Add safety margin for high-res videos (fragmentation/overhead)
+# Add safety margin for high-res videos (fragmentation/overhead)
 if resolution_scale > 1.0:
-    resolution_scale *= 6.0  # FP16 allows relaxing chunk size penalty to 6.0x
+    resolution_scale *= 12.0  # FP16 helped speed, but 6.0x still crashed (30GB peak). Reverted to 12.0x.
 
 scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
-
-chunk_size = max(1, min(video_length, scaled_chunk_limit))
-
-# CRITICAL FIX for small chunks: Cap overlap to ensure we advance by at least 1 frame
-max_overlap = max(0, int(chunk_size * 0.5))
-if overlap_size > max_overlap:
-    overlap_size = max_overlap
-
-if chunk_size <= overlap_size:
-    overlap_size = max(0, chunk_size - 1)
+# ...
 ```
 
 ## 7. Lazy Tensor Loading, Progress Reporting & FP16
-**Issue 1:** The upstream code performs "Eager Loading", converting the *entire* video into GPU tensors at the start.
-**Issue 2:** The cleaning process is a blocking call that can take minutes for high-res video, with no progress updates.
-**Issue 3:** Inference was slow and memory-intensive (Float32).
+**Issue 1:** The upstream code performs "Eager Loading".
+**Issue 2:** The cleaning process is blocking.
+**Issue 3:** Detection process was blocking (blind UI for 2 mins).
 
 **Files Modified:**
 - `worker/demark_world/src/demark_world/cleaner/e2fgvi_hq_cleaner.py`
+- `worker/demark_world/src/demark_world/core.py`
 
 **The Fix:**
-1. Refactored `clean()` to keep frames in system RAM (NumPy) and only convert the *current chunk* to GPU tensors.
-2. Added `progress_callback` argument to `clean()` and called it inside the loop.
-3. Added `torch.cuda.amp.autocast()` context manager for Mixed Precision (FP16) inference, reducing memory by 50% and speeding up compute.
+1. Refactored `clean()` to keep frames in system RAM.
+2. Added `progress_callback` to `clean()`.
+3. Enable FP16 (`autocast`).
+4. **Subprocess Streaming**: Modified `core.py` to read `stdout` from the detector subprocess line-by-line, parsing `tqdm` output to update the main progress bar (0-50%).
 
 ```python
 # REMOVED:

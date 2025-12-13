@@ -184,8 +184,9 @@ class E2FGVIHDCleaner:
         
         # Add safety margin for high-res videos (fragmentation/overhead)
         # Add safety margin for high-res videos (fragmentation/overhead)
+        # Add safety margin for high-res videos (fragmentation/overhead)
         if resolution_scale > 1.0:
-            resolution_scale *= 6.0  # FP16 allows relaxing chunk size penalty to 6.0x
+            resolution_scale *= 12.0  # FP16 isn't enough, 13 frames crashed. Reverting to 12.0x (Safe).
             
         scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
         
