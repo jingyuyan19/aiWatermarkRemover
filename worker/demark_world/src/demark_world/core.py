@@ -184,8 +184,6 @@ class DeMarkWorld:
                             # This allows us to see "Inference: 0.1s | Device: cuda:0"
                             if not quiet:
                                 logger.debug(f"[DETECTOR] {line.strip()}")
-                            det_p = int(match.group(1))
-                            overall = int(det_p * 0.5)
                             
                             # Monotonic Check & Throttling
                             # Only report if progress has INCREASED (int change) or completed

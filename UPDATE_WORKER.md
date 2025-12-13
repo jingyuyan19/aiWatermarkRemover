@@ -141,10 +141,10 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.2 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.3 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.26.2
+docker push jingyuyan19/watermark-worker:v1.26.3
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
@@ -157,15 +157,15 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.2`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.3`.
 6.  Click **Save**.
-7.  The next cold start will pull `v1.26.2`. This effectively "locks" your worker to that version.
+7.  The next cold start will pull `v1.26.3`. This effectively "locks" your worker to that version.
 
-## 12. Debug Probe (v1.26.2)
-**Goal:** Diagnose Slow Detection (1.2 FPS).
+## 13. Hotfix (v1.26.3)
+**Goal:** Fix Crash.
 **Changes:**
-1.  **Debug Logs**: `watermark_detector.py` now prints `Device` and `Inference Time`.
-2.  **Core Logging**: `core.py` now logs non-progress lines from subprocess.
+1.  **Bug Fix**: Removed a copy-paste error that caused a crash when logging debug info.
+2.  **Debug Logs**: Still enabled to diagnose slow detection.
 
 ## 10. Zero-Latency Update (v1.25)
 **Goal:** Reduce total job time from 3m -> 90s.
