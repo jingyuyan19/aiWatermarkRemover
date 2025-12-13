@@ -183,8 +183,9 @@ class E2FGVIHDCleaner:
         resolution_scale = (h * w) / (1920 * 1080)
         
         # Add safety margin for high-res videos (fragmentation/overhead)
+        # Add safety margin for high-res videos (fragmentation/overhead)
         if resolution_scale > 1.0:
-            resolution_scale *= 12.0  # Drastic penalty for 4K to avoid Activation OOM
+            resolution_scale *= 6.0  # FP16 allows relaxing chunk size penalty to 6.0x
             
         scaled_chunk_limit = int(self.chunk_size / max(1, resolution_scale))
         
@@ -234,17 +235,19 @@ class E2FGVIHDCleaner:
             imgs_chunk_t, masks_chunk_t = numpy_to_tensor(frames_np_chunk, masks_np_chunk)
             imgs_chunk = imgs_chunk_t.to(device)
             masks_chunk = masks_chunk_t.to(device)
-            # Process chunk
-            comp_frames_chunk = self.process_frames_chunk(
-                actual_chunk_size,
-                self.config.neighbor_stride,
-                imgs_chunk,
-                masks_chunk,
-                binary_masks_chunk,
-                frames_np_chunk,
-                h,
-                w,
-            )
+            
+            # Process chunk with Mixed Precision (FP16)
+            with torch.cuda.amp.autocast():
+                comp_frames_chunk = self.process_frames_chunk(
+                    actual_chunk_size,
+                    self.config.neighbor_stride,
+                    imgs_chunk,
+                    masks_chunk,
+                    binary_masks_chunk,
+                    frames_np_chunk,
+                    h,
+                    w,
+                )
             # Merge results with blending in overlap region
             comp_frames = merge_frames_with_overlap(
                 result_frames=comp_frames,
