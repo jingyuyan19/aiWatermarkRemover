@@ -141,10 +141,10 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.9 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.27 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.26.9
+docker push jingyuyan19/watermark-worker:v1.27
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
@@ -157,9 +157,15 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.9`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.27`.
 6.  Click **Save**.
 7.  The next cold start will pull `v1.26.9`. This effectively "locks" your worker to that version.
+
+## 20. The "Algorithmic Speed" Update (v1.27)
+**Goal:** < 80s Total Time.
+**Changes:**
+1.  **Stroboscopic Detection**: Detects on every **5th frame** (20% load) and interpolates. Detection time drops from 65s -> ~12s.
+2.  **Island-Aware Budgeting**: Fixes logic bug where small watermarks were treated as huge 4K boxes. Unlocks `T=80` for cleaning (was stalled at T=25). Cleaning time drops from 95s -> ~60s.
 
 ## 19. The "Turbo Link" Update (v1.26.9)
 **Goal:** Restore Blazing Fast Detection.

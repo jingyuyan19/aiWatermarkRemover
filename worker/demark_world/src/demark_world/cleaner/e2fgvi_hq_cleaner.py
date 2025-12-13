@@ -258,11 +258,11 @@ class E2FGVIHDCleaner:
         video_length = len(frames)
         h, w = frames[0].shape[:2]
         
-        # v1.21 Self-Healing Loop
-        # Budget limit for 24GB VRAM (Safe Zone)
-        VOXEL_BUDGET = 45_000_000 
+        # v1.27 Island-Aware Budgeting
+        # Increased budget (Safe for L4/T4 with split strategy)
+        VOXEL_BUDGET = 55_000_000 
         PAD = 72
-        MAX_T = 60
+        MAX_T = 80 # Unlock "Overdrive"
         MIN_T = 5
         
         # Prepare binary masks for compositing
@@ -282,36 +282,40 @@ class E2FGVIHDCleaner:
             # 1. Optimistic Proposal
             proposal_t = min(MAX_T, video_length - cursor)
             
-            # 2. Budget Negotiation (v1.24 Direct Solve)
-            final_t = proposal_t
+            # v1.27: Island-Aware Cost Calculation
+            # We calculate cost based on the LARGEST ISLAND, not the union box.
             
-            # v1.24: Use Proxy for Speed (Eliminate 55s Lag)
+            # Get Proxy (Fast)
             masks_slice = masks[cursor : cursor + proposal_t]
-            h_est, w_est, masks_proxy = self.get_geometry_proxy(masks_slice, scale=8)
+            _, _, masks_proxy = self.get_geometry_proxy(masks_slice, scale=8)
             
-            # Clamp to image size
-            h_est = min(h_est, h)
-            w_est = min(w_est, w)
+            # Get Strategy + Islands immediately (Fast on Proxy)
+            final_rois = self.optimize_roi_strategy(masks_proxy, PAD, scale=8)
             
-            cost = proposal_t * h_est * w_est
+            # Calculate Peak Cost (Max Island Area * T)
+            max_island_area = 0
+            if len(final_rois) > 0:
+                for (h_c, w_c, _, _, _, _) in final_rois:
+                    max_island_area = max(max_island_area, h_c * w_c)
+            else:
+                 max_island_area = 0
+            
+            cost = proposal_t * max_island_area
             
             if cost <= VOXEL_BUDGET:
                 # Safe
                 final_t = proposal_t
             else:
-                # Direct Solve: T = Budget / Area
-                area = max(1, h_est * w_est)
+                # Direct Solve: T = Budget / Max_Island_Area
+                area = max(1, max_island_area)
                 ideal_t = int(VOXEL_BUDGET / area)
                 final_t = max(MIN_T, ideal_t)
                 final_t = min(final_t, proposal_t - 1) # Reduce at least 1
                 
-                # Re-slice proxy for final_t (since we reduced T)
+                # Re-calculate ROIs for new T
                 masks_slice = masks[cursor : cursor + final_t]
-                h_est, w_est, masks_proxy = self.get_geometry_proxy(masks_slice, scale=8) # Fast enough to call twice
-
-            # v1.22/v1.24: Spatial Clustering on Proxy
-            # We pass the PROXY masks to optimize_roi_strategy to keep it fast
-            final_rois = self.optimize_roi_strategy(masks_proxy, PAD, scale=8)
+                _, _, masks_proxy = self.get_geometry_proxy(masks_slice, scale=8)
+                final_rois = self.optimize_roi_strategy(masks_proxy, PAD, scale=8)
 
             # 3. REACTIVE EXECUTION (Safety Net)
             success = False
