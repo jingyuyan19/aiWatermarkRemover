@@ -184,9 +184,11 @@ class DeMarkWorld:
                             det_p = int(match.group(1))
                             overall = int(det_p * 0.5)
                             
-                            # Monotonic Check: Ignore backward jumps (fixes "0% reset" glitch)
-                            if overall >= last_reported_progress:
+                            # Monotonic Check & Throttling
+                            # Only report if progress has INCREASED (int change) or completed
+                            if overall > last_reported_progress or overall == 50:
                                 progress_callback(overall)
+                                logger.debug(f"Progress sent: {overall}%")
                                 last_reported_progress = overall
                             
             # Check exit code

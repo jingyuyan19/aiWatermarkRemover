@@ -141,10 +141,10 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.26.1 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.26
+docker push jingyuyan19/watermark-worker:v1.26.1
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
@@ -157,16 +157,16 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.26.1`.
 6.  Click **Save**.
-7.  The next cold start will pull `v1.26`. This effectively "locks" your worker to that version.
+7.  The next cold start will pull `v1.26.1`. This effectively "locks" your worker to that version.
 
-## 10. The "Speed Demon" Update (v1.26)
-**Goal:** < 80 Seconds Total Job Time.
+## 11. Final Polish (v1.26.1)
+**Goal:** Restore Speed.
 **Changes:**
-1.  **Hang Fixed**: Eliminated the mysterious 94s "Death Hang".
-2.  **Zero-Latency Download**: All 3 models (including YOLO) are now baked in.
-3.  **Turbo Detection**: Re-enabled optimized inference speed.
+1.  **Fixed Regression**: Resolved an I/O spam issue that slowed detection by 8x.
+2.  **Hang Fixed**: Confirmed 0s exit.
+3.  **Latency**: Confirmed 0s download.
 
 ## 10. Zero-Latency Update (v1.25)
 **Goal:** Reduce total job time from 3m -> 90s.
