@@ -409,6 +409,70 @@ class E2FGVIHDCleaner:
         pbar.close()
         return comp_frames
 
+    def optimize_roi_strategy(self, masks_slice, padding):
+        """
+        v1.22: Spatial Clustering to fix "Static Bloat".
+        If the Union BBox is huge but mostly empty (two distant watermarks),
+        split it into separate ROIs.
+        """
+        # 1. Standard Union BBox
+        h_raw, w_raw, y1, y2, x1, x2 = self.get_union_bbox(masks_slice, pad=padding)
+        if h_raw == 0: return []
+        
+        giant_area = h_raw * w_raw
+        
+        # 2. Try Clustering
+        try:
+            union_mask = np.max(masks_slice, axis=0)
+            
+            # Try cv2 first (fastest)
+            try:
+                import cv2
+                num_labels, labels, stats, centroids = cv2.connectedComponentsWithStats(union_mask, connectivity=8)
+                # stats: [x, y, w, h, area]
+                # Label 0 is background
+                clusters = []
+                total_cluster_area = 0
+                
+                if num_labels > 2: # Background + at least 2 components
+                    for i in range(1, num_labels):
+                        x = stats[i, cv2.CC_STAT_LEFT]
+                        y = stats[i, cv2.CC_STAT_TOP]
+                        w = stats[i, cv2.CC_STAT_WIDTH]
+                        h = stats[i, cv2.CC_STAT_HEIGHT]
+                        
+                        # Add padding
+                        cx1 = max(0, x - padding)
+                        cy1 = max(0, y - padding)
+                        cx2 = min(union_mask.shape[1], x + w + padding)
+                        cy2 = min(union_mask.shape[0], y + h + padding)
+                        
+                        ch = cy2 - cy1
+                        cw = cx2 - cx1
+                        
+                        # Ensure divisible by 8 (model requirement)
+                        ch = (ch // 8) * 8
+                        cw = (cw // 8) * 8
+                        if ch == 0 or cw == 0: continue
+                        
+                        clusters.append((ch, cw, cy1, cy1+ch, cx1, cx1+cw))
+                        total_cluster_area += ch * cw
+                        
+                    # Decision: Is splitting cheaper?
+                    # If clusters use < 70% of the giant box, SPLIT.
+                    if total_cluster_area < 0.7 * giant_area:
+                        # logger.info(f"Spatial Clustering: Split giant ROI ({giant_area} px) into {len(clusters)} chunks ({total_cluster_area} px)")
+                        return clusters
+
+            except ImportError:
+                 pass # Fallback to Single
+
+        except Exception as e:
+            logger.warning(f"Clustering failed: {e}. Using Single ROI.")
+            
+        # Default: Single Giant ROI
+        return [(h_raw, w_raw, y1, y2, x1, x2)]
+
 
 if __name__ == "__main__":
     #       --frames examples/extract_frame_and_mask_frames.npy \
