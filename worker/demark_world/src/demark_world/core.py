@@ -189,7 +189,7 @@ class DeMarkWorld:
                         else:
                             # Log non-progress lines (debug info)
                             # This allows us to see "Inference: 0.1s | Device: cuda:0"
-                            if not quiet and "Inference:" in line:
+                            if "Inference:" in line:
                                 logger.debug(f"[DETECTOR] {line.strip()}")
                             
             # Check exit code
