@@ -141,10 +141,10 @@ git pull
 cd worker
 
 # Build the worker image (Force rebuild with no-cache)
-docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.27 -t jingyuyan19/watermark-worker:latest .
+docker build --no-cache --platform linux/amd64 -t jingyuyan19/watermark-worker:v1.27.1 -t jingyuyan19/watermark-worker:latest .
 
 # Push to Docker Hub
-docker push jingyuyan19/watermark-worker:v1.27
+docker push jingyuyan19/watermark-worker:v1.27.1
 docker push jingyuyan19/watermark-worker:latest
 
 echo "✅ Update complete! RunPod will pull new image on next cold start."
@@ -157,9 +157,16 @@ RunPod caches images aggressively. To force it to pull your new code:
 2.  Click on your Endpoint.
 3.  Click **Edit Template** (or the Settings icon).
 4.  Locate the **Container Image** field.
-5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.27`.
+5.  Change `jingyuyan19/watermark-worker:latest` to `jingyuyan19/watermark-worker:v1.27.1`.
 6.  Click **Save**.
 7.  The next cold start will pull `v1.26.9`. This effectively "locks" your worker to that version.
+
+## 21. The "Safety" Hotfix (v1.27.1)
+**Goal:** Fix detection for dynamic watermarks (Sora 2).
+**Changes:**
+1.  **Reverted Stroboscopic Detection**: Now processes **every frame** again, but still uses the optimized video loading (speedup over v1.26.9 maintained).
+2.  **Reason**: Watermarks jump randomly in newer videos, making interpolation unsafe.
+3.  **Island-Aware Budgeting**: Maintained (Optimized cleaning is still active).
 
 ## 20. The "Algorithmic Speed" Update (v1.27)
 **Goal:** < 80s Total Time.

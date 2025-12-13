@@ -25,86 +25,39 @@ def run_detection(video_path: str, output_path: str):
     
     total_frames = len(video_loader)
     
-    # v1.27 Stroboscopic Detection (Stride=5)
-    # Direct YOLO inference on video file is much faster than loop
-    logger.info("Subprocess: Starting Fast Detection (Stride=5)...")
+    # v1.27.1 Fix: Dynamic Watermark Support
+    # We MUST process every frame (vid_stride=1) because Sora 2 watermarks move randomly.
+    # We still use direct video inference (source=video_path) because it is faster than the Python loop.
+    logger.info("Subprocess: Starting Detection (Every Frame)...")
     
     # We use the detector's model directly to leverage ultralytics' optimized video handling
-    # vid_stride=5 means we only process 20% of frames (0, 5, 10...)
-    # stream=True returns a generator for memory efficiency
     results_generator = detector.model.predict(
         source=video_path,
         imgsz=640,
-        conf=0.10, # Lower confidence slightly as we are skipping frames
-        vid_stride=5,
+        conf=0.10,
+        # vid_stride=1, # Process every frame
         stream=True,
         verbose=False,
         device=detector.model.device
     )
     
-    # Store keyframes first
-    keyframe_bboxes = {}
-    last_keyframe_idx = 0
-    
-    for i, result in enumerate(results_generator):
-        frame_idx = i * 5
-        last_keyframe_idx = frame_idx
-        
+    for idx, result in enumerate(results_generator):
         # Report progress
-        if i % 10 == 0:
-            percentage = min(100, int((frame_idx / total_frames) * 100))
-            # Format to match the tqdm pattern expected by core.py
+        if idx % 10 == 0:
+            percentage = min(100, int((idx / total_frames) * 100))
             print(f"Detecting (Subprocess): {percentage}%|", flush=True)
         
         box = None
         if len(result.boxes) > 0:
             # Get best box
-            # Note: The boxes are already scaled to the original image size by YOLO automatically!
-            # (No need for manual scaling here since we passed the video path directly)
             box_obj = result.boxes[0]
             xyxy = box_obj.xyxy[0].cpu().numpy()
             x1, y1, x2, y2 = map(int, xyxy)
             box = (x1, y1, x2, y2)
             
-        keyframe_bboxes[frame_idx] = box
-
-    # Interpolate for all frames
-    logger.info("Subprocess: Interpolating skipped frames...")
-    
-    for idx in range(total_frames):
-        # Find prev and next keyframes
-        # Keyframes are at 0, 5, 10...
-        prev_k = (idx // 5) * 5
-        next_k = prev_k + 5
-        
-        # Exact Hit
-        if idx == prev_k:
-            box = keyframe_bboxes.get(idx)
-        else:
-            # Interpolate
-            box_prev = keyframe_bboxes.get(prev_k)
-            box_next = keyframe_bboxes.get(next_k)
-            
-            # Case 1: Both exist -> Linear Interpolation
-            if box_prev and box_next:
-                alpha = (idx - prev_k) / 5.0
-                x1 = int(box_prev[0] * (1-alpha) + box_next[0] * alpha)
-                y1 = int(box_prev[1] * (1-alpha) + box_next[1] * alpha)
-                x2 = int(box_prev[2] * (1-alpha) + box_next[2] * alpha)
-                y2 = int(box_prev[3] * (1-alpha) + box_next[3] * alpha)
-                box = (x1, y1, x2, y2)
-            # Case 2: Only Prev (Gap or End of video) -> Hold
-            elif box_prev:
-                box = box_prev
-            # Case 3: Only Next (Start of video gap) -> Hold
-            elif box_next:
-                box = box_next
-            # Case 4: None -> None
-            else:
-                box = None
-
         if box:
             frame_bboxes[idx] = {"bbox": box}
+            # Add to lists for backup logic (though strictly we don't need backup if we detect every frame, core.py expects these)
             x1, y1, x2, y2 = box
             bbox_centers.append((int((x1+x2)/2), int((y1+y2)/2)))
             bboxes.append(box)
@@ -113,6 +66,9 @@ def run_detection(video_path: str, output_path: str):
             detect_missed.append(idx)
             bbox_centers.append(None)
             bboxes.append(None)
+
+    # v1.27.1: No interpolation needed (We processed every frame)
+    logger.info(f"Subprocess: Detection complete. Missed {len(detect_missed)} frames.")
 
     results = {
         "frame_bboxes": frame_bboxes,
