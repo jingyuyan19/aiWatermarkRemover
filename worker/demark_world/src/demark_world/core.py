@@ -174,6 +174,12 @@ class DeMarkWorld:
                     if not line and process.poll() is not None:
                         break
                     if line:
+                    if line:
+                        # Log non-progress lines (debug info)
+                        # Check this FIRST and independently to ensure we capture it even if mixed with tqdm output
+                        if "Inference:" in line or "[DETECTOR]" in line:
+                            logger.debug(f"[DETECTOR] {line.strip()}")
+
                         # Parse progress
                         match = tqdm_pattern.search(line)
                         if match:
@@ -186,11 +192,6 @@ class DeMarkWorld:
                                 progress_callback(overall)
                                 logger.debug(f"Progress sent: {overall}%")
                                 last_reported_progress = overall
-                        else:
-                            # Log non-progress lines (debug info)
-                            # This allows us to see "Inference: 0.1s | Device: cuda:0"
-                            if "Inference:" in line:
-                                logger.debug(f"[DETECTOR] {line.strip()}")
                             
             # Check exit code
             func_return = process.wait()
