@@ -342,8 +342,15 @@ class E2FGVIHDCleaner:
 
                         roi_idx = 0
                         for (h_crop, w_crop, y1, y2, x1, x2) in final_rois:
+                            # v1.24 Bugfix: Clamp ROI to actual video dimensions
+                            # The proxy scaling might produce coordinates slightly outside the frame (e.g. 784 vs 780)
+                            y2 = min(h, y2)
+                            x2 = min(w, x2)
+                            h_crop = y2 - y1
+                            w_crop = x2 - x1
+
                             roi_idx += 1
-                            if h_crop == 0 or w_crop == 0: continue
+                            if h_crop <= 0 or w_crop <= 0: continue
                             
                             frames_crop = frames_np_chunk[:, y1:y2, x1:x2, :]
                             masks_crop = masks_np_chunk[:, y1:y2, x1:x2]
